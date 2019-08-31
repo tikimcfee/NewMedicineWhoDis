@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B1231AFBD000787D91 /* AppDelegate.swift */; };
 		4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B3231AFBD000787D91 /* SceneDelegate.swift */; };
-		4593B4B6231AFBD000787D91 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* ContentView.swift */; };
+		4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */; };
 		4593B4B8231AFBD100787D91 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4B7231AFBD100787D91 /* Assets.xcassets */; };
 		4593B4BB231AFBD100787D91 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4BA231AFBD100787D91 /* Preview Assets.xcassets */; };
 		4593B4BE231AFBD100787D91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4BC231AFBD100787D91 /* LaunchScreen.storyboard */; };
@@ -38,7 +38,7 @@
 		4593B4AE231AFBD000787D91 /* Drugs!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Drugs!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4593B4B1231AFBD000787D91 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4593B4B3231AFBD000787D91 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		4593B4B5231AFBD000787D91 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootAppStartupView.swift; sourceTree = "<group>"; };
 		4593B4B7231AFBD100787D91 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4593B4BA231AFBD100787D91 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4593B4BD231AFBD100787D91 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -101,7 +101,7 @@
 			children = (
 				4593B4B1231AFBD000787D91 /* AppDelegate.swift */,
 				4593B4B3231AFBD000787D91 /* SceneDelegate.swift */,
-				4593B4B5231AFBD000787D91 /* ContentView.swift */,
+				4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */,
 				4593B4B7231AFBD100787D91 /* Assets.xcassets */,
 				4593B4BC231AFBD100787D91 /* LaunchScreen.storyboard */,
 				4593B4BF231AFBD100787D91 /* Info.plist */,
@@ -269,7 +269,7 @@
 			files = (
 				4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
-				4593B4B6231AFBD000787D91 /* ContentView.swift in Sources */,
+				4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
