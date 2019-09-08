@@ -95,7 +95,7 @@ struct DrugEntryNumberPad: View {
     
     private func numberText(trackedNumber: Int = 1) -> some View {
         let text = Text("\(trackedNumber)")
-            .frame(width: 44.0, height: 44.0, alignment: .center)
+            .frame(width: 28.0, height: 28.0, alignment: .center)
             .buttonBorder()
             
         if let drug = currentSelectedDrug,
@@ -125,30 +125,38 @@ struct DrugEntryViewCell: View {
     }
     
     private func text() -> some View {
-        var title = Text("\(trackedDrug.drugName)")
-        var subTitle = Text("\(trackedDrug.ingredientList)")
+        var title =
+            Text("\(trackedDrug.drugName)")
+                .font(.subheadline)
+                .fontWeight(.light)
+        
+        var subTitle =
+            Text("\(trackedDrug.ingredientList)")
+                .font(.footnote)
+                .fontWeight(.ultraLight)
+        
+        var count =
+            Text("\(String(didTakeMap[trackedDrug] ?? 0))")
+                .fontWeight(.thin)
         
         if trackedDrug == currentSelectedDrug {
             title = title.foregroundColor(Color.blue)
             subTitle = subTitle.foregroundColor(Color.blue)
+            count = count.foregroundColor(Color.blue)
         } else {
             title = title.foregroundColor(Color.black)
             subTitle = subTitle.foregroundColor(Color.black)
+            count = count.foregroundColor(Color.black)
         }
         
         return VStack(alignment: .leading) {
             HStack {
                 title
-                    .font(.headline)
-                    .fontWeight(.medium)
                 FitView().foregroundColor(Color.blue)
-                Text("\(String(didTakeMap[trackedDrug] ?? 0))")
-                    .fontWeight(.thin)
+                count
             }
             
             subTitle
-                .font(.footnote)
-                .fontWeight(.ultraLight)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
