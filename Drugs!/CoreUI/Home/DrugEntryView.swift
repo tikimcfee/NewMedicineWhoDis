@@ -25,60 +25,132 @@ extension Drug {
 
 struct DrugEntryView: View {
     
+    @State var currentSelectedDrug: Drug? = nil
     @State var currentMedicineEntries: [Drug:Int] = [:]
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .center) {
             ForEach(__testData__listOfDrugs, id: \.self) { drug in
-                DrugEntryViewCell(didTakeMap: self.$currentMedicineEntries, drug: drug)
+                DrugEntryViewCell(
+                    didTakeMap: self.$currentMedicineEntries,
+                    currentSelectedDrug: self.$currentSelectedDrug,
+                    trackedDrug: drug
+                )
             }
             
             VStack {
-                Text("Number Pad")
+                DrugEntryNumberPad(
+                    didTakeMap: self.$currentMedicineEntries,
+                    currentSelectedDrug: self.$currentSelectedDrug
+                )
             }
             .prettyBorder()
-            .fixedSize(horizontal: false, vertical: false)
-            .frame(width: 55, height: 44, alignment: .center)
         }
-        
     }
+}
+
+struct DrugEntryNumberPad: View {
+    
+    @Binding var didTakeMap: [Drug:Int]
+    @Binding var currentSelectedDrug: Drug?
+    
+    let width: Int = 3
+    let height: Int = 3
+    
+    var body: some View {
+        VStack {
+            HStack {
+                ForEach([1, 2, 3], id:\.self) {
+                    self.numberButton(trackedNumber: $0)
+                }
+            }
+            HStack {
+                ForEach([4, 5, 6], id:\.self) {
+                    self.numberButton(trackedNumber: $0)
+                }
+            }
+            HStack {
+                ForEach([7, 8, 9], id:\.self) {
+                    self.numberButton(trackedNumber: $0)
+                }
+            }
+        }
+    }
+    
+    private func numberButton(trackedNumber: Int = 1) -> some View {
+        return Button(
+            action: {
+                if let drug = self.currentSelectedDrug {
+                    self.didTakeMap[drug] = trackedNumber
+                }
+            }
+        ) {
+            numberText(trackedNumber: trackedNumber)
+        }.prettyBorder()
+    }
+    
+    private func numberText(trackedNumber: Int = 1) -> some View {
+        let text = Text("\(trackedNumber)")
+        if let drug = currentSelectedDrug,
+            (didTakeMap[drug] ?? nil) == trackedNumber {
+            return text.foregroundColor(Color.blue)
+        } else {
+            return text.foregroundColor(Color.black)
+        }
+    }
+    
 }
 
 struct DrugEntryViewCell: View {
     
     @Binding var didTakeMap: [Drug:Int]
-    let drug: Drug
-    
+    @Binding var currentSelectedDrug: Drug?
+    let trackedDrug: Drug
     
     var body: some View {
         HStack {
             Spacer().frame(width: 44.0, height: 0.0, alignment: .center)
             
             Button(
-                action: { }
-            ) {
-                VStack(alignment: .leading) {
-                    Text("\(drug.drugName)")
-                        .font(.headline)
-                        .fontWeight(.medium)
-                        
-                    Text("\(drug.ingredientList)")
-                        .font(.footnote)
-                        .fontWeight(.ultraLight)
-                        .fixedSize(horizontal: false, vertical: true)
+                action: {
+                    self.currentSelectedDrug = self.trackedDrug
                 }
-                
+            ) {
+                text()
             }
             
             FitView().foregroundColor(Color.blue)
 
             VStack(alignment: .leading) {
-                Text("\(String(didTakeMap[drug] ?? 0))")
+                Text("\(String(didTakeMap[trackedDrug] ?? 0))")
                     .fontWeight(.thin)
             }
             .prettyBorder()
             
             Spacer().frame(width: 44.0, height: 0.0, alignment: .center)
+        }
+    }
+    
+    private func text() -> some View {
+        var title = Text("\(trackedDrug.drugName)")
+        var subTitle = Text("\(trackedDrug.ingredientList)")
+        
+        if trackedDrug == currentSelectedDrug {
+            title = title.foregroundColor(Color.blue)
+            subTitle = subTitle.foregroundColor(Color.blue)
+        } else {
+            title = title.foregroundColor(Color.black)
+            subTitle = subTitle.foregroundColor(Color.black)
+        }
+        
+        return VStack(alignment: .leading) {
+            title
+                .font(.headline)
+                .fontWeight(.medium)
+            subTitle
+                .font(.footnote)
+                .fontWeight(.ultraLight)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -121,16 +193,31 @@ extension View {
 struct DrugEntryView_Preview: PreviewProvider {
     @State var currentMedicineEntries: [Drug:Int]? = [:]
     
+    static func drugMapBinding() -> Binding<[Drug : Int]> {
+        return Binding<[Drug : Int]>(
+            get: { () -> [Drug : Int] in [:] },
+            set: { ([Drug : Int]) in }
+        )
+    }
+    
+    static func drugBinding() -> Binding<Drug?> {
+        return Binding<Drug?>(
+            get: { () -> Drug? in Drug.blank() },
+            set: { (Drug) in }
+        )
+    }
+    
     static var previews: some View {
         Group {
+            DrugEntryNumberPad(
+                didTakeMap: drugMapBinding(),
+                currentSelectedDrug: drugBinding()
+            )
             DrugEntryView()
             DrugEntryViewCell(
-                didTakeMap: Binding<[Drug : Int]>(get: { () -> [Drug : Int] in
-                    [:]
-                }, set: { ([Drug : Int]) in
-                    
-                }),
-                drug: Drug(
+                didTakeMap: drugMapBinding(),
+                currentSelectedDrug: drugBinding(),
+                trackedDrug: Drug(
                     drugName: "Test Drug",
                     ingredients: [
                         Ingredient(ingredientName: "Sunshine"),

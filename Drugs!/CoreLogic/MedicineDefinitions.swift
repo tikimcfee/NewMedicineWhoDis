@@ -15,6 +15,10 @@ public struct Ingredient: Storable {
 public struct Drug: Storable {
     let drugName: String
     let ingredients: [Ingredient]
+    
+    static func blank() -> Drug {
+        Drug(drugName: "", ingredients: [])
+    }
 }
 
 public struct MedicineEntry: Storable {
