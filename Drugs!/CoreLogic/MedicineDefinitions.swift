@@ -8,9 +8,13 @@
 
 import Foundation
 
+public struct Ingredient: Storable {
+    let ingredientName: String
+}
 
 public struct Drug: Storable {
-    let name: String
+    let drugName: String
+    let ingredients: [Ingredient]
 }
 
 public struct MedicineEntry: Storable {
@@ -34,12 +38,71 @@ public struct MedicineEntry: Storable {
 // ---------------------------------------------------
 
 public let __testData__listOfDrugs: [Drug] = {
-    var drugs: [Drug] = []
-    drugs.append(Drug(name: "Tylenol"))
-    drugs.append(Drug(name: "Advil"))
-    drugs.append(Drug(name: "Excedrin"))
-    drugs.append(Drug(name: "Weeeeeds!"))
-    drugs.append(Drug(name: "Ibuprofen"))
+    var drugs: [Drug] = [
+        Drug(
+            drugName: "Tylenol",
+            ingredients: [
+                Ingredient(ingredientName: "Acetaminophen")
+            ]
+        ),
+        Drug(
+            drugName: "Advil",
+            ingredients: [
+                Ingredient(ingredientName: "Naproxen Sodium")
+            ]
+        ),
+        Drug(
+            drugName: "Venlafaxine",
+            ingredients: [
+                Ingredient(ingredientName: "Venlafaxine")
+            ]
+        ),
+        Drug(
+            drugName: "Excedrin",
+            ingredients: [
+                Ingredient(ingredientName: "Acetaminophen"),
+                Ingredient(ingredientName: "Aspirin"),
+                Ingredient(ingredientName: "Caffeine")
+            ]
+        ),
+        Drug(
+            drugName: "Ibuprofen",
+            ingredients: [
+                Ingredient(ingredientName: "Ibuprofen")
+            ]
+        ),
+        Drug(
+            drugName: "Propranolol",
+            ingredients: [
+                Ingredient(ingredientName: "Propranolol")
+            ]
+        ),
+        Drug(
+            drugName: "Buspirone",
+            ingredients: [
+                Ingredient(ingredientName: "Buspirone")
+            ]
+        ),
+        Drug(
+            drugName: "Trazadone",
+            ingredients: [
+                Ingredient(ingredientName: "Trazadone")
+            ]
+        ),
+        Drug(
+            drugName: "Tums",
+            ingredients: [
+                Ingredient(ingredientName: "Sodium Bicarbonate")
+            ]
+        ),
+        Drug(
+            drugName: "Funky Green Shit",
+            ingredients: [
+                Ingredient(ingredientName: "THC"),
+                Ingredient(ingredientName: "CBD")
+            ]
+        ),
+    ]
     return drugs
 }()
 

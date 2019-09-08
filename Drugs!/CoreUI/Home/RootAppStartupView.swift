@@ -88,7 +88,13 @@ struct RootDrugMedicineCell: View {
         NavigationLink(
             destination: DetailView(selectedDate: medicineEntry.date)
         ) {
-            Text("\(medicineEntry.date, formatter: dateFormatter)")
+            VStack(alignment: .leading) {
+                Text("\(medicineEntry.drugsTaken.description)")
+                    .fontWeight(.semibold)
+                
+                Text("\(medicineEntry.date, formatter: dateFormatter)")
+                    .fontWeight(.ultraLight)
+            }
         }
     }
 }
