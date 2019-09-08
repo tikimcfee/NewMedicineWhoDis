@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-/**Model Extensions */
+/**Model and View Extensions */
 // ----------------------------------------------
 extension Drug {
     var ingredientList: String {
@@ -18,6 +18,22 @@ extension Drug {
         } else {
             return self.ingredients.map { $0.ingredientName }.joined(separator: ", ")
         }
+    }
+}
+
+extension View {
+    func prettyBorder() -> some View {
+        return self
+            .padding(8.0)
+            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
+            .cornerRadius(4.0)
+    }
+    
+    func buttonBorder() -> some View {
+        return self
+            .padding(16.0)
+            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
+            .cornerRadius(4.0)
     }
 }
 
@@ -186,22 +202,6 @@ struct Fit: Shape {
     }
 }
 
-extension View {
-    func prettyBorder() -> some View {
-        return self
-            .padding(8.0)
-            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
-            .cornerRadius(4.0)
-    }
-    
-    func buttonBorder() -> some View {
-        return self
-            .padding(16.0)
-            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
-            .cornerRadius(4.0)
-    }
-}
-
 #if DEBUG
 
 struct DrugEntryView_Preview: PreviewProvider {
@@ -223,22 +223,22 @@ struct DrugEntryView_Preview: PreviewProvider {
     
     static var previews: some View {
         Group {
-            DrugEntryNumberPad(
-                didTakeMap: drugMapBinding(),
-                currentSelectedDrug: drugBinding()
-            )
+//            DrugEntryNumberPad(
+//                didTakeMap: drugMapBinding(),
+//                currentSelectedDrug: drugBinding()
+//            )
             DrugEntryView()
-            DrugEntryViewCell(
-                didTakeMap: drugMapBinding(),
-                currentSelectedDrug: drugBinding(),
-                trackedDrug: Drug(
-                    drugName: "Test Drug",
-                    ingredients: [
-                        Ingredient(ingredientName: "Sunshine"),
-                        Ingredient(ingredientName: "Daisies"),
-                    ]
-                )
-            )
+//            DrugEntryViewCell(
+//                didTakeMap: drugMapBinding(),
+//                currentSelectedDrug: drugBinding(),
+//                trackedDrug: Drug(
+//                    drugName: "Test Drug",
+//                    ingredients: [
+//                        Ingredient(ingredientName: "Sunshine"),
+//                        Ingredient(ingredientName: "Daisies"),
+//                    ]
+//                )
+//            )
         }
     }
 }
