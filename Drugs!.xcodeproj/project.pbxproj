@@ -18,6 +18,7 @@
 		45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */; };
 		45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* ApplicationState.swift */; };
+		45DA2BC3232551B600649270 /* DrugEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugEntryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineDefinitions.swift; sourceTree = "<group>"; };
 		45DA2BBE2324C93E00649270 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		45DA2BC0232532E500649270 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
+		45DA2BC2232551B600649270 /* DrugEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */,
+				45DA2BC2232551B600649270 /* DrugEntryView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -318,6 +321,7 @@
 			files = (
 				45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */,
 				4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */,
+				45DA2BC3232551B600649270 /* DrugEntryView.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */,
 				4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */,
