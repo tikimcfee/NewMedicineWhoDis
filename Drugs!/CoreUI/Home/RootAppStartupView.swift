@@ -16,6 +16,11 @@ private let dateFormatter: DateFormatter = {
     return dateFormatter
 }() // <--- ok so we're defining and then, at runtime, executing the function to create the formatter. Ok, cheeky.
 
+extension MedicineEntry {
+    
+    
+    
+}
 
 // ---------------------------------------------------
 // Core UI Structure
@@ -89,7 +94,7 @@ struct RootDrugMedicineCell: View {
             destination: DetailView(selectedDate: medicineEntry.date)
         ) {
             VStack(alignment: .leading) {
-                Text("\(medicineEntry.drugsTaken.description)")
+                Text("\(medicineEntry.drugList)")
                     .fontWeight(.semibold)
                 
                 Text("\(medicineEntry.date, formatter: dateFormatter)")

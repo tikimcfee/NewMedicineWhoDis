@@ -41,6 +41,31 @@ public struct MedicineEntry: Storable {
 // ---------------------------------------------------
 // ---------------------------------------------------
 
+
+extension Drug {
+    var ingredientList: String {
+        if self.ingredients.count == 1 && self.ingredients.first?.ingredientName == self.drugName {
+            return ""
+        } else {
+            return self.ingredients.map { $0.ingredientName }.joined(separator: ", ")
+        }
+    }
+}
+
+extension MedicineEntry {
+    var drugList: String {
+        if self.drugsTaken.count == 0 {
+            return "(Nothing taken)"
+        } else {
+            return self.drugsTaken.map { $0.drugName }.joined(separator: ", ")
+        }
+    }
+}
+
+// ---------------------------------------------------
+// ---------------------------------------------------
+// ---------------------------------------------------
+
 public let __testData__listOfDrugs: [Drug] = {
     var drugs: [Drug] = [
         Drug(

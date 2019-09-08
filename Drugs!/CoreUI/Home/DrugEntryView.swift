@@ -11,15 +11,6 @@ import SwiftUI
 
 /**Model and View Extensions */
 // ----------------------------------------------
-extension Drug {
-    var ingredientList: String {
-        if self.ingredients.count == 1 && self.ingredients.first?.ingredientName == self.drugName {
-            return ""
-        } else {
-            return self.ingredients.map { $0.ingredientName }.joined(separator: ", ")
-        }
-    }
-}
 
 extension View {
     func prettyBorder() -> some View {
