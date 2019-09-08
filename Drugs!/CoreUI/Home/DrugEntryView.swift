@@ -29,23 +29,27 @@ struct DrugEntryView: View {
     @State var currentMedicineEntries: [Drug:Int] = [:]
     
     var body: some View {
-        VStack(alignment: .center) {
-            ForEach(__testData__listOfDrugs, id: \.self) { drug in
-                DrugEntryViewCell(
-                    didTakeMap: self.$currentMedicineEntries,
-                    currentSelectedDrug: self.$currentSelectedDrug,
-                    trackedDrug: drug
-                )
+        HStack() {
+            ScrollView {
+                ForEach(__testData__listOfDrugs, id: \.self) { drug in
+                    DrugEntryViewCell(
+                        didTakeMap: self.$currentMedicineEntries,
+                        currentSelectedDrug: self.$currentSelectedDrug,
+                        trackedDrug: drug
+                    )
+                }
             }
             
+        
             VStack {
                 DrugEntryNumberPad(
                     didTakeMap: self.$currentMedicineEntries,
                     currentSelectedDrug: self.$currentSelectedDrug
                 )
             }
-            .prettyBorder()
         }
+        .frame(maxHeight: 240)
+        .padding(4.0)
     }
 }
 
@@ -78,19 +82,22 @@ struct DrugEntryNumberPad: View {
     }
     
     private func numberButton(trackedNumber: Int = 1) -> some View {
-        return Button(
-            action: {
-                if let drug = self.currentSelectedDrug {
-                    self.didTakeMap[drug] = trackedNumber
-                }
-            }
-        ) {
+        return Button(action: { self.onTap(of: trackedNumber) }) {
             numberText(trackedNumber: trackedNumber)
-        }.prettyBorder()
+        }
+    }
+    
+    private func onTap(of number: Int) {
+        if let drug = self.currentSelectedDrug {
+            self.didTakeMap[drug] = number
+        }
     }
     
     private func numberText(trackedNumber: Int = 1) -> some View {
         let text = Text("\(trackedNumber)")
+            .frame(width: 44.0, height: 44.0, alignment: .center)
+            .buttonBorder()
+            
         if let drug = currentSelectedDrug,
             (didTakeMap[drug] ?? nil) == trackedNumber {
             return text.foregroundColor(Color.blue)
@@ -108,27 +115,13 @@ struct DrugEntryViewCell: View {
     let trackedDrug: Drug
     
     var body: some View {
-        HStack {
-            Spacer().frame(width: 44.0, height: 0.0, alignment: .center)
-            
-            Button(
-                action: {
-                    self.currentSelectedDrug = self.trackedDrug
-                }
-            ) {
-                text()
-            }
-            
-            FitView().foregroundColor(Color.blue)
-
-            VStack(alignment: .leading) {
-                Text("\(String(didTakeMap[trackedDrug] ?? 0))")
-                    .fontWeight(.thin)
-            }
-            .prettyBorder()
-            
-            Spacer().frame(width: 44.0, height: 0.0, alignment: .center)
-        }
+        Button(action: onTap) {
+            text()
+        }.prettyBorder()
+    }
+    
+    private func onTap() {
+        self.currentSelectedDrug = self.trackedDrug
     }
     
     private func text() -> some View {
@@ -144,9 +137,15 @@ struct DrugEntryViewCell: View {
         }
         
         return VStack(alignment: .leading) {
-            title
-                .font(.headline)
-                .fontWeight(.medium)
+            HStack {
+                title
+                    .font(.headline)
+                    .fontWeight(.medium)
+                FitView().foregroundColor(Color.blue)
+                Text("\(String(didTakeMap[trackedDrug] ?? 0))")
+                    .fontWeight(.thin)
+            }
+            
             subTitle
                 .font(.footnote)
                 .fontWeight(.ultraLight)
@@ -163,7 +162,7 @@ struct FitView: View {
         return Fit().stroke(
             style: StrokeStyle(
                 lineCap: .round,
-                dash: [strokeDash, strokeDash + 2, strokeDash + 4]
+                dash: [strokeDash, strokeDash * 4]
             )
         ).frame(width: nil, height: lineSize, alignment: .center)
     }
@@ -173,8 +172,8 @@ struct FitView: View {
 struct Fit: Shape {
     func path(in rect: CGRect) -> Path {
         Path { path in
-            path.move(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: rect.maxX, y: 0))
+            path.move(to: CGPoint(x: 0, y: rect.maxY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         }
     }
 }
@@ -183,6 +182,13 @@ extension View {
     func prettyBorder() -> some View {
         return self
             .padding(8.0)
+            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
+            .cornerRadius(4.0)
+    }
+    
+    func buttonBorder() -> some View {
+        return self
+            .padding(16.0)
             .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
             .cornerRadius(4.0)
     }
