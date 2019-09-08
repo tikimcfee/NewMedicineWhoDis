@@ -22,12 +22,12 @@ private let dateFormatter: DateFormatter = {
 // ---------------------------------------------------
 struct RootAppStartupView: View {
     
-    @State var coreAppState : CoreAppState = __testData__coreAppState
+    private var coreOperator : MedicineLogOperator = __testData__coreMedicineOperator
 
     // Main view
     var body: some View {
         NavigationView {
-            RootDrugView(medicineEntries: $coreAppState.medicineMap)
+            RootDrugView(coreOperator: coreOperator)
                 .navigationBarTitle(Text("When did I..."))
                 .navigationBarItems(
                     leading: createEditButton(),
@@ -52,7 +52,7 @@ struct RootAppStartupView: View {
     }
     
     var doAdd: () {
-        self.coreAppState.addEntry(medicineEntry: self.createNewEntry())
+        self.coreOperator.addEntry(medicineEntry: self.createNewEntry())
     }
     
     func createNewEntry() -> MedicineEntry {
@@ -61,14 +61,17 @@ struct RootAppStartupView: View {
 }
 
 struct RootDrugView: View {
-    @Binding var medicineEntries: [MedicineEntry]
+    @ObservedObject var coreOperator: MedicineLogOperator
 
     var body: some View {
         List {
-            ForEach(medicineEntries, id: \.self) { entry in
+            ForEach(coreOperator.currentEntries, id: \.self) { entry in
                 self.makeNavigationLink(medicineEntry: entry)
             }.onDelete { indices in
-                indices.forEach { self.medicineEntries.remove(at: $0) }
+                indices.forEach { index in
+                    let id = self.coreOperator.currentEntries[index].randomId
+                    self.coreOperator.removeEntry(id: id)
+                }
             }
         }
     }

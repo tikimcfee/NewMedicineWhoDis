@@ -8,9 +8,6 @@
 
 import Foundation
 
-// ---------------------------------------------------
-
-
 
 public struct Drug: Storable {
     let name: String
@@ -32,27 +29,6 @@ public struct MedicineEntry: Storable {
     }
 }
 
-// Read up on Class vs Struct, SwiftUI differences... 'cause the whole thing COMPILES but BREAKS if this is a class. Lol.
-public struct CoreAppState: Storable {
-    var medicineMap: [MedicineEntry]
-    
-    init(medicineMap: [MedicineEntry] = []) {
-        self.medicineMap = medicineMap
-    }
-}
-
-extension CoreAppState {
-    mutating func addEntry(medicineEntry: MedicineEntry) {
-        medicineMap.insert(medicineEntry, at: 0)
-    }
-    
-    mutating func removeEntry(id: String) {
-        medicineMap.removeAll {
-            $0.randomId == id
-        }
-    }
-}
-
 // ---------------------------------------------------
 // ---------------------------------------------------
 // ---------------------------------------------------
@@ -67,16 +43,12 @@ public let __testData__listOfDrugs: [Drug] = {
     return drugs
 }()
 
-public let __testData__listOfDates: [Date] = {
-    var dates: [Date] = []
-    for _ in 0...10 {
-        dates.append(Date())
-    }
-    return dates
-}()
-
-public let __testData__coreAppState: CoreAppState = {
-    return CoreAppState(
-        medicineMap: []
+public let __testData__coreMedicineOperator: MedicineLogOperator = {
+    let medicineStore = MedicineLogStore()
+    let loadedState = medicineStore.load() ?? CoreAppState()
+    
+    return MedicineLogOperator(
+        medicineStore: medicineStore,
+        coreAppState: loadedState
     )
 }()

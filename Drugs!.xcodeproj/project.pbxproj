@@ -17,6 +17,7 @@
 		4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4D3231AFBD200787D91 /* Drugs_UITests.swift */; };
 		45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */; };
 		45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
+		45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* ApplicationState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		4593B4D5231AFBD200787D91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineDefinitions.swift; sourceTree = "<group>"; };
 		45DA2BBE2324C93E00649270 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		45DA2BC0232532E500649270 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +153,7 @@
 		45DA2BBA2324B24E00649270 /* CoreLogic */ = {
 			isa = PBXGroup;
 			children = (
+				45DA2BC0232532E500649270 /* ApplicationState.swift */,
 				45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */,
 				45DA2BBE2324C93E00649270 /* Persistence.swift */,
 			);
@@ -313,6 +316,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */,
 				4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */,
