@@ -23,12 +23,12 @@ public struct Drug: Storable {
 
 public struct MedicineEntry: Storable {
     let date: Date
-    let drugsTaken: [Drug]
+    let drugsTaken: [Drug:Int]
     let randomId: String
     
     init(
         date: Date,
-        drugsTaken: [Drug] = [],
+        drugsTaken: [Drug:Int],
         _ randomId: String = UUID.init().uuidString
     ) {
         self.date = date
@@ -57,7 +57,7 @@ extension MedicineEntry {
         if self.drugsTaken.count == 0 {
             return "(Nothing taken)"
         } else {
-            return self.drugsTaken.map { $0.drugName }.joined(separator: ", ")
+            return self.drugsTaken.keys.map { $0.drugName }.joined(separator: ", ")
         }
     }
 }

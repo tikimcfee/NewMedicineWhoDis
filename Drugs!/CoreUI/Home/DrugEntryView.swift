@@ -12,6 +12,18 @@ import SwiftUI
 /**Model and View Extensions */
 // ----------------------------------------------
 
+class InProgressEntry: ObservableObject {
+    @Published private var backingEntries: [Drug:Int] = [:]
+    
+    var entryMap: [Drug:Int] {
+        get { return backingEntries }
+        set(value) {
+            self.backingEntries = value
+            self.objectWillChange.send()
+        }
+    }
+}
+
 extension View {
     func prettyBorder() -> some View {
         return self
@@ -32,25 +44,24 @@ extension View {
 
 struct DrugEntryView: View {
     
+    @ObservedObject var inProgressEntry: InProgressEntry = InProgressEntry()
     @State var currentSelectedDrug: Drug? = nil
-    @State var currentMedicineEntries: [Drug:Int] = [:]
     
     var body: some View {
         HStack() {
             ScrollView {
                 ForEach(__testData__listOfDrugs, id: \.self) { drug in
                     DrugEntryViewCell(
-                        didTakeMap: self.$currentMedicineEntries,
+                        inProgressEntry: self.inProgressEntry,
                         currentSelectedDrug: self.$currentSelectedDrug,
                         trackedDrug: drug
                     )
                 }
             }
-            
         
             VStack {
                 DrugEntryNumberPad(
-                    didTakeMap: self.$currentMedicineEntries,
+                    inProgressEntry: self.inProgressEntry,
                     currentSelectedDrug: self.$currentSelectedDrug
                 )
             }
@@ -58,11 +69,92 @@ struct DrugEntryView: View {
         .frame(maxHeight: 240)
         .padding(4.0)
     }
+    
+    enum Result {
+        case saved(clear: Bool)
+        case error(clear: Bool)
+    }
+    
+    func saveAndClear(with handler: ([Drug:Int]) -> Result) {
+        let handlerResult = handler(self.inProgressEntry.entryMap)
+        
+        var shouldClear: Bool
+        
+        // todo: view animations, callbacks
+        switch(handlerResult) {
+        case .saved(let clear):
+            shouldClear = clear
+        case .error(let clear):
+            shouldClear = clear
+        }
+        
+        if shouldClear {
+            resetState()
+        }
+    }
+    
+    func resetState(_ map: [Drug:Int] = [:]) {
+        self.inProgressEntry.entryMap = map
+    }
+}
+
+struct DrugEntryViewCell: View {
+    
+    @ObservedObject var inProgressEntry: InProgressEntry
+    @Binding var currentSelectedDrug: Drug?
+    let trackedDrug: Drug
+    
+    var body: some View {
+        Button(action: onTap) {
+            text()
+        }.prettyBorder()
+    }
+    
+    private func onTap() {
+        self.currentSelectedDrug = self.trackedDrug
+    }
+    
+    private func text() -> some View {
+        var title =
+            Text("\(trackedDrug.drugName)")
+                .font(.subheadline)
+                .fontWeight(.light)
+        
+        var subTitle =
+            Text("\(trackedDrug.ingredientList)")
+                .font(.footnote)
+                .fontWeight(.ultraLight)
+        
+        var count =
+            Text("\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0))")
+                .fontWeight(.thin)
+        
+        if trackedDrug == currentSelectedDrug {
+            title = title.foregroundColor(Color.blue)
+            subTitle = subTitle.foregroundColor(Color.blue)
+            count = count.foregroundColor(Color.blue)
+        } else {
+            title = title.foregroundColor(Color.black)
+            subTitle = subTitle.foregroundColor(Color.black)
+            count = count.foregroundColor(Color.black)
+        }
+        
+        return VStack(alignment: .leading) {
+            HStack {
+                title
+                FitView().foregroundColor(Color.blue)
+                count
+            }
+            
+            subTitle
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
 }
 
 struct DrugEntryNumberPad: View {
     
-    @Binding var didTakeMap: [Drug:Int]
+    @ObservedObject var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     
     let width: Int = 3
@@ -96,7 +188,7 @@ struct DrugEntryNumberPad: View {
     
     private func onTap(of number: Int) {
         if let drug = self.currentSelectedDrug {
-            self.didTakeMap[drug] = number
+            self.inProgressEntry.entryMap[drug] = number
         }
     }
     
@@ -106,67 +198,13 @@ struct DrugEntryNumberPad: View {
             .buttonBorder()
             
         if let drug = currentSelectedDrug,
-            (didTakeMap[drug] ?? nil) == trackedNumber {
+            (inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
             return text.foregroundColor(Color.blue)
         } else {
             return text.foregroundColor(Color.black)
         }
     }
     
-}
-
-struct DrugEntryViewCell: View {
-    
-    @Binding var didTakeMap: [Drug:Int]
-    @Binding var currentSelectedDrug: Drug?
-    let trackedDrug: Drug
-    
-    var body: some View {
-        Button(action: onTap) {
-            text()
-        }.prettyBorder()
-    }
-    
-    private func onTap() {
-        self.currentSelectedDrug = self.trackedDrug
-    }
-    
-    private func text() -> some View {
-        var title =
-            Text("\(trackedDrug.drugName)")
-                .font(.subheadline)
-                .fontWeight(.light)
-        
-        var subTitle =
-            Text("\(trackedDrug.ingredientList)")
-                .font(.footnote)
-                .fontWeight(.ultraLight)
-        
-        var count =
-            Text("\(String(didTakeMap[trackedDrug] ?? 0))")
-                .fontWeight(.thin)
-        
-        if trackedDrug == currentSelectedDrug {
-            title = title.foregroundColor(Color.blue)
-            subTitle = subTitle.foregroundColor(Color.blue)
-            count = count.foregroundColor(Color.blue)
-        } else {
-            title = title.foregroundColor(Color.black)
-            subTitle = subTitle.foregroundColor(Color.black)
-            count = count.foregroundColor(Color.black)
-        }
-        
-        return VStack(alignment: .leading) {
-            HStack {
-                title
-                FitView().foregroundColor(Color.blue)
-                count
-            }
-            
-            subTitle
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
 }
 
 struct FitView: View {

@@ -16,12 +16,6 @@ private let dateFormatter: DateFormatter = {
     return dateFormatter
 }() // <--- ok so we're defining and then, at runtime, executing the function to create the formatter. Ok, cheeky.
 
-extension MedicineEntry {
-    
-    
-    
-}
-
 // ---------------------------------------------------
 // Core UI Structure
 // ---------------------------------------------------
@@ -34,10 +28,10 @@ struct RootAppStartupView: View {
         NavigationView {
             RootDrugView(coreOperator: coreOperator)
                 .navigationBarTitle(Text("When did I..."))
-                .navigationBarItems(
-                    leading: createEditButton(),
-                    trailing: createTrailingAddButton()
-                )
+//                .navigationBarItems(
+//                    leading: createEditButton(),
+//                    trailing: createTrailingAddButton()
+//                )
             DetailView()
         }.navigationViewStyle(DoubleColumnNavigationViewStyle())
     }
@@ -47,42 +41,83 @@ struct RootAppStartupView: View {
         return EditButton()
     }
     
-    // Add button
-    func createTrailingAddButton() -> some View {
-        return Button (
-            action: { withAnimation { self.doAdd } }
-        ) {
-            Image(systemName: "plus")
-        }
-    }
+//    // Add button
+//    func createTrailingAddButton() -> some View {
+//        return Button (
+//            action: { withAnimation { self.doAdd } }
+//        ) {
+//            Image(systemName: "plus")
+//        }.frame(width: 44.0, height: 44.0, alignment: .center)
+//    }
     
-    var doAdd: () {
-        self.coreOperator.addEntry(medicineEntry: self.createNewEntry())
-    }
-    
-    func createNewEntry() -> MedicineEntry {
-        return MedicineEntry(date: Date(), drugsTaken: [])
-    }
+//    var doAdd: () {
+//        self.coreOperator.addEntry(medicineEntry: self.createNewEntry())
+//    }
+//
+//    func createNewEntry() -> MedicineEntry {
+//        return MedicineEntry(date: Date(), drugsTaken: [])
+//    }
 }
 
 struct RootDrugView: View {
     @ObservedObject var coreOperator: MedicineLogOperator
+    let drugEntryView: DrugEntryView = DrugEntryView()
 
     var body: some View {
-        List {
-            ForEach(coreOperator.currentEntries, id: \.self) { entry in
-                self.makeNavigationLink(medicineEntry: entry)
-            }.onDelete { indices in
-                indices.forEach { index in
-                    let id = self.coreOperator.currentEntries[index].randomId
-                    self.coreOperator.removeEntry(id: id)
+        VStack {
+            List {
+                ForEach(coreOperator.currentEntries, id: \.self) { entry in
+                    self.makeNavigationLink(medicineEntry: entry)
+                }.onDelete { indices in
+                    indices.forEach { index in
+                        let id = self.coreOperator.currentEntries[index].randomId
+                        self.coreOperator.removeEntry(id: id)
+                    }
                 }
-            }
+            }.frame(maxHeight: 440.0)
+            
+            self.drugEntryView
+            
+            makeSaveButton()
         }
     }
     
     func makeNavigationLink(medicineEntry: MedicineEntry) -> some View {
         return RootDrugMedicineCell(medicineEntry: medicineEntry)
+    }
+    
+    func makeSaveButton() -> some View {
+        return Button(
+            action: saveTapped
+        ) {
+            Text("Take some drugs")
+                .foregroundColor(Color.white)
+                .padding(8.0)
+                .frame(maxWidth: UIScreen.main.bounds.width - 8.0)
+                .background(
+                    Rectangle()
+                        .cornerRadius(4.0)
+                        .foregroundColor(Color.init(red: 0.4, green: 0.8, blue: 0.9))
+                )
+        }.padding(8.0)
+    }
+    
+    private func saveTapped() {
+        self.drugEntryView.saveAndClear { drugMap in
+            let hasEntries = drugMap.count > 0
+            let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
+            guard hasEntries && hasNonZeroEntries else {
+                print("Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)")
+                return .error(clear: false)
+            }
+            
+            self.coreOperator.addEntry(medicineEntry: self.createNewEntry(with: drugMap))
+            return .saved(clear: true)
+        }
+    }
+        
+    func createNewEntry(with map: [Drug:Int]) -> MedicineEntry {
+        return MedicineEntry(date: Date(), drugsTaken: map)
     }
 }
 
@@ -91,7 +126,7 @@ struct RootDrugMedicineCell: View {
     
     var body: some View {
         NavigationLink(
-            destination: DetailView(selectedDate: medicineEntry.date)
+            destination: DetailView(medicineEntry: medicineEntry)
         ) {
             VStack(alignment: .leading) {
                 Text("\(medicineEntry.drugList)")
@@ -105,15 +140,22 @@ struct RootDrugMedicineCell: View {
 }
 
 struct DetailView: View {
-    var selectedDate: Date?
+    var medicineEntry: MedicineEntry?
 
     var body: some View {
-        Group {
-            if selectedDate != nil {
-                Text("\(selectedDate!, formatter: dateFormatter)")
-            } else {
-                Text("Detail view content goes here")
-            }
+        let inner: Text
+        let medicineList: Text
+        if let entry = medicineEntry {
+            inner = Text("\(entry.date, formatter: dateFormatter)")
+            medicineList = Text(entry.drugList)
+        } else {
+            inner = Text("Detail view content goes here")
+            medicineList = Text("~")
+        }
+        
+        return VStack(alignment: .leading) {
+            inner
+            medicineList
         }.navigationBarTitle(Text("Detail"))
     }
 }
@@ -125,7 +167,6 @@ struct ContentView_Previews: PreviewProvider {
         Group {
             RootAppStartupView()
 //            DetailView()
-//            DetailView(selectedDate: Date())
         }
     }
 }
