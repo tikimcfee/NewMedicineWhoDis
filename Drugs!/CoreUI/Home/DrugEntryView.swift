@@ -42,32 +42,53 @@ extension View {
 
 // ----------------------------------------------
 
+extension View {
+    
+    func slightlyRaised() -> some View {
+        return self
+            .shadow(color: Color.gray, radius: 0.5, x: 0.0, y: 0.5)
+            .padding(4.0)
+    }
+    
+}
+
 struct DrugEntryView: View {
     
     @ObservedObject var inProgressEntry: InProgressEntry = InProgressEntry()
     @State var currentSelectedDrug: Drug? = nil
     
     var body: some View {
-        HStack() {
-            ScrollView {
-                ForEach(__testData__listOfDrugs, id: \.self) { drug in
-                    DrugEntryViewCell(
-                        inProgressEntry: self.inProgressEntry,
-                        currentSelectedDrug: self.$currentSelectedDrug,
-                        trackedDrug: drug
-                    )
-                }
-            }
-        
-            VStack {
+        ZStack {
+            HStack(alignment: .bottom) {
+                ScrollView {
+                    ForEach(__testData__listOfDrugs, id: \.self) { drug in
+                        DrugEntryViewCell(
+                            inProgressEntry: self.inProgressEntry,
+                            currentSelectedDrug: self.$currentSelectedDrug,
+                            trackedDrug: drug
+                        ).padding(
+                            EdgeInsets.init(
+                                top: 0.0, leading: 0.0,
+                                bottom: 4.0, trailing: 0.0
+                            )
+                        )
+                    }
+                }.slightlyRaised()
+            
                 DrugEntryNumberPad(
                     inProgressEntry: self.inProgressEntry,
                     currentSelectedDrug: self.$currentSelectedDrug
-                )
+                ).slightlyRaised()
             }
         }
-        .frame(maxHeight: 240)
-        .padding(4.0)
+        .padding(8.0)
+        .frame(height:320)
+            
+        .background(
+            Color(red: 0.8, green: 0.9, blue: 0.9)
+            .slightlyRaised()
+        )
+        
     }
     
     enum Result {
@@ -106,8 +127,8 @@ struct DrugEntryViewCell: View {
     
     var body: some View {
         Button(action: onTap) {
-            text()
-        }.prettyBorder()
+            text().prettyBorder()
+        }
     }
     
     private func onTap() {
@@ -142,12 +163,11 @@ struct DrugEntryViewCell: View {
         return VStack(alignment: .leading) {
             HStack {
                 title
-                FitView().foregroundColor(Color.blue)
+                Spacer()
                 count
             }
             
-            subTitle
-                .fixedSize(horizontal: false, vertical: true)
+//            subTitle.fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -157,38 +177,65 @@ struct DrugEntryNumberPad: View {
     @ObservedObject var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     
-    let width: Int = 3
-    let height: Int = 3
+    private var currentDrugCount: Int {
+        guard let drug = currentSelectedDrug else { return 0 }
+        return self.inProgressEntry.entryMap[drug] ?? 0
+    }
     
     var body: some View {
         VStack {
+            headerLabel()
+            
             HStack {
-                ForEach([1, 2, 3], id:\.self) {
-                    self.numberButton(trackedNumber: $0)
-                }
+                createButtonsFor(1, 2, 3)
             }
             HStack {
-                ForEach([4, 5, 6], id:\.self) {
-                    self.numberButton(trackedNumber: $0)
-                }
+                createButtonsFor(4, 5, 6)
             }
             HStack {
-                ForEach([7, 8, 9], id:\.self) {
-                    self.numberButton(trackedNumber: $0)
-                }
+                createButtonsFor(7, 8, 9)
             }
+        }
+    }
+    
+    private func headerLabel() -> some View {
+        var headerText: Text
+        if let selectedDrug = currentSelectedDrug {
+            let title = "\(selectedDrug.drugName) (\(currentDrugCount))"
+            
+            headerText = Text(title)
+                .bold()
+                .font(.subheadline)
+        } else {
+            headerText = Text("Select something from the list, ya doink.")
+                .fontWeight(.ultraLight)
+                .italic()
+        }
+        return headerText
+    }
+    
+    private func createButtonsFor(_ numbersIn: Int...) -> some View {
+        return ForEach(numbersIn, id:\.self) {
+            self.numberButton(trackedNumber: $0)
         }
     }
     
     private func numberButton(trackedNumber: Int = 1) -> some View {
         return Button(action: { self.onTap(of: trackedNumber) }) {
             numberText(trackedNumber: trackedNumber)
-        }
+        }.padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 4.0, trailing: 0.0))
     }
     
     private func onTap(of number: Int) {
         if let drug = self.currentSelectedDrug {
-            self.inProgressEntry.entryMap[drug] = number
+            // toggle selection
+            if let lastSelection = self.inProgressEntry.entryMap[drug],
+                lastSelection == number {
+                self.inProgressEntry.entryMap[drug] = nil
+            } else {
+                self.inProgressEntry.entryMap[drug] = number
+            }
+            
         }
     }
     
