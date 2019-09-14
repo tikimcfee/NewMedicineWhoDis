@@ -127,12 +127,16 @@ struct DrugEntryViewCell: View {
     
     var body: some View {
         Button(action: onTap) {
-            text().prettyBorder()
+            text().padding(.horizontal, 16.0)
         }
     }
     
     private func onTap() {
-        self.currentSelectedDrug = self.trackedDrug
+        if let selected = self.currentSelectedDrug, selected == self.trackedDrug {
+            self.currentSelectedDrug = nil
+        } else {
+            self.currentSelectedDrug = self.trackedDrug
+        }
     }
     
     private func text() -> some View {
