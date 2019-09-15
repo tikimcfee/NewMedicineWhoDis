@@ -17,6 +17,10 @@ public class CoreAppState: Storable {
         self.medicineMap = medicineMap
     }
     
+    public func lastEntryTiming() -> [Drug: Date] {
+        return self.medicineMap.last?.timesDrugsAreNextAvailable ?? [:]
+    }
+    
     public static func == (lhs: CoreAppState, rhs: CoreAppState) -> Bool {
         return lhs.medicineMap == rhs.medicineMap
     }

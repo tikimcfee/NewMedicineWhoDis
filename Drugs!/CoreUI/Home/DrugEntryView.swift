@@ -18,8 +18,8 @@ class InProgressEntry: ObservableObject {
     var entryMap: [Drug:Int] {
         get { return backingEntries }
         set(value) {
-            self.backingEntries = value
             self.objectWillChange.send()
+            self.backingEntries = value
         }
     }
 }
@@ -127,7 +127,7 @@ struct DrugEntryViewCell: View {
     
     var body: some View {
         Button(action: onTap) {
-            text().padding(.horizontal, 16.0)
+            text().padding(.trailing, 16.0)
         }
     }
     
@@ -170,7 +170,6 @@ struct DrugEntryViewCell: View {
                 Spacer()
                 count
             }
-            
 //            subTitle.fixedSize(horizontal: false, vertical: true)
         }
     }

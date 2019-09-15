@@ -15,9 +15,14 @@ public struct Ingredient: Storable {
 public struct Drug: Storable {
     let drugName: String
     let ingredients: [Ingredient]
+    let hourlyDoseTime: Int
     
     static func blank() -> Drug {
-        Drug(drugName: "", ingredients: [])
+        Drug(
+            drugName: "",
+            ingredients: [],
+            hourlyDoseTime: 4
+        )
     }
 }
 
@@ -50,6 +55,10 @@ extension Drug {
             return self.ingredients.map { $0.ingredientName }.joined(separator: ", ")
         }
     }
+    
+    var doseTimeInSeconds: Double {
+        return Double(hourlyDoseTime) * 60.0 * 60.0
+    }
 }
 
 extension MedicineEntry {
@@ -59,6 +68,14 @@ extension MedicineEntry {
         } else {
             return self.drugsTaken.keys.map { $0.drugName }.joined(separator: ", ")
         }
+    }
+    
+    var timesDrugsAreNextAvailable: [Drug: Date] {
+        var result: [Drug: Date] = [:]
+        drugsTaken.forEach { pair in
+            result[pair.key] = self.date.advanced(by: pair.key.doseTimeInSeconds)
+        }
+        return result
     }
 }
 
@@ -72,19 +89,22 @@ public let __testData__listOfDrugs: [Drug] = {
             drugName: "Tylenol",
             ingredients: [
                 Ingredient(ingredientName: "Acetaminophen")
-            ]
+            ],
+            hourlyDoseTime: 6
         ),
         Drug(
             drugName: "Advil",
             ingredients: [
                 Ingredient(ingredientName: "Naproxen Sodium")
-            ]
+            ],
+            hourlyDoseTime: 6
         ),
         Drug(
             drugName: "Venlafaxine",
             ingredients: [
                 Ingredient(ingredientName: "Venlafaxine")
-            ]
+            ],
+            hourlyDoseTime: 6
         ),
         Drug(
             drugName: "Excedrin",
@@ -92,47 +112,88 @@ public let __testData__listOfDrugs: [Drug] = {
                 Ingredient(ingredientName: "Acetaminophen"),
                 Ingredient(ingredientName: "Aspirin"),
                 Ingredient(ingredientName: "Caffeine")
-            ]
+            ],
+            hourlyDoseTime: 6
         ),
         Drug(
             drugName: "Ibuprofen",
             ingredients: [
                 Ingredient(ingredientName: "Ibuprofen")
-            ]
+            ],
+            hourlyDoseTime: 6
         ),
         Drug(
             drugName: "Propranolol",
             ingredients: [
                 Ingredient(ingredientName: "Propranolol")
-            ]
+            ],
+            hourlyDoseTime: 12
         ),
         Drug(
             drugName: "Buspirone",
             ingredients: [
                 Ingredient(ingredientName: "Buspirone")
             ]
+            ,
+            hourlyDoseTime: 24
         ),
         Drug(
             drugName: "Trazadone",
             ingredients: [
                 Ingredient(ingredientName: "Trazadone")
-            ]
+            ],
+            hourlyDoseTime: 24
         ),
         Drug(
             drugName: "Tums",
             ingredients: [
                 Ingredient(ingredientName: "Sodium Bicarbonate")
-            ]
+            ],
+            hourlyDoseTime: 4
         ),
         Drug(
             drugName: "Funky Green Shit",
             ingredients: [
                 Ingredient(ingredientName: "THC"),
                 Ingredient(ingredientName: "CBD")
-            ]
+            ],
+            hourlyDoseTime: 1
         ),
     ]
     return drugs
+}()
+
+public let __testData__anEntry: MedicineEntry = {
+    return MedicineEntry(
+            date: Date(),
+            drugsTaken: [
+                Drug(
+                    drugName: "Drugs",
+                    ingredients: [Ingredient(ingredientName: "Sunshine")],
+                    hourlyDoseTime: 1
+                ) : 2,
+                Drug(
+                    drugName: "A great stuff",
+                    ingredients: [Ingredient(ingredientName: "Milk")],
+                    hourlyDoseTime: 2
+                ) : 1,
+                Drug(
+                    drugName: "Allthepots",
+                    ingredients: [Ingredient(ingredientName: "Sunshine")],
+                    hourlyDoseTime: 3
+                ) : 2,
+                Drug(
+                    drugName: "Pepto",
+                    ingredients: [Ingredient(ingredientName: "Sunshine")],
+                    hourlyDoseTime: 4
+                ) : 1,
+                Drug(
+                    drugName: "Sugar",
+                    ingredients: [Ingredient(ingredientName: "Sunshine")],
+                    hourlyDoseTime: 24
+                ) : 3,
+            ]
+        )
 }()
 
 public let __testData__coreMedicineOperator: MedicineLogOperator = {

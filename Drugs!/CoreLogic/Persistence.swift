@@ -101,6 +101,7 @@ public class MedicineLogOperator: ObservableObject {
     
     private func onQueue(run operation: LogOperation) {
         self.queue.async {
+            self.emit()
             
             switch(operation) {
             
@@ -113,7 +114,7 @@ public class MedicineLogOperator: ObservableObject {
             
             let didSucceed = self.medicineStore.save(appState: self.coreAppState)
             print("Operation::\n\t'\(operation)'\n\tSucceeded:\(didSucceed)")
-            self.emit()
+            
         }
     }
     

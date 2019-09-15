@@ -11,10 +11,16 @@ import SwiftUI
 // Statically used
 private let dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .medium
+    dateFormatter.dateStyle = .none
     dateFormatter.timeStyle = .medium
     return dateFormatter
 }() // <--- ok so we're defining and then, at runtime, executing the function to create the formatter. Ok, cheeky.
+
+private let dateFormatterSmall: DateFormatter = {
+    let dateFormatter = DateFormatter()
+    dateFormatter.timeStyle = .short
+    return dateFormatter
+}()
 
 // ---------------------------------------------------
 // Core UI Structure
@@ -139,23 +145,51 @@ struct RootDrugMedicineCell: View {
     }
 }
 
+struct DetailEntryModel: Identifiable, Storable {
+    var id = UUID()
+    let drugName: String
+    let timeForNextDose: String
+    let canTakeAgain: Bool
+}
+
+struct DetailEntryModelCell: View {
+    let model: DetailEntryModel
+    let fromEntry: MedicineEntry
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(model.drugName)
+                if model.canTakeAgain {
+                    Image(systemName: "checkmark.circle.fill").foregroundColor(Color.green)
+                } else {
+                    Image(systemName: "multiply.circle").foregroundColor(Color.red)
+                }
+            }
+            Text(model.timeForNextDose)
+        }.padding(4.0)
+    }
+    
+}
+
 struct DetailView: View {
     var medicineEntry: MedicineEntry?
 
     var body: some View {
-        let inner: Text
-        let medicineList: Text
-        if let entry = medicineEntry {
-            inner = Text("\(entry.date, formatter: dateFormatter)")
-            medicineList = Text(entry.drugList)
-        } else {
-            inner = Text("Detail view content goes here")
-            medicineList = Text("~")
-        }
+        let now = Date()
+        let data: [DetailEntryModel] = medicineEntry?.timesDrugsAreNextAvailable.compactMap { keyPair in
+            DetailEntryModel(
+                drugName: keyPair.key.drugName,
+                timeForNextDose: "Take again at \(dateFormatterSmall.string(from: keyPair.value))",
+                canTakeAgain: now >= keyPair.value
+            )
+        } ?? []
         
         return VStack(alignment: .leading) {
-            inner
-            medicineList
+            Text("\(Date(), formatter: dateFormatter)")
+            ForEach(data, id: \.self) { item in
+                DetailEntryModelCell(model: item, fromEntry: self.medicineEntry!)
+            }
         }.navigationBarTitle(Text("Detail"))
     }
 }
@@ -165,8 +199,10 @@ struct DetailView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            RootAppStartupView()
-//            DetailView()
+//            RootAppStartupView()
+            DetailView(
+                medicineEntry: __testData__anEntry
+            )
         }
     }
 }
