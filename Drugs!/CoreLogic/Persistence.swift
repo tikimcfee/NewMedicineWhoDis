@@ -75,7 +75,7 @@ public class MedicineLogOperator: ObservableObject {
     private let queue: DispatchQueue
     
     var currentEntries: [MedicineEntry] {
-        return coreAppState.medicineMap
+        return coreAppState.mainEntryList
     }
     
     init(

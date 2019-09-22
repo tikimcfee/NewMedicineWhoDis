@@ -15,6 +15,9 @@
 		4593B4BE231AFBD100787D91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4BC231AFBD100787D91 /* LaunchScreen.storyboard */; };
 		4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4C8231AFBD200787D91 /* Drugs_Tests.swift */; };
 		4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4D3231AFBD200787D91 /* Drugs_UITests.swift */; };
+		459679F723370558001DCBA1 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F623370558001DCBA1 /* AppColors.swift */; };
+		459679F923371772001DCBA1 /* DrugDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* DrugDetailView.swift */; };
+		459679FB2337204C001DCBA1 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
 		45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */; };
 		45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* ApplicationState.swift */; };
@@ -53,6 +56,9 @@
 		4593B4CF231AFBD200787D91 /* Drugs!UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Drugs!UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4593B4D3231AFBD200787D91 /* Drugs_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_UITests.swift; sourceTree = "<group>"; };
 		4593B4D5231AFBD200787D91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		459679F623370558001DCBA1 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		459679F823371772001DCBA1 /* DrugDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugDetailView.swift; sourceTree = "<group>"; };
+		459679FA2337204B001DCBA1 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
 		45DA2BBC2324C1FD00649270 /* MedicineDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineDefinitions.swift; sourceTree = "<group>"; };
 		45DA2BBE2324C93E00649270 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		45DA2BC0232532E500649270 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
@@ -144,6 +150,15 @@
 			path = "Drugs!UITests";
 			sourceTree = "<group>";
 		};
+		459679F523370548001DCBA1 /* Theming */ = {
+			isa = PBXGroup;
+			children = (
+				459679F623370558001DCBA1 /* AppColors.swift */,
+				459679FA2337204B001DCBA1 /* Formatting.swift */,
+			);
+			path = Theming;
+			sourceTree = "<group>";
+		};
 		45DA2BB92324B21600649270 /* Standard App Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +180,7 @@
 		45DA2BBB2324B28A00649270 /* CoreUI */ = {
 			isa = PBXGroup;
 			children = (
+				459679F523370548001DCBA1 /* Theming */,
 				45F0D6152324457B00A8313F /* Home */,
 			);
 			path = CoreUI;
@@ -183,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */,
+				459679F823371772001DCBA1 /* DrugDetailView.swift */,
 				45DA2BC2232551B600649270 /* DrugEntryView.swift */,
 			);
 			path = Home;
@@ -319,11 +336,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				459679FB2337204C001DCBA1 /* Formatting.swift in Sources */,
 				45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */,
 				4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */,
 				45DA2BC3232551B600649270 /* DrugEntryView.swift in Sources */,
+				459679F923371772001DCBA1 /* DrugDetailView.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineDefinitions.swift in Sources */,
+				459679F723370558001DCBA1 /* AppColors.swift in Sources */,
 				4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */,
 			);

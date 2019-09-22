@@ -19,7 +19,7 @@ public struct Drug: Storable {
     
     static func blank() -> Drug {
         Drug(
-            drugName: "",
+			drugName: "<default drug binding\(UUID.init().uuidString)>",
             ingredients: [],
             hourlyDoseTime: 4
         )
@@ -72,7 +72,9 @@ extension MedicineEntry {
     
     var timesDrugsAreNextAvailable: [Drug: Date] {
         var result: [Drug: Date] = [:]
-        drugsTaken.forEach { pair in
+        drugsTaken
+			.sorted { l, r in l.key.drugName.compare(r.key.drugName) == .orderedAscending }
+			.forEach { pair in
             result[pair.key] = self.date.advanced(by: pair.key.doseTimeInSeconds)
         }
         return result
@@ -152,10 +154,24 @@ public let __testData__listOfDrugs: [Drug] = {
             hourlyDoseTime: 4
         ),
         Drug(
-            drugName: "Funky Green Shit",
+            drugName: "Herb",
             ingredients: [
                 Ingredient(ingredientName: "THC"),
                 Ingredient(ingredientName: "CBD")
+            ],
+            hourlyDoseTime: 1
+        ),
+		Drug(
+            drugName: "Diphenhydramine",
+            ingredients: [
+                Ingredient(ingredientName: "Diphenhydramine"),
+            ],
+            hourlyDoseTime: 1
+        ),
+		Drug(
+            drugName: "Simethicone",
+            ingredients: [
+                Ingredient(ingredientName: "Simethicone"),
             ],
             hourlyDoseTime: 1
         ),
@@ -165,7 +181,7 @@ public let __testData__listOfDrugs: [Drug] = {
 
 public let __testData__anEntry: MedicineEntry = {
     return MedicineEntry(
-            date: Date(),
+			date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
             drugsTaken: [
                 Drug(
                     drugName: "Drugs",
@@ -192,8 +208,8 @@ public let __testData__anEntry: MedicineEntry = {
                     ingredients: [Ingredient(ingredientName: "Sunshine")],
                     hourlyDoseTime: 24
                 ) : 3,
-            ]
-        )
+			]
+		)
 }()
 
 public let __testData__coreMedicineOperator: MedicineLogOperator = {

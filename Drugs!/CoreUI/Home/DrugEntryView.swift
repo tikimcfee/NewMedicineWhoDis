@@ -13,29 +13,21 @@ import SwiftUI
 // ----------------------------------------------
 
 class InProgressEntry: ObservableObject {
-    @Published private var backingEntries: [Drug:Int] = [:]
-    
-    var entryMap: [Drug:Int] {
-        get { return backingEntries }
-        set(value) {
-            self.objectWillChange.send()
-            self.backingEntries = value
-        }
-    }
+	@Published var entryMap: [Drug:Int] = [:]
 }
 
 extension View {
     func prettyBorder() -> some View {
         return self
             .padding(8.0)
-            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
+            .border(Color.viewBorder, width: 2.0)
             .cornerRadius(4.0)
     }
     
     func buttonBorder() -> some View {
         return self
             .padding(16.0)
-            .border(Color.init(red: 0.65, green: 0.85, blue: 0.95), width: 2.0)
+            .border(Color.buttonBorder, width: 2.0)
             .cornerRadius(4.0)
     }
 }
@@ -82,11 +74,10 @@ struct DrugEntryView: View {
             }
         }
         .padding(8.0)
-        .frame(height:320)
-            
+        .frame(height:280)
         .background(
-            Color(red: 0.8, green: 0.9, blue: 0.9)
-            .slightlyRaised()
+			Color(red: 0.8, green: 0.9, blue: 0.9)
+				.slightlyRaised()
         )
         
     }
@@ -155,13 +146,13 @@ struct DrugEntryViewCell: View {
                 .fontWeight(.thin)
         
         if trackedDrug == currentSelectedDrug {
-            title = title.foregroundColor(Color.blue)
-            subTitle = subTitle.foregroundColor(Color.blue)
-            count = count.foregroundColor(Color.blue)
+			title = title.foregroundColor(Color.medicineCellSelected)
+            subTitle = subTitle.foregroundColor(Color.medicineCellSelected)
+            count = count.foregroundColor(Color.medicineCellSelected)
         } else {
-            title = title.foregroundColor(Color.black)
-            subTitle = subTitle.foregroundColor(Color.black)
-            count = count.foregroundColor(Color.black)
+            title = title.foregroundColor(Color.medicineCellSelected)
+            subTitle = subTitle.foregroundColor(Color.medicineCellSelected)
+            count = count.foregroundColor(Color.medicineCellSelected)
         }
         
         return VStack(alignment: .leading) {
@@ -195,7 +186,7 @@ struct DrugEntryNumberPad: View {
             HStack {
                 createButtonsFor(4, 5, 6)
             }
-            HStack {
+			HStack {
                 createButtonsFor(7, 8, 9)
             }
         }
@@ -210,7 +201,7 @@ struct DrugEntryNumberPad: View {
                 .bold()
                 .font(.subheadline)
         } else {
-            headerText = Text("Select something from the list, ya doink.")
+            headerText = Text("Pick a thing from the list")
                 .fontWeight(.ultraLight)
                 .italic()
         }
@@ -249,9 +240,9 @@ struct DrugEntryNumberPad: View {
             
         if let drug = currentSelectedDrug,
             (inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
-            return text.foregroundColor(Color.blue)
+            return text.foregroundColor(Color.medicineCellSelected)
         } else {
-            return text.foregroundColor(Color.black)
+            return text.foregroundColor(Color.medicineCellNotSelected)
         }
     }
     

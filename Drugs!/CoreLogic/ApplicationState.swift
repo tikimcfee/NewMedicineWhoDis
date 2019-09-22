@@ -8,35 +8,34 @@
 
 import Foundation
 
-// Read up on Class vs Struct, SwiftUI differences... 'cause the whole thing COMPILES but BREAKS if this is a class. Lol.
 public class CoreAppState: Storable {
     
-    var medicineMap: [MedicineEntry]
+    var mainEntryList: [MedicineEntry]
     
     init(medicineMap: [MedicineEntry] = []) {
-        self.medicineMap = medicineMap
+        self.mainEntryList = medicineMap
     }
     
     public func lastEntryTiming() -> [Drug: Date] {
-        return self.medicineMap.last?.timesDrugsAreNextAvailable ?? [:]
+        return mainEntryList.last?.timesDrugsAreNextAvailable ?? [:]
     }
     
     public static func == (lhs: CoreAppState, rhs: CoreAppState) -> Bool {
-        return lhs.medicineMap == rhs.medicineMap
+        return lhs.mainEntryList == rhs.mainEntryList
     }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(medicineMap)
+        hasher.combine(mainEntryList)
     }
 }
 
 public extension CoreAppState {
     func addEntry(medicineEntry: MedicineEntry) {
-        medicineMap.insert(medicineEntry, at: 0)
+        mainEntryList.insert(medicineEntry, at: 0)
     }
     
     func removeEntry(id: String) {
-        medicineMap.removeAll {
+        mainEntryList.removeAll {
             $0.randomId == id
         }
     }
