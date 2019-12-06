@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		45135960239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4513595F239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift */; };
 		45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
+		45135965239A3A9700EB2D31 /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 45135964239A3A9700EB2D31 /* WaterfallGrid */; };
 		4517802F23612F6700E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		4517803023612F6900E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		4517803123612F6C00E7C5F7 /* CoreInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45452B8A235D308700273D79 /* CoreInsights.swift */; };
@@ -85,6 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45135965239A3A9700EB2D31 /* WaterfallGrid in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +242,9 @@
 			dependencies = (
 			);
 			name = "Drugs!";
+			packageProductDependencies = (
+				45135964239A3A9700EB2D31 /* WaterfallGrid */,
+			);
 			productName = "Drugs!";
 			productReference = 4593B4AE231AFBD000787D91 /* Meds!.app */;
 			productType = "com.apple.product-type.application";
@@ -312,6 +317,9 @@
 				Base,
 			);
 			mainGroup = 4593B4A5231AFBD000787D91;
+			packageReferences = (
+				45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
+			);
 			productRefGroup = 4593B4AF231AFBD000787D91 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -708,6 +716,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/paololeonardi/WaterfallGrid.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		45135964239A3A9700EB2D31 /* WaterfallGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */;
+			productName = WaterfallGrid;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4593B4A6231AFBD000787D91 /* Project object */;
 }
