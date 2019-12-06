@@ -8,19 +8,15 @@
 
 import Foundation
 
-public class CoreAppState: Storable {
+public class AppState: Storable {
     
-    var mainEntryList: [MedicineEntry]
+    private(set) var mainEntryList: [MedicineEntry]
     
     init(medicineMap: [MedicineEntry] = []) {
         self.mainEntryList = medicineMap
     }
     
-    public func lastEntryTiming() -> [Drug: Date] {
-        return mainEntryList.last?.timesDrugsAreNextAvailable ?? [:]
-    }
-    
-    public static func == (lhs: CoreAppState, rhs: CoreAppState) -> Bool {
+    public static func == (lhs: AppState, rhs: AppState) -> Bool {
         return lhs.mainEntryList == rhs.mainEntryList
     }
     
@@ -29,14 +25,12 @@ public class CoreAppState: Storable {
     }
 }
 
-public extension CoreAppState {
+extension AppState {
     func addEntry(medicineEntry: MedicineEntry) {
         mainEntryList.insert(medicineEntry, at: 0)
     }
     
     func removeEntry(id: String) {
-        mainEntryList.removeAll {
-            $0.randomId == id
-        }
+        mainEntryList.removeAll { $0.uuid == id }
     }
 }

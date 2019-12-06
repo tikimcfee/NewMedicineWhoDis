@@ -9,9 +9,9 @@
 import Foundation
 import SwiftUI
 
-
 public typealias Storable = Equatable & Hashable & Codable
 
+// Global encoders / decoder instances ... should we really?
 private let jsonEncoder = JSONEncoder()
 private let jsonDecoder = JSONDecoder()
 private let fileManager = FileManager.default
@@ -39,40 +39,53 @@ public class MedicineLogStore {
         return logFileUrl
     }
     
-    func save(appState: CoreAppState) -> Bool {
+    func save(appState: AppState) -> Bool {
         do {
             let jsonData = try jsonEncoder.encode(appState)
             try jsonData.write(to: medicineLogsDefaultFile)
             return true
         } catch {
-            print("Encoding error : \(error)")
+			loge {
+				Event(MedicineLogStore.self, "Encoding error : \(error)", .critical)
+			}
             return false
         }
     }
     
-    func load() -> CoreAppState? {
+    func load() -> AppState {
+		if !fileManager.fileExists(atPath: medicineLogsDefaultFile.path) {
+			logd {
+				Event(MedicineLogStore.self, "No existing logs; creating new CoreAppState")
+			}
+			return AppState()
+		}
         do {
             let stateDate = try Data.init(contentsOf: medicineLogsDefaultFile)
-            return try jsonDecoder.decode(CoreAppState.self, from: stateDate)
+            return try jsonDecoder.decode(AppState.self, from: stateDate)
         } catch {
-            print("Encoding error : \(error)")
-            return nil
+			loge {
+				Event(MedicineLogStore.self, "Decoding error : \(error); returning a new CoreAppState", .critical)
+			}
+            return AppState()
         }
     }
-    
 }
+
 
 enum LogOperation {
     case add(_ medicineEntry: MedicineEntry)
     case remove(_ medicineEntryId: String)
 }
 
+/// This whole 'LogStore' and 'Operator' thing is getting annoying.. make it better
+/// - Why is there an Operator and an AppState? Is it really so important to separate the code?
+
 public class MedicineLogOperator: ObservableObject {
     
-    @Published private var coreAppState: CoreAppState
-    
     private let medicineStore: MedicineLogStore
-    private let queue: DispatchQueue
+    @Published private var coreAppState: AppState
+	
+	private let queue: DispatchQueue
     
     var currentEntries: [MedicineEntry] {
         return coreAppState.mainEntryList
@@ -80,7 +93,7 @@ public class MedicineLogOperator: ObservableObject {
     
     init(
         medicineStore: MedicineLogStore,
-        coreAppState: CoreAppState,
+        coreAppState: AppState,
         _ queue: DispatchQueue = DispatchQueue.init(
             label: "MedicineLogOperator-Queue",
             qos: .userInteractive
@@ -92,29 +105,36 @@ public class MedicineLogOperator: ObservableObject {
     }
     
     func addEntry(medicineEntry: MedicineEntry) {
-        onQueue(run: .add(medicineEntry))
+		onQueue {
+			.add(medicineEntry)
+		}
     }
     
     func removeEntry(id: String) {
-        onQueue(run: .remove(id))
+		onQueue {
+			.remove(id)
+		}
     }
     
-    private func onQueue(run operation: LogOperation) {
-        self.queue.async {
+	func onQueue(_ operation: @escaping () -> LogOperation) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
+        queue.async {
             self.emit()
+			
+			let op = operation()
+			
+            switch(op) {
+				case .add(let medicineEntry):
+					self.coreAppState.addEntry(medicineEntry: medicineEntry)
             
-            switch(operation) {
-            
-            case .add(let medicineEntry):
-                self.coreAppState.addEntry(medicineEntry: medicineEntry)
-            
-            case .remove(let medicineEntryId):
-                self.coreAppState.removeEntry(id: medicineEntryId)
+				case .remove(let medicineEntryId):
+					self.coreAppState.removeEntry(id: medicineEntryId)
             }
             
             let didSucceed = self.medicineStore.save(appState: self.coreAppState)
-            print("Operation::\n\t'\(operation)'\n\tSucceeded:\(didSucceed)")
-            
+			
+			logd {
+				Event(MedicineLogOperator.self, "Operation::\n\t'\(op)'\n\tSuccess:\(didSucceed)")
+			}
         }
     }
     

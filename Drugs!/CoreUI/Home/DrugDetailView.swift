@@ -9,20 +9,36 @@
 import SwiftUI
 
 struct DrugDetailView: View {
-    var medicineEntry: MedicineEntry?
+    let medicineEntry: MedicineEntry
+	
+	init(_ entry: MedicineEntry) {
+		self.medicineEntry = entry
+	}
 
     var body: some View {
-        let data: [DetailEntryModel] = medicineEntry?.toDetailEntryModels() ?? []
+		let data: [DetailEntryModel] = medicineEntry.toDetailEntryModels()
+		let count = data.count
+		let screenTitle: String
+		if count == 1 {
+			screenTitle = "... take this?"
+		} else {
+			screenTitle = "... take these?"
+		}
         
-        return VStack(alignment: .leading) {
+        return VStack(alignment: .trailing) {
 			
-            Text("\(Date(), formatter: dateFormatter)")
-			
-            ForEach(data, id: \.self) { item in
-                DetailEntryModelCell(model: item, fromEntry: self.medicineEntry!)
+			Text("at \(medicineEntry.date, formatter: dateFormatter)")
+				.font(.title)
+				.bold()
+				.underline()
+
+			ForEach(data, id: \.self) { item in
+                DetailEntryModelCell(model: item, fromEntry: self.medicineEntry)
             }
 			
-        }.navigationBarTitle(Text("Detail"))
+		}
+		.padding(8.0)
+		.navigationBarTitle(Text(screenTitle))
     }
 }
 
@@ -31,29 +47,51 @@ struct DetailEntryModelCell: View {
     let fromEntry: MedicineEntry
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(model.drugName)
-            }
+		let titleColor: Color
+		if model.canTakeAgain {
+			titleColor = Color.black
+		} else {
+			titleColor = Color.gray
+		}
+		
+        return VStack(alignment: .leading, spacing: 0) {
 			HStack {
 				canTakeMedicineView
-				Text(model.timeForNextDose)
+				Text(model.drugName)
+					.padding(4.0)
+					.font(.headline)
+					.foregroundColor(titleColor)
+				subtitleView
+				Spacer()
 			}
-			.padding(4.0)
+				
+			HStack {
+				Spacer()
+				Text(model.timeForNextDose)
+					.padding(.top, 10.0)
+			}				
+        }.padding(4.0)
 			.background(Color.timeForNextDose)
 			.cornerRadius(4.0)
-				
-        }.padding(4.0)
+			.slightlyRaised()
     }
+	
+	private var subtitleView: some View {
+		return Text("\(self.model.ingredientList)")
+			.font(.footnote)
+			.fontWeight(.ultraLight)
+			.fixedSize(horizontal: false, vertical: true)
+	}
 	
 	private var canTakeMedicineView: some View {
 		let config: (image: String, color: Color)
 		if model.canTakeAgain {
 			config = ("checkmark.circle.fill", Color.timeForNextDoseImageNow)
 		} else {
-			config = ("multiply.circle", Color.timeForNextDoseImageLater )
+			config = ("multiply.circle", Color.timeForNextDoseImageLater)
 		}
-		return Image(systemName: config.image).foregroundColor(config.color)
+		return Image(systemName: config.image)
+			.foregroundColor(config.color)
 	}
     
 }
@@ -63,28 +101,31 @@ struct DetailEntryModel: Identifiable, Storable {
     let drugName: String
     let timeForNextDose: String
     let canTakeAgain: Bool
+	let ingredientList: String
 }
 
 extension MedicineEntry {
 	
 	func toDetailEntryModels() -> [DetailEntryModel] {
 		let now = Date()
-		return timesDrugsAreNextAvailable.compactMap { keyPair in
+		return timesDrugsAreNextAvailable.compactMap { (drug, date) in
 			
-			let canTakeAgain = now >= keyPair.value
-			let formattedDate = dateFormatterSmall.string(from: keyPair.value)
+			let canTakeAgain = now >= date
+			let formattedDate = dateFormatterSmall.string(from: date)
+			let ingredientList = drug.ingredientList
 			
 			let text: String
 			if canTakeAgain {
-				text = "Go for it! (was ready at \(formattedDate))"
+				text = "You can take some \(drug.drugName) now!"
 			} else {
 				text = "Wait 'till about \(formattedDate)"
 			}
 			
             return DetailEntryModel(
-                drugName: keyPair.key.drugName,
+                drugName: drug.drugName,
                 timeForNextDose: text,
-                canTakeAgain: canTakeAgain
+                canTakeAgain: canTakeAgain,
+				ingredientList: ingredientList
             )
         }
 	}
@@ -95,7 +136,7 @@ extension MedicineEntry {
 
 struct DrugDetailView_Previews: PreviewProvider {
     static var previews: some View {
-		DrugDetailView(medicineEntry: __testData__anEntry)
+		DrugDetailView(__testData__anEntry)
     }
 }
 

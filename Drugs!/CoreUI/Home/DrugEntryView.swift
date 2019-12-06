@@ -30,19 +30,14 @@ extension View {
             .border(Color.buttonBorder, width: 2.0)
             .cornerRadius(4.0)
     }
+	
+	func slightlyRaised() -> some View {
+		return self
+			.shadow(color: Color.gray, radius: 0.5, x: 0.0, y: 0.5)
+			.padding(4.0)
+	}
 }
 
-// ----------------------------------------------
-
-extension View {
-    
-    func slightlyRaised() -> some View {
-        return self
-            .shadow(color: Color.gray, radius: 0.5, x: 0.0, y: 0.5)
-            .padding(4.0)
-    }
-    
-}
 
 struct DrugEntryView: View {
     
@@ -51,7 +46,7 @@ struct DrugEntryView: View {
     
     var body: some View {
         ZStack {
-            HStack(alignment: .bottom) {
+			HStack(alignment: .center) {
                 ScrollView {
                     ForEach(__testData__listOfDrugs, id: \.self) { drug in
                         DrugEntryViewCell(
@@ -65,20 +60,24 @@ struct DrugEntryView: View {
                             )
                         )
                     }
-                }.slightlyRaised()
+				}.padding(
+					EdgeInsets.init(
+						top: 4.0, leading: 4.0,
+						bottom: 4.0, trailing: 0.0
+					)
+				)
             
                 DrugEntryNumberPad(
                     inProgressEntry: self.inProgressEntry,
                     currentSelectedDrug: self.$currentSelectedDrug
-                ).slightlyRaised()
+				).padding(.trailing, 2.0)
+				
             }
         }
-        .padding(8.0)
         .frame(height:280)
         .background(
 			Color(red: 0.8, green: 0.9, blue: 0.9)
-				.slightlyRaised()
-        )
+		).slightlyRaised()
         
     }
     
@@ -94,11 +93,10 @@ struct DrugEntryView: View {
         
         // todo: view animations, callbacks
         switch(handlerResult) {
-        case .saved(let clear):
-            shouldClear = clear
-        case .error(let clear):
-            shouldClear = clear
-        }
+			case .saved(let clear), 
+				 .error(let clear):
+				shouldClear = clear
+		}
         
         if shouldClear {
             resetState()
@@ -136,10 +134,7 @@ struct DrugEntryViewCell: View {
                 .font(.subheadline)
                 .fontWeight(.light)
         
-        var subTitle =
-            Text("\(trackedDrug.ingredientList)")
-                .font(.footnote)
-                .fontWeight(.ultraLight)
+        
         
         var count =
             Text("\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0))")
@@ -147,11 +142,9 @@ struct DrugEntryViewCell: View {
         
         if trackedDrug == currentSelectedDrug {
 			title = title.foregroundColor(Color.medicineCellSelected)
-            subTitle = subTitle.foregroundColor(Color.medicineCellSelected)
             count = count.foregroundColor(Color.medicineCellSelected)
         } else {
             title = title.foregroundColor(Color.medicineCellSelected)
-            subTitle = subTitle.foregroundColor(Color.medicineCellSelected)
             count = count.foregroundColor(Color.medicineCellSelected)
         }
         
@@ -293,22 +286,7 @@ struct DrugEntryView_Preview: PreviewProvider {
     
     static var previews: some View {
         Group {
-//            DrugEntryNumberPad(
-//                didTakeMap: drugMapBinding(),
-//                currentSelectedDrug: drugBinding()
-//            )
             DrugEntryView()
-//            DrugEntryViewCell(
-//                didTakeMap: drugMapBinding(),
-//                currentSelectedDrug: drugBinding(),
-//                trackedDrug: Drug(
-//                    drugName: "Test Drug",
-//                    ingredients: [
-//                        Ingredient(ingredientName: "Sunshine"),
-//                        Ingredient(ingredientName: "Daisies"),
-//                    ]
-//                )
-//            )
         }
     }
 }

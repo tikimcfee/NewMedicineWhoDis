@@ -13,15 +13,15 @@ import SwiftUI
 // ---------------------------------------------------
 struct RootAppStartupView: View {
     
-    private var coreOperator : MedicineLogOperator = __testData__coreMedicineOperator
-
     // Main view
     var body: some View {
         NavigationView {
-            RootDrugView(coreOperator: coreOperator)
-                .navigationBarTitle(Text("When did I..."))
-            DrugDetailView()
-        }.navigationViewStyle(DoubleColumnNavigationViewStyle())
+            RootDrugView().navigationBarTitle(
+				Text("When did I...")
+			)
+        }.navigationViewStyle(
+			DoubleColumnNavigationViewStyle()
+		)
     }
     
     // Edit button
@@ -32,33 +32,32 @@ struct RootAppStartupView: View {
 
 struct RootDrugView: View {
 	
-    @ObservedObject var coreOperator: MedicineLogOperator
-    let drugEntryView: DrugEntryView = DrugEntryView()
+    @EnvironmentObject private var medicineOperator : MedicineLogOperator
 
     var body: some View {
         VStack {
-            List {
-                ForEach(coreOperator.currentEntries, id: \.self) { entry in
-                    self.makeNavigationLink(medicineEntry: entry)
-                }.onDelete { indices in
-                    indices.forEach { index in
-                        let id = self.coreOperator.currentEntries[index].randomId
-                        self.coreOperator.removeEntry(id: id)
-                    }
-                }
-            }.frame(maxHeight: 440.0)
-            
-            self.drugEntryView
-            
-            makeSaveButton()
+            medicineList
+            drugEntryView
+            saveButton
         }
     }
+	
+	var medicineList: some View {
+		return List {
+			ForEach(medicineOperator.currentEntries, id: \.self) { entry in
+				RootDrugMedicineCell(medicineEntry: entry)
+			}.onDelete { indices in
+				indices.forEach { index in
+					let id = self.medicineOperator.currentEntries[index].uuid
+					self.medicineOperator.removeEntry(id: id)
+				}
+			}
+		}.frame(maxHeight: 440.0)
+	}
+	
+	let drugEntryView: DrugEntryView = DrugEntryView()
     
-    func makeNavigationLink(medicineEntry: MedicineEntry) -> some View {
-        return RootDrugMedicineCell(medicineEntry: medicineEntry)
-    }
-    
-    func makeSaveButton() -> some View {
+	var saveButton: some View {
         return Button(
             action: saveTapped
         ) {
@@ -79,11 +78,16 @@ struct RootDrugView: View {
             let hasEntries = drugMap.count > 0
             let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
             guard hasEntries && hasNonZeroEntries else {
-                print("Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)")
+				logd {
+					Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .medium)
+				}
                 return .error(clear: false)
             }
             
-            self.coreOperator.addEntry(medicineEntry: self.createNewEntry(with: drugMap))
+			medicineOperator.addEntry(
+				medicineEntry: self.createNewEntry(with: drugMap)
+			)
+			
             return .saved(clear: true)
         }
     }
@@ -98,7 +102,7 @@ struct RootDrugMedicineCell: View {
     
     var body: some View {
         NavigationLink(
-            destination: DrugDetailView(medicineEntry: medicineEntry)
+            destination: DrugDetailView(medicineEntry)
         ) {
             VStack(alignment: .leading) {
                 Text("\(medicineEntry.drugList)")
@@ -107,7 +111,7 @@ struct RootDrugMedicineCell: View {
                 Text("\(medicineEntry.date, formatter: dateFormatter)")
                     .fontWeight(.ultraLight)
             }
-        }
+		}
     }
 }
 
@@ -116,7 +120,8 @@ struct RootDrugMedicineCell: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            RootAppStartupView()
+			RootAppStartupView()
+				.environmentObject(__testData__coreMedicineOperator)
         }
     }
 }
