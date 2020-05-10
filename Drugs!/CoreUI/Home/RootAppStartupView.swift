@@ -16,18 +16,16 @@ struct RootAppStartupView: View {
     // Main view
     var body: some View {
         NavigationView {
-            RootDrugView().navigationBarTitle(
-				Text("When did I...")
-			)
+            RootDrugView()
+				.navigationBarTitle(
+					Text("When did I..."), 
+					displayMode: .inline
+				)
         }.navigationViewStyle(
 			DoubleColumnNavigationViewStyle()
 		)
     }
-    
-    // Edit button
-    func createEditButton() -> some View {
-        return EditButton()
-    }
+	
 }
 
 struct RootDrugView: View {
@@ -44,15 +42,15 @@ struct RootDrugView: View {
 	
 	var medicineList: some View {
 		return List {
-			ForEach(medicineOperator.currentEntries, id: \.self) { entry in
-				RootDrugMedicineCell(medicineEntry: entry)
+			ForEach(medicineOperator.currentEntries, id: \.self) {
+				RootDrugMedicineCell(medicineEntry: $0)
 			}.onDelete { indices in
 				indices.forEach { index in
 					let id = self.medicineOperator.currentEntries[index].uuid
 					self.medicineOperator.removeEntry(id: id)
 				}
 			}
-		}.frame(maxHeight: 440.0)
+		}.frame(maxHeight: 140.0)
 	}
 	
 	let drugEntryView: DrugEntryView = DrugEntryView()

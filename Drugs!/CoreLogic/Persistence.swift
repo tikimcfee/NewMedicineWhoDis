@@ -85,7 +85,10 @@ public class MedicineLogOperator: ObservableObject {
     private let medicineStore: MedicineLogStore
     @Published private var coreAppState: AppState
 	
-	private let queue: DispatchQueue
+	private let queue: DispatchQueue = DispatchQueue.init(
+		label: "MedicineLogOperator-Queue",
+		qos: .userInteractive
+	) 
     
     var currentEntries: [MedicineEntry] {
         return coreAppState.mainEntryList
@@ -93,36 +96,29 @@ public class MedicineLogOperator: ObservableObject {
     
     init(
         medicineStore: MedicineLogStore,
-        coreAppState: AppState,
-        _ queue: DispatchQueue = DispatchQueue.init(
-            label: "MedicineLogOperator-Queue",
-            qos: .userInteractive
-        )
+        coreAppState: AppState 
     ) {
         self.medicineStore = medicineStore
         self.coreAppState = coreAppState
-        self.queue = queue
     }
     
     func addEntry(medicineEntry: MedicineEntry) {
-		onQueue {
+		onQueue (
 			.add(medicineEntry)
-		}
+		)
     }
     
     func removeEntry(id: String) {
-		onQueue {
+		onQueue (
 			.remove(id)
-		}
+		)
     }
     
-	func onQueue(_ operation: @escaping () -> LogOperation) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
+	func onQueue(_ operation: LogOperation) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
         queue.async {
             self.emit()
 			
-			let op = operation()
-			
-            switch(op) {
+            switch(operation) {
 				case .add(let medicineEntry):
 					self.coreAppState.addEntry(medicineEntry: medicineEntry)
             
@@ -133,7 +129,7 @@ public class MedicineLogOperator: ObservableObject {
             let didSucceed = self.medicineStore.save(appState: self.coreAppState)
 			
 			logd {
-				Event(MedicineLogOperator.self, "Operation::\n\t'\(op)'\n\tSuccess:\(didSucceed)")
+				Event(MedicineLogOperator.self, "Operation::\n\t'\(operation)'\n\tSuccess:\(didSucceed)")
 			}
         }
     }

@@ -99,7 +99,11 @@ public let __testData__listOfDrugs: [Drug] = {
 			hourlyDoseTime: 1
 		),
 	]
-	return drugs
+	
+	return drugs.sorted { l, r in 
+		return l.drugName.count >= r.drugName.count
+	}
+
 }()
 
 public let __testData__anEntry: MedicineEntry = {

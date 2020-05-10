@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import WaterfallGrid
 
 /**Model and View Extensions */
 // ----------------------------------------------
@@ -116,8 +117,11 @@ struct DrugEntryViewCell: View {
     
     var body: some View {
         Button(action: onTap) {
-            text().padding(.trailing, 16.0)
-        }
+			text().padding(
+				EdgeInsets.init(top: 4.0, leading: 8.0, bottom: 4.0, trailing: 8.0)
+			)
+		}.background(Color.buttonBackground.slightlyRaised())
+			
     }
     
     private func onTap() {
@@ -133,112 +137,26 @@ struct DrugEntryViewCell: View {
             Text("\(trackedDrug.drugName)")
                 .font(.subheadline)
                 .fontWeight(.light)
-        
-        
-        
+
         var count =
-            Text("\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0))")
+            Text("(\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0)))")
                 .fontWeight(.thin)
-        
+				
         if trackedDrug == currentSelectedDrug {
 			title = title.foregroundColor(Color.medicineCellSelected)
             count = count.foregroundColor(Color.medicineCellSelected)
         } else {
-            title = title.foregroundColor(Color.medicineCellSelected)
-            count = count.foregroundColor(Color.medicineCellSelected)
+            title = title.foregroundColor(Color.medicineCellNotSelected)
+            count = count.foregroundColor(Color.medicineCellNotSelected)
         }
         
-        return VStack(alignment: .leading) {
-            HStack {
-                title
-                Spacer()
-                count
-            }
-//            subTitle.fixedSize(horizontal: false, vertical: true)
-        }
+		return HStack {
+			title
+			count
+		}.padding(
+			EdgeInsets.init(top: 0, leading: 4.0, bottom: 0, trailing: 4.0)
+		)
     }
-}
-
-struct DrugEntryNumberPad: View {
-    
-    @ObservedObject var inProgressEntry: InProgressEntry
-    @Binding var currentSelectedDrug: Drug?
-    
-    private var currentDrugCount: Int {
-        guard let drug = currentSelectedDrug else { return 0 }
-        return self.inProgressEntry.entryMap[drug] ?? 0
-    }
-    
-    var body: some View {
-        VStack {
-            headerLabel()
-            
-            HStack {
-                createButtonsFor(1, 2, 3)
-            }
-            HStack {
-                createButtonsFor(4, 5, 6)
-            }
-			HStack {
-                createButtonsFor(7, 8, 9)
-            }
-        }
-    }
-    
-    private func headerLabel() -> some View {
-        var headerText: Text
-        if let selectedDrug = currentSelectedDrug {
-            let title = "\(selectedDrug.drugName) (\(currentDrugCount))"
-            
-            headerText = Text(title)
-                .bold()
-                .font(.subheadline)
-        } else {
-            headerText = Text("Pick a thing from the list")
-                .fontWeight(.ultraLight)
-                .italic()
-        }
-        return headerText
-    }
-    
-    private func createButtonsFor(_ numbersIn: Int...) -> some View {
-        return ForEach(numbersIn, id:\.self) {
-            self.numberButton(trackedNumber: $0)
-        }
-    }
-    
-    private func numberButton(trackedNumber: Int = 1) -> some View {
-        return Button(action: { self.onTap(of: trackedNumber) }) {
-            numberText(trackedNumber: trackedNumber)
-        }.padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 4.0, trailing: 0.0))
-    }
-    
-    private func onTap(of number: Int) {
-        if let drug = self.currentSelectedDrug {
-            // toggle selection
-            if let lastSelection = self.inProgressEntry.entryMap[drug],
-                lastSelection == number {
-                self.inProgressEntry.entryMap[drug] = nil
-            } else {
-                self.inProgressEntry.entryMap[drug] = number
-            }
-            
-        }
-    }
-    
-    private func numberText(trackedNumber: Int = 1) -> some View {
-        let text = Text("\(trackedNumber)")
-            .frame(width: 28.0, height: 28.0, alignment: .center)
-            .buttonBorder()
-            
-        if let drug = currentSelectedDrug,
-            (inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
-            return text.foregroundColor(Color.medicineCellSelected)
-        } else {
-            return text.foregroundColor(Color.medicineCellNotSelected)
-        }
-    }
-    
 }
 
 struct FitView: View {
@@ -286,7 +204,11 @@ struct DrugEntryView_Preview: PreviewProvider {
     
     static var previews: some View {
         Group {
-            DrugEntryView()
+//            DrugEntryView()
+			Group {
+				RootAppStartupView()
+					.environmentObject(__testData__coreMedicineOperator)
+			}
         }
     }
 }

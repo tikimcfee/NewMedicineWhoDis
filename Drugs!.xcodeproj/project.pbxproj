@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		45135960239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4513595F239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift */; };
 		45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
-		45135965239A3A9700EB2D31 /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 45135964239A3A9700EB2D31 /* WaterfallGrid */; };
 		4517802F23612F6700E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		4517803023612F6900E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		4517803123612F6C00E7C5F7 /* CoreInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45452B8A235D308700273D79 /* CoreInsights.swift */; };
@@ -30,6 +29,7 @@
 		459679F723370558001DCBA1 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F623370558001DCBA1 /* AppColors.swift */; };
 		459679F923371772001DCBA1 /* DrugDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* DrugDetailView.swift */; };
 		459679FB2337204C001DCBA1 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
+		45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE91C123CBFB55007E0580 /* DrugEntryNumberPad.swift */; };
 		45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* ApplicationState.swift */; };
@@ -75,6 +75,7 @@
 		459679F623370558001DCBA1 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		459679F823371772001DCBA1 /* DrugDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugDetailView.swift; sourceTree = "<group>"; };
 		459679FA2337204B001DCBA1 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
+		45CE91C123CBFB55007E0580 /* DrugEntryNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryNumberPad.swift; sourceTree = "<group>"; };
 		45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineModelDefinitions.swift; sourceTree = "<group>"; };
 		45DA2BBE2324C93E00649270 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		45DA2BC0232532E500649270 /* ApplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationState.swift; sourceTree = "<group>"; };
@@ -86,7 +87,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45135965239A3A9700EB2D31 /* WaterfallGrid in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,6 +222,7 @@
 				4593B4B5231AFBD000787D91 /* RootAppStartupView.swift */,
 				459679F823371772001DCBA1 /* DrugDetailView.swift */,
 				45DA2BC2232551B600649270 /* DrugEntryView.swift */,
+				45CE91C123CBFB55007E0580 /* DrugEntryNumberPad.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -243,7 +244,6 @@
 			);
 			name = "Drugs!";
 			packageProductDependencies = (
-				45135964239A3A9700EB2D31 /* WaterfallGrid */,
 			);
 			productName = "Drugs!";
 			productReference = 4593B4AE231AFBD000787D91 /* Meds!.app */;
@@ -318,7 +318,6 @@
 			);
 			mainGroup = 4593B4A5231AFBD000787D91;
 			packageReferences = (
-				45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
 			);
 			productRefGroup = 4593B4AF231AFBD000787D91 /* Products */;
 			projectDirPath = "";
@@ -370,6 +369,7 @@
 				45DA2BC3232551B600649270 /* DrugEntryView.swift in Sources */,
 				45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */,
 				459679F923371772001DCBA1 /* DrugDetailView.swift in Sources */,
+				45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,
 				45135960239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift in Sources */,
@@ -716,25 +716,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/paololeonardi/WaterfallGrid.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.3.2;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		45135964239A3A9700EB2D31 /* WaterfallGrid */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45135963239A3A9700EB2D31 /* XCRemoteSwiftPackageReference "WaterfallGrid" */;
-			productName = WaterfallGrid;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4593B4A6231AFBD000787D91 /* Project object */;
 }

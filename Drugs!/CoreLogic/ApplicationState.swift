@@ -21,7 +21,7 @@ public class AppState: Storable {
     }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(mainEntryList)
+		hasher.combine(mainEntryList)
     }
 }
 

@@ -17,7 +17,7 @@ public struct Drug: Storable {
 
     let drugName		: String
     let ingredients		: [Ingredient]
-    let hourlyDoseTime	: Int
+    let hourlyDoseTime	: Int 
     
     static func blank() -> Drug {
         Drug(
