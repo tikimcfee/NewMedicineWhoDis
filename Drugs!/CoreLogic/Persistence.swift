@@ -11,70 +11,72 @@ import SwiftUI
 
 public typealias Storable = Equatable & Hashable & Codable
 
-// Global encoders / decoder instances ... should we really?
-private let jsonEncoder = JSONEncoder()
-private let jsonDecoder = JSONDecoder()
-private let fileManager = FileManager.default
+public class MedicineLogStore {
+    private let jsonEncoder = JSONEncoder()
+    private let jsonDecoder = JSONDecoder()
+    private let fileManager = FileManager.default
 
-private var documentsDirectory: URL {
-    let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
-    return paths[0]
+    private var documentsDirectory: URL {
+        let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
+
+    private func directory(named directoryName: String) -> URL {
+        let directory = documentsDirectory.appendingPathComponent(directoryName, isDirectory: true)
+        if !fileManager.fileExists(atPath: directory.path) {
+            try! fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+        }
+        return directory
+    }
+
+    private func file(named fileName: String, in directory: URL) -> URL {
+        let fileUrl = directory.appendingPathComponent(fileName)
+        if !fileManager.fileExists(atPath: fileUrl.path) {
+            fileManager.createFile(atPath: fileUrl.path, contents: Data(), attributes: nil)
+        }
+        return fileUrl
+    }
+
+    private var medicineLogsDirectory: URL {
+        return directory(named: "medicineLogs")
+    }
+
+    private var medicineLogsDefaultFile: URL {
+        return file(named: "core_logs_file.json", in: medicineLogsDirectory)
+    }
+
+    private var medicineLogsDefaultFileIsEmpty: Bool {
+        let attributes = try? fileManager.attributesOfItem(atPath: medicineLogsDefaultFile.absoluteString) as NSDictionary
+        let size = attributes?.fileSize() ?? 0
+        return size <= 0
+    }
 }
 
-public class MedicineLogStore {
-    
-    private var medicineLogsDirectory: URL {
-        let logsDirUrl = documentsDirectory.appendingPathComponent("medicineLogs", isDirectory: true)
-        if !fileManager.fileExists(atPath: logsDirUrl.path) {
-            try! fileManager.createDirectory(at: logsDirUrl, withIntermediateDirectories: true, attributes: nil)
-        }
-        return logsDirUrl
-    }
-    
-    private var medicineLogsDefaultFile: URL {
-        let logFileUrl = medicineLogsDirectory.appendingPathComponent("core_logs_file.json")
-        if !fileManager.fileExists(atPath: logFileUrl.path) {
-            fileManager.createFile(atPath: logFileUrl.path, contents: Data(), attributes: nil)
-        }
-        return logFileUrl
-    }
-    
+extension MedicineLogStore {
     func save(appState: AppState) -> Bool {
         do {
             let jsonData = try jsonEncoder.encode(appState)
             try jsonData.write(to: medicineLogsDefaultFile)
             return true
         } catch {
-			loge {
-				Event(MedicineLogStore.self, "Encoding error : \(error)", .critical)
-			}
+            loge { Event(MedicineLogStore.self, "Encoding error : \(error)", .error) }
             return false
         }
     }
-    
+
     func load() -> AppState {
-		if !fileManager.fileExists(atPath: medicineLogsDefaultFile.path) {
-			logd {
-				Event(MedicineLogStore.self, "No existing logs; creating new CoreAppState")
-			}
-			return AppState()
-		}
+        if medicineLogsDefaultFileIsEmpty {
+            logd { Event(MedicineLogStore.self, "No existing logs; creating new CoreAppState") }
+            return AppState()
+        }
         do {
-            let stateDate = try Data.init(contentsOf: medicineLogsDefaultFile)
-            return try jsonDecoder.decode(AppState.self, from: stateDate)
+            let stateData = try Data.init(contentsOf: medicineLogsDefaultFile)
+            return try jsonDecoder.decode(AppState.self, from: stateData)
         } catch {
-			loge {
-				Event(MedicineLogStore.self, "Decoding error : \(error); returning a new CoreAppState", .critical)
-			}
+            loge { Event(MedicineLogStore.self, "Decoding error : \(error); returning a new CoreAppState", .error) }
             return AppState()
         }
     }
-}
-
-
-enum LogOperation {
-    case add(_ medicineEntry: MedicineEntry)
-    case remove(_ medicineEntryId: String)
 }
 
 /// This whole 'LogStore' and 'Operator' thing is getting annoying.. make it better
@@ -103,34 +105,25 @@ public class MedicineLogOperator: ObservableObject {
     }
     
     func addEntry(medicineEntry: MedicineEntry) {
-		onQueue (
-			.add(medicineEntry)
-		)
+        onQueue {
+            self.coreAppState.addEntry(medicineEntry: medicineEntry)
+        }
     }
     
     func removeEntry(id: String) {
-		onQueue (
-			.remove(id)
-		)
+		onQueue {
+            self.coreAppState.removeEntry(id: id)
+        }
     }
     
-	func onQueue(_ operation: LogOperation) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
+	private func onQueue(_ operation: @escaping () -> Void) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
         queue.async {
             self.emit()
-			
-            switch(operation) {
-				case .add(let medicineEntry):
-					self.coreAppState.addEntry(medicineEntry: medicineEntry)
-            
-				case .remove(let medicineEntryId):
-					self.coreAppState.removeEntry(id: medicineEntryId)
-            }
-            
+            operation()
             let didSucceed = self.medicineStore.save(appState: self.coreAppState)
-			
-			logd {
-				Event(MedicineLogOperator.self, "Operation::\n\t'\(operation)'\n\tSuccess:\(didSucceed)")
-			}
+            logd {
+                Event(MedicineLogOperator.self, "Saved store after operation: \(didSucceed)")
+            }
         }
     }
     

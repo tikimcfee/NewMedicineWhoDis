@@ -135,8 +135,10 @@ extension MedicineEntry {
 #if DEBUG
 
 struct DrugDetailView_Previews: PreviewProvider {
+    private static let entry = DefaultDrugList().defaultEntry
+    
     static var previews: some View {
-		DrugDetailView(__testData__anEntry)
+		DrugDetailView(entry)
     }
 }
 

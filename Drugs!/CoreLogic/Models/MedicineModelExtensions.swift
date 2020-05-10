@@ -9,14 +9,15 @@
 import Foundation
 
 extension Drug {
+
+    private var onlyIngredientIsSelf: Bool {
+        return ingredients.count == 1
+            && ingredients.first?.ingredientName == drugName
+    }
+
 	var ingredientList: String {
-		let onlyIngredientIsSelf = ingredients.count == 1 && ingredients.first?.ingredientName == drugName
-		
-		if onlyIngredientIsSelf {
-			return ""
-		} else {
-			return ingredients.map { $0.ingredientName }.joined(separator: ", ")
-		}
+        guard !onlyIngredientIsSelf else { return "" }
+		return ingredients.map { $0.ingredientName }.joined(separator: ", ")
 	}
 	
 	var doseTimeInSeconds: Double {

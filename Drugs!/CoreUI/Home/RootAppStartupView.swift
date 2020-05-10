@@ -76,9 +76,7 @@ struct RootDrugView: View {
             let hasEntries = drugMap.count > 0
             let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
             guard hasEntries && hasNonZeroEntries else {
-				logd {
-					Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .medium)
-				}
+                logd { Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
                 return .error(clear: false)
             }
             
@@ -118,8 +116,7 @@ struct RootDrugMedicineCell: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-			RootAppStartupView()
-				.environmentObject(__testData__coreMedicineOperator)
+            RootAppStartupView().environmentObject(makeTestMedicineOperator())
         }
     }
 }

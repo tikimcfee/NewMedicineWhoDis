@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		45135960239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4513595F239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift */; };
+		45135960239A2BCC00EB2D31 /* DefaultData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4513595F239A2BCC00EB2D31 /* DefaultData.swift */; };
 		45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 		4517802F23612F6700E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		4517803023612F6900E7C5F7 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
@@ -34,6 +34,8 @@
 		45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBE2324C93E00649270 /* Persistence.swift */; };
 		45DA2BC1232532E500649270 /* ApplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* ApplicationState.swift */; };
 		45DA2BC3232551B600649270 /* DrugEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugEntryView.swift */; };
+		F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
+		F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,7 +56,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4513595F239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineDefinitions__TestData.swift; sourceTree = "<group>"; };
+		4513595F239A2BCC00EB2D31 /* DefaultData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultData.swift; sourceTree = "<group>"; };
 		45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineModelExtensions.swift; sourceTree = "<group>"; };
 		45452B8A235D308700273D79 /* CoreInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreInsights.swift; sourceTree = "<group>"; };
 		45452B8C235D49D400273D79 /* TestingPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = TestingPlayground.playground; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -189,9 +191,8 @@
 			children = (
 				45452B8C235D49D400273D79 /* TestingPlayground.playground */,
 				45DA2BC0232532E500649270 /* ApplicationState.swift */,
-				45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */,
-				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
-				4513595F239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift */,
+				F0C035BE2467AE3F00599A4D /* Models */,
+				4513595F239A2BCC00EB2D31 /* DefaultData.swift */,
 				45DA2BBE2324C93E00649270 /* Persistence.swift */,
 				45452B8A235D308700273D79 /* CoreInsights.swift */,
 			);
@@ -225,6 +226,15 @@
 				45CE91C123CBFB55007E0580 /* DrugEntryNumberPad.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		F0C035BE2467AE3F00599A4D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
+				45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -372,7 +382,7 @@
 				45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,
-				45135960239A2BCC00EB2D31 /* MedicineDefinitions__TestData.swift in Sources */,
+				45135960239A2BCC00EB2D31 /* DefaultData.swift in Sources */,
 				459679F723370558001DCBA1 /* AppColors.swift in Sources */,
 				4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* Persistence.swift in Sources */,
@@ -386,6 +396,7 @@
 				4517803123612F6C00E7C5F7 /* CoreInsights.swift in Sources */,
 				4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */,
 				4517803523612F7500E7C5F7 /* ApplicationState.swift in Sources */,
+				F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				4517803323612F7100E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
 				4517802F23612F6700E7C5F7 /* Persistence.swift in Sources */,
 			);
@@ -398,6 +409,7 @@
 				4517803223612F6C00E7C5F7 /* CoreInsights.swift in Sources */,
 				4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */,
 				4517803623612F7500E7C5F7 /* ApplicationState.swift in Sources */,
+				F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				4517803423612F7200E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
 				4517803023612F6900E7C5F7 /* Persistence.swift in Sources */,
 			);

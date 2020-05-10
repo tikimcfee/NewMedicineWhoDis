@@ -15,7 +15,7 @@ public func eTag(_ object: Any?) -> String {
 }
 
 public enum Criticality: String {
-	case low, medium, high, critical
+	case debug, warning, error
 }
 
 public struct Event: CustomStringConvertible {
@@ -26,7 +26,7 @@ public struct Event: CustomStringConvertible {
 	init (
 		_ tagObject: Any? = nil,
 		_ message: String = "",
-		_ criticality: Criticality = .low
+		_ criticality: Criticality = .debug
 	) {
 		self.tag = eTag(tagObject)
 		self.message = message

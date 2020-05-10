@@ -8,7 +8,6 @@
 
 import Foundation
 import SwiftUI
-import WaterfallGrid
 
 /**Model and View Extensions */
 // ----------------------------------------------
@@ -41,6 +40,8 @@ extension View {
 
 
 struct DrugEntryView: View {
+
+    private let drugList = DefaultDrugList().drugs
     
     @ObservedObject var inProgressEntry: InProgressEntry = InProgressEntry()
     @State var currentSelectedDrug: Drug? = nil
@@ -49,7 +50,7 @@ struct DrugEntryView: View {
         ZStack {
 			HStack(alignment: .center) {
                 ScrollView {
-                    ForEach(__testData__listOfDrugs, id: \.self) { drug in
+                    ForEach(drugList, id: \.self) { drug in
                         DrugEntryViewCell(
                             inProgressEntry: self.inProgressEntry,
                             currentSelectedDrug: self.$currentSelectedDrug,
@@ -204,11 +205,8 @@ struct DrugEntryView_Preview: PreviewProvider {
     
     static var previews: some View {
         Group {
-//            DrugEntryView()
-			Group {
-				RootAppStartupView()
-					.environmentObject(__testData__coreMedicineOperator)
-			}
+            RootAppStartupView()
+                .environmentObject(makeTestMedicineOperator())
         }
     }
 }

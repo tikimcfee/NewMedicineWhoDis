@@ -19,9 +19,7 @@ class Drugs_Tests: XCTestCase {
     }
 
     func testExample() {
-		logd {
-			Event("TEST", "Test log message")
-		}
+        logd { Event("TEST", "Test log message") }
     }
 
 }
