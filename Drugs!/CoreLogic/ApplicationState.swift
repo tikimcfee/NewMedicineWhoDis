@@ -9,7 +9,7 @@
 import Foundation
 import Combine
 
-public class AppState: Storable, ObservableObject {
+public class AppState: FileStorable, ObservableObject {
 
     public enum CodingKeys: CodingKey {
         case listState

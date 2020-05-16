@@ -8,22 +8,22 @@
 
 import Foundation
 
-public struct Drug: Storable {
+public struct Drug: FileStorable {
 
     let drugName: String
     let ingredients: [Ingredient]
     let hourlyDoseTime: Int
     
-    static func blank() -> Drug {
+    static func blank(_ name: String? = nil) -> Drug {
         Drug(
-			drugName: "<default drug binding\(UUID.init().uuidString)>",
+			drugName: name ?? "<default drug binding\(UUID.init().uuidString)>",
             ingredients: [],
             hourlyDoseTime: 4
         )
     }
 }
 
-public struct Ingredient: Storable {
+public struct Ingredient: FileStorable {
 
     let ingredientName: String
 
@@ -34,7 +34,7 @@ public struct Ingredient: Storable {
     }
 }
 
-public struct MedicineEntry: Storable {
+public struct MedicineEntry: FileStorable {
     
 	let date: Date
     let drugsTaken: [Drug:Int]

@@ -23,13 +23,6 @@ extension View {
             .border(Color.viewBorder, width: 2.0)
             .cornerRadius(4.0)
     }
-    
-    func buttonBorder() -> some View {
-        return self
-            .padding(16.0)
-            .border(Color.buttonBorder, width: 2.0)
-            .cornerRadius(4.0)
-    }
 	
 	func slightlyRaised() -> some View {
 		return self
@@ -183,8 +176,9 @@ struct DrugEntryView_Preview: PreviewProvider {
     
     static var previews: some View {
         Group {
-            RootAppStartupView()
-                .environmentObject(makeTestMedicineOperator())
+//            RootAppStartupView()
+//                .environmentObject(makeTestMedicineOperator())
+            DrugEntryView()
         }
     }
 }

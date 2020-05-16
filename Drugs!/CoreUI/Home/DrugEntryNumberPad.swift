@@ -21,38 +21,24 @@ struct DrugEntryNumberPad: View {
 	
 	var body: some View {
 		HStack {
-			VStack {
+            VStack(spacing: 4) {
 				headerLabel.frame(minHeight: 16.0)
 				buttonGrid
 			}
-			
-			
-			//			saveButton.padding(
-			//				EdgeInsets.init(top: 4.0, leading: 0.0, bottom: 8.0, trailing: 4.0)
-			//			)
 		}
 		
-	}
-	
-	func onTapSave() {
-		
-	}
-	
-	private var saveButton: some View {
-		Button(
-			action: onTapSave
-		) {
-			Color.buttonBackground.slightlyRaised()
-		}
 	}
 	
 	private var buttonGrid: some View {
-		return VStack {
-			HStack {
-				createButtonsFor(1, 2, 3, 4)
+		return VStack(spacing: 4) {
+            HStack(spacing: 4) {
+				createButtonsFor(1, 2, 3)
 			}
-			HStack {
-				createButtonsFor(5, 6, 7, 8)
+            HStack(spacing: 4) {
+                createButtonsFor(4, 5, 6)
+            }
+            HStack(spacing: 4) {
+				createButtonsFor(7, 8, 9)
 			}
 		}
 	}
@@ -66,7 +52,7 @@ struct DrugEntryNumberPad: View {
 				.bold()
 				.font(.subheadline)
 		} else {
-			headerText = Text("Pick a thing from the list")
+			headerText = Text("Pick a drugs from the list")
 				.fontWeight(.ultraLight)
 				.italic()
 		}
@@ -82,7 +68,7 @@ struct DrugEntryNumberPad: View {
 	private func numberButton(trackedNumber: Int) -> some View {
 		return Button(action: { self.onTap(of: trackedNumber) }) {
 			numberText(trackedNumber: trackedNumber)
-		}
+        }
 	}
 	
 	private func onTap(of number: Int) {
@@ -99,8 +85,10 @@ struct DrugEntryNumberPad: View {
 	
 	private func numberText(trackedNumber: Int) -> some View {
 		let text = Text("\(trackedNumber)")
-			.frame(width: 28.0, height: 28.0, alignment: .center)
-			.buttonBorder()
+            .fontWeight(.bold)
+			.frame(width: 48, height: 48, alignment: .center)
+			.background(Color.buttonBackground)
+            .clipShape(Circle())
 		
 		if let drug = currentSelectedDrug,
 			(inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
@@ -111,3 +99,32 @@ struct DrugEntryNumberPad: View {
 	}
 	
 }
+
+#if DEBUG
+
+struct DrugEntryNumberPad_Preview: PreviewProvider {
+    @ObservedObject static var inProgressEntry: InProgressEntry = InProgressEntry()
+//    @State var currentMedicineEntries: [Drug:Int]? = [:]
+//
+    static func drugMapBinding() -> Binding<[Drug : Int]> {
+        return Binding<[Drug : Int]>(
+            get: { () -> [Drug : Int] in [:] },
+            set: { ([Drug : Int]) in }
+        )
+    }
+
+    static func drugBinding() -> Binding<Drug?> {
+        return Binding<Drug?>(
+            get: { () -> Drug? in nil },
+            set: { (Drug) in }
+        )
+    }
+
+    static var previews: some View {
+        Group {
+            DrugEntryNumberPad(inProgressEntry: inProgressEntry, currentSelectedDrug: drugBinding())
+        }
+    }
+}
+
+#endif

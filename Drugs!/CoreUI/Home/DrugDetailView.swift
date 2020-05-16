@@ -96,7 +96,7 @@ struct DetailEntryModelCell: View {
     
 }
 
-struct DetailEntryModel: Identifiable, Storable {
+struct DetailEntryModel: Identifiable, FileStorable {
     var id = UUID()
     let drugName: String
     let timeForNextDose: String

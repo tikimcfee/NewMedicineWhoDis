@@ -37,6 +37,12 @@
 		F01BBBB2246F900900BBC3A3 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
 		F01BBBB4246F939600BBC3A3 /* MedicineLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */; };
 		F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
+		F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
+		F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
+		F05FA181246FAF5A00FF8FE9 /* MedicineLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */; };
+		F05FA182246FAF5B00FF8FE9 /* MedicineLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */; };
+		F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
+		F05FA184246FAF6A00FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
 		F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 		F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 /* End PBXBuildFile section */
@@ -195,6 +201,7 @@
 		45DA2BBA2324B24E00649270 /* CoreLogic */ = {
 			isa = PBXGroup;
 			children = (
+				F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */,
 				F01BBBB0246F8FE400BBC3A3 /* Persistence */,
 				45452B8C235D49D400273D79 /* TestingPlayground.playground */,
 				45DA2BC0232532E500649270 /* ApplicationState.swift */,
@@ -240,7 +247,6 @@
 			children = (
 				F01BBBB1246F900900BBC3A3 /* FileStore.swift */,
 				F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */,
-				F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -413,11 +419,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */,
 				4517803123612F6C00E7C5F7 /* CoreInsights.swift in Sources */,
 				4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */,
 				4517803523612F7500E7C5F7 /* ApplicationState.swift in Sources */,
+				F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */,
 				F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				4517803323612F7100E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
+				F05FA181246FAF5A00FF8FE9 /* MedicineLogStore.swift in Sources */,
 				4517802F23612F6700E7C5F7 /* Persistence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -426,11 +435,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F05FA184246FAF6A00FF8FE9 /* FileStore.swift in Sources */,
 				4517803223612F6C00E7C5F7 /* CoreInsights.swift in Sources */,
 				4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */,
 				4517803623612F7500E7C5F7 /* ApplicationState.swift in Sources */,
+				F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */,
 				F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				4517803423612F7200E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
+				F05FA182246FAF5B00FF8FE9 /* MedicineLogStore.swift in Sources */,
 				4517803023612F6900E7C5F7 /* Persistence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
