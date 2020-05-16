@@ -13,28 +13,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        
-		// Load up some app support classes
-		let log = MedicineLogStore()
-		let appState = log.load()
-		
-		let appOperator = MedicineLogOperator(
-			medicineStore: log,
-			coreAppState: appState
-		)
-		
-		// Create our initial view and setup global environment objects.
-        let contentView = RootAppStartupView()
-			.environmentObject(appOperator)
 
-        // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
-            let window = UIWindow(windowScene: windowScene)
-			window.rootViewController = UIHostingController(rootView: contentView)
-            self.window = window
-            window.makeKeyAndVisible()
+            window = UIWindow(windowScene: windowScene)
+            self.window?.rootViewController = UIViewController()
+            self.window?.makeKeyAndVisible()
+        }
+
+		let log = MedicineLogStore()
+        log.load { result in
+            switch result {
+            case .success(let state):
+                let appOperator = MedicineLogOperator(medicineStore: log, coreAppState: state)
+                let contentView = RootAppStartupView()
+                    .environmentObject(appOperator)
+
+                self.window?.rootViewController = UIHostingController(rootView: contentView)
+
+            case .failure(let error):
+                print(error)
+            }
+
+
         }
     }
 

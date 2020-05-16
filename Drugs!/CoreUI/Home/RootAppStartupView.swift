@@ -28,15 +28,43 @@ struct RootAppStartupView: View {
 	
 }
 
+enum AppStateError: Error {
+    case saveError(cause: Error)
+    case removError(cause: Error)
+}
+extension AppStateError: Identifiable {
+    var id: String {
+        switch self {
+        case .saveError:
+            return "saveError"
+        default:
+            return "unknown"
+        }
+    }
+}
+
 struct RootDrugView: View {
 	
     @EnvironmentObject private var medicineOperator : MedicineLogOperator
+    @State private var error: AppStateError? = nil
 
     var body: some View {
-        VStack {
+        return VStack {
             medicineList
             drugEntryView
             saveButton
+        }.alert(item: $error) { error in
+            let message: String
+            if case let AppStateError.saveError(cause) = error {
+                message = cause.localizedDescription
+            } else {
+                message = "No error; something went wrong while something else went wrong. Damn."
+            }
+            return Alert(
+                title: Text("Kaboom"),
+                message: Text(message),
+                dismissButton: .default(Text("Well that sucks."))
+            )
         }
     }
 	
@@ -45,10 +73,17 @@ struct RootDrugView: View {
 			ForEach(medicineOperator.currentEntries, id: \.self) {
 				RootDrugMedicineCell(medicineEntry: $0)
 			}.onDelete { indices in
-				indices.forEach { index in
-					let id = self.medicineOperator.currentEntries[index].uuid
-					self.medicineOperator.removeEntry(id: id)
-				}
+                // do not support multi delete yet
+                guard indices.count == 1,
+                    let index = indices.first
+                    else { return }
+
+				let id = self.medicineOperator.currentEntries[index].uuid
+                self.medicineOperator.removeEntry(id: id) { result in
+                    if case let .failure(removeError) = result {
+                        self.error = .removError(cause: removeError)
+                    }
+                }
 			}
 		}.frame(maxHeight: 140.0)
 	}
@@ -72,19 +107,21 @@ struct RootDrugView: View {
     }
     
     private func saveTapped() {
-        self.drugEntryView.saveAndClear { drugMap in
-            let hasEntries = drugMap.count > 0
-            let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
-            guard hasEntries && hasNonZeroEntries else {
-                logd { Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
-                return .error(clear: false)
+        let drugMap = drugEntryView.inProgressEntry.entryMap
+        let hasEntries = drugMap.count > 0
+        let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
+        guard hasEntries && hasNonZeroEntries else {
+            logd { Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
+            return
+        }
+
+        medicineOperator.addEntry(medicineEntry: createNewEntry(with: drugMap)) { result in
+            switch result {
+            case .success:
+                self.drugEntryView.resetState()
+            case .failure(let saveError):
+                self.error = .saveError(cause: saveError)
             }
-            
-			medicineOperator.addEntry(
-				medicineEntry: self.createNewEntry(with: drugMap)
-			)
-			
-            return .saved(clear: true)
         }
     }
         

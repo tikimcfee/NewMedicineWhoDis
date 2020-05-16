@@ -41,7 +41,7 @@ extension View {
 
 struct DrugEntryView: View {
 
-    private let drugList = DefaultDrugList().drugs
+    private let drugList = DefaultDrugList.shared.drugs
     
     @ObservedObject var inProgressEntry: InProgressEntry = InProgressEntry()
     @State var currentSelectedDrug: Drug? = nil
@@ -81,28 +81,6 @@ struct DrugEntryView: View {
 			Color(red: 0.8, green: 0.9, blue: 0.9)
 		).slightlyRaised()
         
-    }
-    
-    enum Result {
-        case saved(clear: Bool)
-        case error(clear: Bool)
-    }
-    
-    func saveAndClear(with handler: ([Drug:Int]) -> Result) {
-        let handlerResult = handler(self.inProgressEntry.entryMap)
-        
-        var shouldClear: Bool
-        
-        // todo: view animations, callbacks
-        switch(handlerResult) {
-			case .saved(let clear), 
-				 .error(let clear):
-				shouldClear = clear
-		}
-        
-        if shouldClear {
-            resetState()
-        }
     }
     
     func resetState(_ map: [Drug:Int] = [:]) {

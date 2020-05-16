@@ -7,13 +7,26 @@
 //
 
 import Foundation
+import Combine
 
-public class AppState: Storable {
+public class AppState: Storable, ObservableObject {
+
+    public enum CodingKeys: CodingKey {
+        case listState
+    }
     
-    private(set) var mainEntryList: [MedicineEntry]
-    
-    init(medicineMap: [MedicineEntry] = []) {
-        self.mainEntryList = medicineMap
+    @Published private(set) var mainEntryList: [MedicineEntry] = []
+
+    public init() { }
+
+    public required init(from decoder: Decoder) throws {
+        let codedKeys = try decoder.container(keyedBy: AppState.CodingKeys.self)
+        self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: AppState.CodingKeys.self)
+        try container.encode(mainEntryList, forKey: .listState)
     }
     
     public static func == (lhs: AppState, rhs: AppState) -> Bool {

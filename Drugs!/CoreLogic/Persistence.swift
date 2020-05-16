@@ -10,8 +10,9 @@ import Foundation
 import SwiftUI
 
 public typealias Storable = Equatable & Hashable & Codable
+public typealias SaveResult = Result<Void, Error>
 
-public class MedicineLogStore {
+public class FileStore {
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
     private let fileManager = FileManager.default
@@ -46,51 +47,66 @@ public class MedicineLogStore {
     }
 
     private var medicineLogsDefaultFileIsEmpty: Bool {
-        let attributes = try? fileManager.attributesOfItem(atPath: medicineLogsDefaultFile.absoluteString) as NSDictionary
+        let attributes = try? fileManager.attributesOfItem(atPath: medicineLogsDefaultFile.path) as NSDictionary
         let size = attributes?.fileSize() ?? 0
         return size <= 0
     }
-}
 
-extension MedicineLogStore {
-    func save(appState: AppState) -> Bool {
+    public func saveAppState(_ appState: AppState) -> Error? {
         do {
             let jsonData = try jsonEncoder.encode(appState)
-            try jsonData.write(to: medicineLogsDefaultFile)
-            return true
+            try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
+            return nil
         } catch {
             loge { Event(MedicineLogStore.self, "Encoding error : \(error)", .error) }
-            return false
+            return error
         }
     }
 
-    func load() -> AppState {
+    public func loadAppState() -> Result<AppState, Error> {
         if medicineLogsDefaultFileIsEmpty {
             logd { Event(MedicineLogStore.self, "No existing logs; creating new CoreAppState") }
-            return AppState()
+            return .success(AppState())
         }
         do {
             let stateData = try Data.init(contentsOf: medicineLogsDefaultFile)
-            return try jsonDecoder.decode(AppState.self, from: stateData)
+            let decodedState = try jsonDecoder.decode(AppState.self, from: stateData)
+            return .success(decodedState)
         } catch {
             loge { Event(MedicineLogStore.self, "Decoding error : \(error); returning a new CoreAppState", .error) }
-            return AppState()
+            return .failure(error)
         }
     }
 }
 
-/// This whole 'LogStore' and 'Operator' thing is getting annoying.. make it better
-/// - Why is there an Operator and an AppState? Is it really so important to separate the code?
+public class MedicineLogStore {
+
+    private let filestore = FileStore()
+
+    func save(appState: AppState, _ handler: (Result<Void, Error>) -> Void) {
+        if let error = filestore.saveAppState(appState) {
+            handler(.failure(error))
+        } else {
+            handler(.success(()))
+        }
+    }
+
+    func load(_ handler: (Result<AppState, Error>) -> Void) {
+        let result = filestore.loadAppState()
+        handler(result)
+    }
+}
 
 public class MedicineLogOperator: ObservableObject {
-    
+
     private let medicineStore: MedicineLogStore
-    @Published private var coreAppState: AppState
-	
-	private let queue: DispatchQueue = DispatchQueue.init(
+    @ObservedObject private var coreAppState: AppState
+
+    private let mainQueue = DispatchQueue.main
+	private let saveQueue: DispatchQueue = DispatchQueue.init(
 		label: "MedicineLogOperator-Queue",
 		qos: .userInteractive
-	) 
+	)
     
     var currentEntries: [MedicineEntry] {
         return coreAppState.mainEntryList
@@ -103,33 +119,42 @@ public class MedicineLogOperator: ObservableObject {
         self.medicineStore = medicineStore
         self.coreAppState = coreAppState
     }
-    
-    func addEntry(medicineEntry: MedicineEntry) {
-        onQueue {
-            self.coreAppState.addEntry(medicineEntry: medicineEntry)
+
+    func addEntry(
+        medicineEntry: MedicineEntry,
+        _ handler: @escaping (SaveResult) -> Void
+    ) {
+        emit()
+        coreAppState.addEntry(medicineEntry: medicineEntry)
+        saveAppState(handler)
+    }
+
+    func removeEntry(
+        id: String,
+        _ handler: @escaping (SaveResult) -> Void
+    ) {
+        emit()
+        coreAppState.removeEntry(id: id)
+        saveAppState(handler)
+    }
+
+    private func emit() {
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
         }
     }
-    
-    func removeEntry(id: String) {
-		onQueue {
-            self.coreAppState.removeEntry(id: id)
-        }
-    }
-    
-	private func onQueue(_ operation: @escaping () -> Void) { /// Is the operation thing really necessary? I guess it let's us skip action if we want
-        queue.async {
-            self.emit()
-            operation()
-            let didSucceed = self.medicineStore.save(appState: self.coreAppState)
-            logd {
-                Event(MedicineLogOperator.self, "Saved store after operation: \(didSucceed)")
+
+    private func saveAppState(_ handler: @escaping (SaveResult) -> Void) {
+        saveQueue.async {
+            self.medicineStore.save(appState: self.coreAppState) { result in
+                self.notifyHandler(result, handler)
             }
         }
     }
-    
-    private func emit() {
-        DispatchQueue.main.sync { [weak self] in
-            self?.objectWillChange.send()
+
+    private func notifyHandler(_ result: SaveResult, _ handler: @escaping (SaveResult) -> Void) {
+        mainQueue.async {
+            handler(result)
         }
     }
     

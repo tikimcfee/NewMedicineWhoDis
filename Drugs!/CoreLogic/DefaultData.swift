@@ -8,7 +8,12 @@
 
 import Foundation
 
-final class DefaultDrugList {
+public final class DefaultDrugList {
+
+    public static let shared = DefaultDrugList()
+
+    private init() { }
+
     lazy var defaultEntry : MedicineEntry = {
         return MedicineEntry(
             date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
@@ -119,9 +124,17 @@ final class DefaultDrugList {
 
 public func makeTestMedicineOperator() -> MedicineLogOperator {
     let medicineStore = MedicineLogStore()
-    let loadedState = medicineStore.load()
+    var loaded: AppState? = nil
+    medicineStore.load {
+        switch $0 {
+        case .success(let state):
+            loaded = state
+        case .failure:
+            loaded = AppState()
+        }
+    }
     return MedicineLogOperator(
         medicineStore: medicineStore,
-        coreAppState: loadedState
+        coreAppState: loaded ?? AppState()
     )
 }

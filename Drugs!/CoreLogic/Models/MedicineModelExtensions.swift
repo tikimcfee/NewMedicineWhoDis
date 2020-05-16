@@ -9,7 +9,6 @@
 import Foundation
 
 extension Drug {
-
     private var onlyIngredientIsSelf: Bool {
         return ingredients.count == 1
             && ingredients.first?.ingredientName == drugName
