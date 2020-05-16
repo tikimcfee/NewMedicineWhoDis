@@ -9,6 +9,16 @@
 import UIKit
 import SwiftUI
 
+private extension Result where Success == AppState, Failure == Error {
+    var appState: AppState {
+        if case .success(let appState) = self {
+            return appState
+        } else {
+            return AppState()
+        }
+    }
+}
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
@@ -17,26 +27,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if let windowScene = scene as? UIWindowScene {
             window = UIWindow(windowScene: windowScene)
-            self.window?.rootViewController = UIViewController()
-            self.window?.makeKeyAndVisible()
         }
 
 		let log = MedicineLogStore()
-        log.load { result in
-            switch result {
-            case .success(let state):
-                let appOperator = MedicineLogOperator(medicineStore: log, coreAppState: state)
-                let contentView = RootAppStartupView()
-                    .environmentObject(appOperator)
+        let appStateLoadResult = log.load().appState
+        let appOperator = MedicineLogOperator(medicineStore: log, coreAppState: appStateLoadResult)
+        let contentView = RootAppStartupView()
+            .environmentObject(appOperator)
 
-                self.window?.rootViewController = UIHostingController(rootView: contentView)
-
-            case .failure(let error):
-                print(error)
-            }
-
-
-        }
+        self.window?.rootViewController = UIHostingController(rootView: contentView)
+        self.window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
