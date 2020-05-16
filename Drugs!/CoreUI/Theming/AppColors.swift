@@ -9,10 +9,10 @@
 import Foundation
 import SwiftUI
 
-typealias AppColor = Color
-
-extension AppColor {
-	
+public class AppLaunchThemingUtil {
+    public static func setGlobalThemes() {
+        UITableView.appearance().separatorStyle = .none
+    }
 }
 
 extension Color {

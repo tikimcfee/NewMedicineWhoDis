@@ -7,8 +7,25 @@
 //
 
 import Foundation
+import SwiftUI
 
 public final class DefaultDrugList {
+
+    @ObservedObject static var inProgressEntry: InProgressEntry = InProgressEntry()
+
+    static func drugMapBinding() -> Binding<[Drug : Int]> {
+        return Binding<[Drug : Int]>(
+            get: { () -> [Drug : Int] in [:] },
+            set: { ([Drug : Int]) in }
+        )
+    }
+
+    static func drugBinding() -> Binding<Drug?> {
+        return Binding<Drug?>(
+            get: { () -> Drug? in Drug.blank() },
+            set: { (Drug) in }
+        )
+    }
 
     public static let shared = DefaultDrugList()
 

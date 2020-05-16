@@ -52,7 +52,7 @@ struct DrugEntryNumberPad: View {
 				.bold()
 				.font(.subheadline)
 		} else {
-			headerText = Text("Pick a drugs from the list")
+			headerText = Text("No med selected")
 				.fontWeight(.ultraLight)
 				.italic()
 		}
@@ -103,26 +103,12 @@ struct DrugEntryNumberPad: View {
 #if DEBUG
 
 struct DrugEntryNumberPad_Preview: PreviewProvider {
-    @ObservedObject static var inProgressEntry: InProgressEntry = InProgressEntry()
-//    @State var currentMedicineEntries: [Drug:Int]? = [:]
-//
-    static func drugMapBinding() -> Binding<[Drug : Int]> {
-        return Binding<[Drug : Int]>(
-            get: { () -> [Drug : Int] in [:] },
-            set: { ([Drug : Int]) in }
-        )
-    }
-
-    static func drugBinding() -> Binding<Drug?> {
-        return Binding<Drug?>(
-            get: { () -> Drug? in nil },
-            set: { (Drug) in }
-        )
-    }
-
     static var previews: some View {
         Group {
-            DrugEntryNumberPad(inProgressEntry: inProgressEntry, currentSelectedDrug: drugBinding())
+            DrugEntryNumberPad(
+                inProgressEntry: DefaultDrugList.inProgressEntry,
+                currentSelectedDrug: DefaultDrugList.drugBinding()
+            )
         }
     }
 }
