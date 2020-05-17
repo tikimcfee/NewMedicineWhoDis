@@ -9,6 +9,23 @@
 import Foundation
 import Combine
 
+enum AppStateError: Error {
+    case updateError
+    case saveError(cause: Error)
+    case removError(cause: Error)
+}
+
+extension AppStateError: Identifiable {
+    var id: String {
+        switch self {
+        case .saveError:
+            return "saveError"
+        default:
+            return "unknown"
+        }
+    }
+}
+
 public class AppState: FileStorable, ObservableObject {
 
     public enum CodingKeys: CodingKey {
@@ -39,6 +56,13 @@ public class AppState: FileStorable, ObservableObject {
 }
 
 extension AppState {
+    func updateEntry(medicineEntry: MedicineEntry) throws {
+        guard let index = mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid }) else {
+            throw AppStateError.updateError
+        }
+        mainEntryList[index] = medicineEntry
+    }
+
     func addEntry(medicineEntry: MedicineEntry) {
         mainEntryList.insert(medicineEntry, at: 0)
     }

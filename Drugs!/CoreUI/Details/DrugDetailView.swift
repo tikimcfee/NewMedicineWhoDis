@@ -1,11 +1,9 @@
 import SwiftUI
 
 struct DrugDetailView: View {
-    let medicineEntry: MedicineEntry
-	
-	init(_ entry: MedicineEntry) {
-		self.medicineEntry = entry
-	}
+    @EnvironmentObject var medicineLogOperator: MedicineLogOperator
+    @State var medicineEntry: MedicineEntry
+    @State var editIsPresented: Bool = false
 
     var body: some View {
 		let data: [DetailEntryModel] = medicineEntry.toDetailEntryModels()
@@ -29,9 +27,19 @@ struct DrugDetailView: View {
                         .listRowInsets(EdgeInsets())
                 }
             }
+
+            Spacer()
+
+            Components.fullWidthButton("Edit this entry") { self.editIsPresented = true }
 		}
 		.padding(8.0)
 		.navigationBarTitle(Text(screenTitle))
+        .sheet(isPresented: $editIsPresented) {
+            DrugEntryEditorView(
+                targetEntry: self.$medicineEntry,
+                shouldContinueEditing: self.$editIsPresented
+            ).environmentObject(self.medicineLogOperator)
+        }
     }
 }
 
@@ -132,9 +140,8 @@ extension MedicineEntry {
 #if DEBUG
 
 struct DrugDetailView_Previews: PreviewProvider {
-    private static let entry = DefaultDrugList.shared.defaultEntry
     static var previews: some View {
-		DrugDetailView(entry)
+        DrugDetailView(medicineEntry: DefaultDrugList.shared.defaultEntry)
     }
 }
 

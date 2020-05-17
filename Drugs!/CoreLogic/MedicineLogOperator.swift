@@ -42,6 +42,19 @@ public class MedicineLogOperator: ObservableObject {
         saveAppState(handler)
     }
 
+    func updateEntry(
+        medicineEntry: MedicineEntry,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        emit()
+        do {
+            try coreAppState.updateEntry(medicineEntry: medicineEntry)
+            saveAppState(handler)
+        } catch {
+            handler(.failure(error))
+        }
+    }
+
     private func emit() {
         DispatchQueue.main.async { [weak self] in
             self?.objectWillChange.send()

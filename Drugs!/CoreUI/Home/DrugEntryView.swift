@@ -13,7 +13,10 @@ import SwiftUI
 // ----------------------------------------------
 
 class InProgressEntry: ObservableObject {
-	@Published var entryMap: [Drug:Int] = [:]
+	@Published var entryMap: [Drug:Int]
+    init(_ map: [Drug:Int] = [:]) {
+        self.entryMap = map
+    }
 }
 
 extension View {

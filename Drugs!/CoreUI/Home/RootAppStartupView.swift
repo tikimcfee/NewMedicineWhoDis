@@ -16,22 +16,6 @@ struct RootAppStartupView: View {
 	
 }
 
-enum AppStateError: Error {
-    case saveError(cause: Error)
-    case removError(cause: Error)
-}
-
-extension AppStateError: Identifiable {
-    var id: String {
-        switch self {
-        case .saveError:
-            return "saveError"
-        default:
-            return "unknown"
-        }
-    }
-}
-
 struct RootDrugView: View {
 	
     @EnvironmentObject private var medicineOperator : MedicineLogOperator
@@ -75,7 +59,7 @@ struct RootDrugView: View {
                 }
             } else {
                 ForEach(medicineOperator.currentEntries, id: \.self) {
-                    RootDrugMedicineCell(medicineEntry: $0)
+                    RootDrugMedicineCell($0)
                         .listRowInsets(EdgeInsets(
                             top: 4, leading: 8, bottom: 4, trailing: 8
                         ))
@@ -103,19 +87,7 @@ struct RootDrugView: View {
     }
     
 	var saveButton: some View {
-        return Button(
-            action: saveTapped
-        ) {
-            Text("Take some drugs")
-                .padding(8)
-                .foregroundColor(Color.buttonText)
-                .frame(maxWidth: UIScreen.main.bounds.width)
-                .background(
-                    Rectangle()
-                        .cornerRadius(4.0)
-						.foregroundColor(Color.buttonBackground)
-                )
-        }
+        return Components.fullWidthButton("Take some drugs", saveTapped)
     }
     
     private func saveTapped() {
@@ -144,10 +116,14 @@ struct RootDrugView: View {
 
 struct RootDrugMedicineCell: View {
     let medicineEntry: MedicineEntry
+
+    init(_ entry: MedicineEntry) {
+        self.medicineEntry = entry
+    }
     
     var body: some View {
         NavigationLink(
-            destination: DrugDetailView(medicineEntry)
+            destination: DrugDetailView(medicineEntry: medicineEntry)
         ) {
             VStack(alignment: .leading) {
                 Text("\(medicineEntry.drugList)")

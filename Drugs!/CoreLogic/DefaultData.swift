@@ -9,6 +9,44 @@
 import Foundation
 import SwiftUI
 
+public class WrappedObservable<Value>: ObservableObject {
+    @Published var value: Value
+    init(_ start: Value) {
+        self.value = start
+    }
+}
+
+public class WrappedBinding<Value> {
+    private var current: Value
+    init(_ start: Value) {
+        self.current = start
+    }
+    lazy var binding = Binding<Value>(
+        get: { () -> Value in self.current },
+        set: { (val: Value) in self.current = val }
+    )
+}
+
+public class BoolBinding {
+    private var current: Bool = false
+    convenience init(_ start: Bool) {
+        self.init()
+        self.current = start
+    }
+    lazy var binding = Binding<Bool>(
+        get: { () -> Bool in self.current },
+        set: { (val: Bool) in self.current = val }
+    )
+}
+
+public class DrugBinding {
+    private var current: Drug = Drug.blank()
+    lazy var binding = Binding<Drug>(
+        get: { () -> Drug in self.current },
+        set: { (val: Drug) in self.current = val }
+    )
+}
+
 public final class DefaultDrugList {
 
     @ObservedObject static var inProgressEntry: InProgressEntry = InProgressEntry()

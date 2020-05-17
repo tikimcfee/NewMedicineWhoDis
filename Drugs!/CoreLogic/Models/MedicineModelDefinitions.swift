@@ -37,7 +37,7 @@ public struct Ingredient: FileStorable {
 public struct MedicineEntry: FileStorable {
     
 	let date: Date
-    let drugsTaken: [Drug:Int]
+    var drugsTaken: [Drug:Int]
     let uuid: String
     
     init(
