@@ -1,19 +1,7 @@
-//
-//  ContentView.swift
-//  Drugs!
-//
-//  Created by Ivan Lugo on 8/31/19.
-//  Copyright © 2019 Ivan Lugo. All rights reserved.
-//
-
 import SwiftUI
 
-// ---------------------------------------------------
-// Core UI Structure
-// ---------------------------------------------------
 struct RootAppStartupView: View {
-    
-    // Main view
+
     var body: some View {
         NavigationView {
             RootDrugView()
@@ -32,6 +20,7 @@ enum AppStateError: Error {
     case saveError(cause: Error)
     case removError(cause: Error)
 }
+
 extension AppStateError: Identifiable {
     var id: String {
         switch self {
