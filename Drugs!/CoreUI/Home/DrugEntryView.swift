@@ -35,7 +35,7 @@ struct DrugEntryView: View {
             DrugSelectionListView(
                 inProgressEntry: inProgressEntry,
                 currentSelectedDrug: $currentSelectedDrug
-            ).padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 4))
+            ).padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
 
             DrugEntryNumberPad(
                 inProgressEntry: inProgressEntry,
@@ -43,7 +43,7 @@ struct DrugEntryView: View {
             ).padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
 
         }
-        .frame(height: 256)
+        .frame(height: 228)
         .background(Color(red: 0.8, green: 0.9, blue: 0.9))
         
     }

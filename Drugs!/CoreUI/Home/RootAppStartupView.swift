@@ -88,10 +88,7 @@ struct RootDrugView: View {
                 ForEach(medicineOperator.currentEntries, id: \.self) {
                     RootDrugMedicineCell(medicineEntry: $0)
                         .listRowInsets(EdgeInsets(
-                            top: 4,
-                            leading: 8,
-                            bottom: 4,
-                            trailing: 8
+                            top: 4, leading: 8, bottom: 4, trailing: 8
                         ))
                 }.onDelete { indices in
                     // do not support multi delete yet

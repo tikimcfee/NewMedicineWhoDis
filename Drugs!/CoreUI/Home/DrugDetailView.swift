@@ -25,17 +25,18 @@ struct DrugDetailView: View {
 			screenTitle = "... take these?"
 		}
         
-        return VStack(alignment: .trailing) {
+        return VStack(alignment: .leading) {
 			
 			Text("at \(medicineEntry.date, formatter: dateFormatter)")
 				.font(.title)
-				.bold()
 				.underline()
 
-			ForEach(data, id: \.self) { item in
-                DetailEntryModelCell(model: item, fromEntry: self.medicineEntry)
+            List {
+                ForEach (data, id: \.self) { item in
+                    DetailEntryModelCell(model: item, fromEntry: self.medicineEntry)
+                        .listRowInsets(EdgeInsets())
+                }
             }
-			
 		}
 		.padding(8.0)
 		.navigationBarTitle(Text(screenTitle))
@@ -71,7 +72,11 @@ struct DetailEntryModelCell: View {
 					.padding(.top, 10.0)
 			}				
         }.padding(4.0)
-			.background(Color.timeForNextDose)
+			.background(
+                model.canTakeAgain
+                    ? Color.timeForNextDoseReady
+                    : Color.timeForNextDose
+            )
 			.cornerRadius(4.0)
 			.slightlyRaised()
     }
@@ -108,7 +113,7 @@ extension MedicineEntry {
 	
 	func toDetailEntryModels() -> [DetailEntryModel] {
 		let now = Date()
-		return timesDrugsAreNextAvailable.compactMap { (drug, date) in
+		return timesDrugsAreNextAvailable.map { (drug, date) in
 			
 			let canTakeAgain = now >= date
 			let formattedDate = dateFormatterSmall.string(from: date)
@@ -116,7 +121,7 @@ extension MedicineEntry {
 			
 			let text: String
 			if canTakeAgain {
-				text = "You can take some \(drug.drugName) now!"
+				text = "You can take some \(drug.drugName) now"
 			} else {
 				text = "Wait 'till about \(formattedDate)"
 			}
@@ -127,7 +132,7 @@ extension MedicineEntry {
                 canTakeAgain: canTakeAgain,
 				ingredientList: ingredientList
             )
-        }
+        }.sorted { $0.drugName < $1.drugName }
 	}
 	
 }

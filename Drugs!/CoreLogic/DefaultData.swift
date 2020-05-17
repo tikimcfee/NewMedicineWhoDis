@@ -16,7 +16,7 @@ public final class DefaultDrugList {
     static func drugMapBinding() -> Binding<[Drug : Int]> {
         return Binding<[Drug : Int]>(
             get: { () -> [Drug : Int] in [:] },
-            set: { ([Drug : Int]) in }
+            set: { (_ : [Drug : Int]) in }
         )
     }
 
@@ -34,7 +34,7 @@ public final class DefaultDrugList {
     lazy var defaultEntry : MedicineEntry = {
         return MedicineEntry(
             date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
-            drugsTaken: drugs.reduce(into: [Drug: Int]()) { result, drug in
+            drugsTaken: Array(drugs[0...4]).reduce(into: [Drug: Int]()) { result, drug in
                 result[drug, default: 0] += Int.random(in: 1...4)
             }
         )
@@ -47,21 +47,14 @@ public final class DefaultDrugList {
                 ingredients: [
                     Ingredient("Acetaminophen")
                 ],
-                hourlyDoseTime: 6
-            ),
-            Drug(
-                drugName: "Advil",
-                ingredients: [
-                    Ingredient("Naproxen Sodium")
-                ],
-                hourlyDoseTime: 6
+                hourlyDoseTime: 5
             ),
             Drug(
                 drugName: "Venlafaxine",
                 ingredients: [
                     Ingredient("Venlafaxine")
                 ],
-                hourlyDoseTime: 6
+                hourlyDoseTime: 24
             ),
             Drug(
                 drugName: "Excedrin",
@@ -70,14 +63,14 @@ public final class DefaultDrugList {
                     Ingredient("Aspirin"),
                     Ingredient("Caffeine")
                 ],
-                hourlyDoseTime: 6
+                hourlyDoseTime: 5
             ),
             Drug(
                 drugName: "Ibuprofen",
                 ingredients: [
                     Ingredient("Ibuprofen")
                 ],
-                hourlyDoseTime: 6
+                hourlyDoseTime: 8
             ),
             Drug(
                 drugName: "Propranolol",
@@ -109,26 +102,11 @@ public final class DefaultDrugList {
                 hourlyDoseTime: 4
             ),
             Drug(
-                drugName: "Herb",
+                drugName: "Vitamins",
                 ingredients: [
-                    Ingredient("THC"),
-                    Ingredient("CBD")
+                    Ingredient("Vitamins")
                 ],
-                hourlyDoseTime: 1
-            ),
-            Drug(
-                drugName: "Diphenhydramine",
-                ingredients: [
-                    Ingredient("Diphenhydramine"),
-                ],
-                hourlyDoseTime: 1
-            ),
-            Drug(
-                drugName: "Simethicone",
-                ingredients: [
-                    Ingredient("Simethicone"),
-                ],
-                hourlyDoseTime: 1
+                hourlyDoseTime: 0
             )
         ]
 
