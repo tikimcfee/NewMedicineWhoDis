@@ -29,12 +29,15 @@ struct DrugEntryEditorView: View {
     }
 
     private func saveTapped() {
+        // TODO: This is bad; need to find a way to observe the edited entry
+        // TODO: The pop bug can be seen here. If you do this in the result, the view updates,
+        // but doesn't pop. Do it *again*, the data updates and the view pops. The first time,
+        // it's because the data hasn't been set. The second, the data is changing from
+        // underneath the list / detail, and it's causing it to explode / corrupt.
         targetEntry.drugsTaken = inProgressEntry.entryMap
         medicineOperator.updateEntry(medicineEntry: targetEntry) { result in
             switch result {
             case .success:
-                // TODO: This is bad; need to find a way to observe the edited entry
-
                 self.shouldContinueEditing = false
 
             case .failure(let error) where error is AppStateError:
