@@ -60,6 +60,10 @@ struct DetailEntryModelCell: View {
             HStack(spacing: 2) {
 				canTakeMedicineView
                     .padding(4)
+                Text(model.drugName)
+                    .padding(4.0)
+                    .font(.headline)
+                    .foregroundColor(titleColor)
                 Text(model.countMessage)
                     .padding(4)
                     .frame(width: 20)
@@ -67,12 +71,8 @@ struct DetailEntryModelCell: View {
                     .foregroundColor(Color.init(red: 1.0, green: 1.0, blue: 1.0))
                     .background(Color.init(red: 0.3, green: 0.7, blue: 0.7))
                     .clipShape(Circle())
-                Text(model.drugName)
-                    .padding(4.0)
-                    .font(.headline)
-                    .foregroundColor(titleColor)
+                Spacer()
 				subtitleView
-				Spacer()
 			}
 				
             HStack(alignment: .bottom) {
