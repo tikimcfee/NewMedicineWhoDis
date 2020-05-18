@@ -1,44 +1,45 @@
 import SwiftUI
 
 struct DrugDetailView: View {
+
     @EnvironmentObject var medicineLogOperator: MedicineLogOperator
-    @State var medicineEntry: MedicineEntry
-    @State var editIsPresented: Bool = false
+    @EnvironmentObject var drugEntryEditorState: DrugEntryEditorState
 
     var body: some View {
-		let data: [DetailEntryModel] = medicineEntry.toDetailEntryModels()
+        let data: [DetailEntryModel] = drugEntryEditorState.sourceEntry.toDetailEntryModels()
 		let count = data.count
 		let screenTitle: String
 		if count == 1 {
-			screenTitle = "... take this?"
+			screenTitle = "take this?"
 		} else {
-			screenTitle = "... take these?"
+			screenTitle = "take these?"
 		}
         
         return VStack(alignment: .leading) {
 			
-			Text("at \(medicineEntry.date, formatter: dateFormatter)")
+			Text("at \(drugEntryEditorState.sourceEntry.date, formatter: dateFormatter)")
 				.font(.title)
 				.underline()
 
             List {
                 ForEach (data, id: \.self) { item in
-                    DetailEntryModelCell(model: item, fromEntry: self.medicineEntry)
+                    DetailEntryModelCell(model: item, fromEntry: self.drugEntryEditorState.sourceEntry)
                         .listRowInsets(EdgeInsets())
                 }
             }
 
             Spacer()
 
-            Components.fullWidthButton("Edit this entry") { self.editIsPresented = true }
+            Components.fullWidthButton("Edit this entry") {
+                self.drugEntryEditorState.editorIsVisible = true
+            }
 		}
 		.padding(8.0)
 		.navigationBarTitle(Text(screenTitle))
-        .sheet(isPresented: $editIsPresented) {
-            DrugEntryEditorView(
-                targetEntry: self.$medicineEntry,
-                shouldContinueEditing: self.$editIsPresented
-            ).environmentObject(self.medicineLogOperator)
+        .sheet(isPresented: $drugEntryEditorState.editorIsVisible) {
+            DrugEntryEditorView()
+                .environmentObject(self.medicineLogOperator)
+                .environmentObject(self.drugEntryEditorState)
         }
     }
 }
@@ -56,17 +57,25 @@ struct DetailEntryModelCell: View {
 		}
 		
         return VStack(alignment: .leading, spacing: 0) {
-			HStack {
+            HStack(spacing: 2) {
 				canTakeMedicineView
-				Text(model.drugName)
-					.padding(4.0)
-					.font(.headline)
-					.foregroundColor(titleColor)
+                    .padding(4)
+                Text(model.countMessage)
+                    .padding(4)
+                    .frame(width: 20)
+                    .font(.footnote)
+                    .foregroundColor(Color.init(red: 1.0, green: 1.0, blue: 1.0))
+                    .background(Color.init(red: 0.3, green: 0.7, blue: 0.7))
+                    .clipShape(Circle())
+                Text(model.drugName)
+                    .padding(4.0)
+                    .font(.headline)
+                    .foregroundColor(titleColor)
 				subtitleView
 				Spacer()
 			}
 				
-			HStack {
+            HStack(alignment: .bottom) {
 				Spacer()
 				Text(model.timeForNextDose)
 					.padding(.top, 10.0)
@@ -86,6 +95,7 @@ struct DetailEntryModelCell: View {
 			.font(.footnote)
 			.fontWeight(.ultraLight)
 			.fixedSize(horizontal: false, vertical: true)
+            .padding(4)
 	}
 	
 	private var canTakeMedicineView: some View {
@@ -104,6 +114,7 @@ struct DetailEntryModelCell: View {
 struct DetailEntryModel: Identifiable, FileStorable {
     var id = UUID()
     let drugName: String
+    let countMessage: String
     let timeForNextDose: String
     let canTakeAgain: Bool
 	let ingredientList: String
@@ -128,6 +139,7 @@ extension MedicineEntry {
 			
             return DetailEntryModel(
                 drugName: drug.drugName,
+                countMessage: "\(drugsTaken[drug]!)",
                 timeForNextDose: text,
                 canTakeAgain: canTakeAgain,
 				ingredientList: ingredientList
@@ -141,7 +153,9 @@ extension MedicineEntry {
 
 struct DrugDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        DrugDetailView(medicineEntry: DefaultDrugList.shared.defaultEntry)
+        DrugDetailView()
+            .environmentObject(DrugEntryEditorState(sourceEntry: DefaultDrugList.shared.defaultEntry))
+            .environmentObject(makeTestMedicineOperator())
     }
 }
 

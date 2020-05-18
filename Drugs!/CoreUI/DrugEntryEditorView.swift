@@ -1,25 +1,29 @@
 import Foundation
 import SwiftUI
 
+final class DrugEntryEditorState: ObservableObject {
+    @Published var sourceEntry: MedicineEntry
+    @Published var inProgressEntry: InProgressEntry
+    @Published var editorIsVisible: Bool = false
+    @Published var editorError: AppStateError?
+
+    public init (sourceEntry: MedicineEntry) {
+        self.sourceEntry = sourceEntry
+        self.inProgressEntry = InProgressEntry(sourceEntry.drugsTaken)
+    }
+}
+
 struct DrugEntryEditorView: View {
 
     @EnvironmentObject private var medicineOperator : MedicineLogOperator
-    @ObservedObject private var inProgressEntry: InProgressEntry
-    @State private var error: AppStateError? = nil
-    @Binding private var targetEntry: MedicineEntry
-    @Binding private var shouldContinueEditing: Bool
-
-    public init(targetEntry: Binding<MedicineEntry>, shouldContinueEditing: Binding<Bool>) {
-        self.inProgressEntry = InProgressEntry(targetEntry.wrappedValue.drugsTaken)
-        self._shouldContinueEditing = shouldContinueEditing
-        self._targetEntry = targetEntry
-    }
+    @EnvironmentObject private var editorState: DrugEntryEditorState
 
     var body: some View {
         return VStack {
-            DrugEntryView(inProgressEntry: inProgressEntry)
+            DrugEntryView(inProgressEntry: editorState.inProgressEntry)
             Components.fullWidthButton("Save changes", saveTapped).padding(8)
-        }.alert(item: $error) { error in
+        }
+        .alert(item: $editorState.editorError) { error in
             Alert(
                 title: Text("Kaboom 2"),
                 message: Text(error.localizedDescription),
@@ -34,17 +38,16 @@ struct DrugEntryEditorView: View {
         // but doesn't pop. Do it *again*, the data updates and the view pops. The first time,
         // it's because the data hasn't been set. The second, the data is changing from
         // underneath the list / detail, and it's causing it to explode / corrupt.
-        targetEntry.drugsTaken = inProgressEntry.entryMap
-        medicineOperator.updateEntry(medicineEntry: targetEntry) { result in
+        editorState.sourceEntry.drugsTaken = editorState.inProgressEntry.entryMap
+        medicineOperator.updateEntry(medicineEntry: editorState.sourceEntry) { result in
             switch result {
             case .success:
-                self.shouldContinueEditing = false
+                self.editorState.editorIsVisible = false
+                break;
 
-            case .failure(let error) where error is AppStateError:
-                self.error = error as? AppStateError
-
-            default:
-                self.error = .updateError
+            case .failure(let error):
+                self.editorState.editorError =
+                    error as? AppStateError ?? .updateError
             }
         }
     }
@@ -55,10 +58,7 @@ struct DrugEntryEditorView: View {
 
 struct DrugEntryEditorView_Previews: PreviewProvider {
     static var previews: some View {
-        return DrugEntryEditorView(
-            targetEntry: WrappedBinding(DefaultDrugList.shared.defaultEntry).binding,
-            shouldContinueEditing: BoolBinding(true).binding
-        )
+        return DrugEntryEditorView()
     }
 }
 

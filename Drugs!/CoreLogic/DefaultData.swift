@@ -22,7 +22,7 @@ public class WrappedBinding<Value> {
         self.current = start
     }
     lazy var binding = Binding<Value>(
-        get: { () -> Value in self.current },
+        get: { return self.current },
         set: { (val: Value) in self.current = val }
     )
 }
@@ -111,24 +111,16 @@ public final class DefaultDrugList {
                 hourlyDoseTime: 8
             ),
             Drug(
-                drugName: "Propranolol",
+                drugName: "Omeprazole",
                 ingredients: [
-                    Ingredient("Propranolol")
+                    Ingredient("Omeprazole")
                 ],
-                hourlyDoseTime: 12
-            ),
-            Drug(
-                drugName: "Buspirone",
-                ingredients: [
-                    Ingredient("Buspirone")
-                ]
-                ,
                 hourlyDoseTime: 24
             ),
             Drug(
-                drugName: "Trazadone",
+                drugName: "Melatonin",
                 ingredients: [
-                    Ingredient("Trazadone")
+                    Ingredient("Melatonin")
                 ],
                 hourlyDoseTime: 24
             ),

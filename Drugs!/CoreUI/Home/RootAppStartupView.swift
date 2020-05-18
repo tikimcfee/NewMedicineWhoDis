@@ -59,7 +59,7 @@ struct RootDrugView: View {
                 }
             } else {
                 ForEach(medicineOperator.currentEntries, id: \.self) {
-                    RootDrugMedicineCell($0)
+                    RootDrugMedicineCell(medicineEntry: $0)
                         .listRowInsets(EdgeInsets(
                             top: 4, leading: 8, bottom: 4, trailing: 8
                         ))
@@ -115,15 +115,12 @@ struct RootDrugView: View {
 }
 
 struct RootDrugMedicineCell: View {
-    let medicineEntry: MedicineEntry
+    @State var medicineEntry: MedicineEntry
 
-    init(_ entry: MedicineEntry) {
-        self.medicineEntry = entry
-    }
-    
     var body: some View {
         NavigationLink(
-            destination: DrugDetailView(medicineEntry: medicineEntry)
+            destination: DrugDetailView()
+                .environmentObject(DrugEntryEditorState(sourceEntry: medicineEntry))
         ) {
             VStack(alignment: .leading) {
                 Text("\(medicineEntry.drugList)")
