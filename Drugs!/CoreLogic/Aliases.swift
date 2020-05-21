@@ -1,1 +1,1 @@
-public typealias FileStorable = Equatable & Hashable & Codable
+public typealias EquatableFileStorable = Equatable & Hashable & Codable

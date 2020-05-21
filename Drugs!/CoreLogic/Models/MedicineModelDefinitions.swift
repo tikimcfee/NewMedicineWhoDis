@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Drug: FileStorable {
+public struct Drug: EquatableFileStorable {
 
     let drugName: String
     let ingredients: [Ingredient]
@@ -16,14 +16,14 @@ public struct Drug: FileStorable {
     
     static func blank(_ name: String? = nil) -> Drug {
         Drug(
-			drugName: name ?? "<default drug binding\(UUID.init().uuidString)>",
+			drugName: name ?? "<\(UUID.init().uuidString)>",
             ingredients: [],
             hourlyDoseTime: 4
         )
     }
 }
 
-public struct Ingredient: FileStorable {
+public struct Ingredient: EquatableFileStorable {
 
     let ingredientName: String
 
@@ -34,11 +34,12 @@ public struct Ingredient: FileStorable {
     }
 }
 
-public struct MedicineEntry: FileStorable {
+public struct MedicineEntry: EquatableFileStorable, Identifiable {
     
-	let date: Date
-    var drugsTaken: [Drug:Int]
     let uuid: String
+    var date: Date
+    var drugsTaken: [Drug:Int]
+    public var id: String { return uuid }
     
     init(
         date: Date,

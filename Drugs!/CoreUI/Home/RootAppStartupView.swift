@@ -42,43 +42,73 @@ struct RootDrugView: View {
             )
         }
     }
-	
+
 	var medicineList: some View {
         return List {
-            if medicineOperator.currentEntries.isEmpty {
+            if medicineOperator.coreAppState.mainEntryList.isEmpty {
                 Spacer()
                 Spacer()
-                HStack(alignment: .center)  {
-                    Spacer()
-                    Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
-                        .fontWeight(.light)
-                        .font(.callout)
-                        .italic()
-                        .multilineTextAlignment(.center)
-                    Spacer()
-                }
+                empty
             } else {
-                ForEach(medicineOperator.currentEntries, id: \.self) {
-                    RootDrugMedicineCell(medicineEntry: $0)
-                        .listRowInsets(EdgeInsets(
-                            top: 4, leading: 8, bottom: 4, trailing: 8
-                        ))
-                }.onDelete { indices in
-                    // do not support multi delete yet
-                    guard indices.count == 1,
-                        let index = indices.first
-                        else { return }
-
-                    let id = self.medicineOperator.currentEntries[index].uuid
-                    self.medicineOperator.removeEntry(id: id) { result in
-                        if case let .failure(removeError) = result {
-                            self.error = .removError(cause: removeError)
-                        }
-                    }
-                }
+                list
             }
         }
 	}
+
+    var empty: some View {
+        return HStack(alignment: .center)  {
+            Spacer()
+            Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
+                .fontWeight(.light)
+                .font(.callout)
+                .italic()
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+    }
+
+    var list: some View {
+        /**
+         Here's how to break the app
+         ForEach([List], id:) assumes that ID is unique; meaning, each thing will only ever show up one.
+         However, the entire model object is equatabale / hashable. Because of that, the id assumes the
+         unequal view instances require a rebuild. I'm assuming this behavior has to be crazy unintentional
+         and that I'm doing something absolutely bonkers for this to happen.
+         **/
+        // ForEach(medicineOperator.coreAppState.mainEntryList) { entry in
+        ForEach(medicineOperator.coreAppState.mainEntryList) { entry in
+            NavigationLink(
+                destination: DrugDetailView(),
+                tag: entry.uuid,
+                selection: self.$medicineOperator.coreAppState.detailState.selectedUuid
+            ) {
+                RootDrugMedicineCell(
+                    drugList: entry.drugList,
+                    dateString: dateFormatter.string(from: entry.date)
+                )
+            }
+            .contentShape(Rectangle())
+            .listRowInsets(EdgeInsets(
+                top: 4, leading: 8, bottom: 4, trailing: 8
+            ))
+            .onTapGesture {
+                self.medicineOperator.select(uuid: entry.uuid)
+            }
+
+        }.onDelete { indices in
+            // do not support multi delete yet
+            guard indices.count == 1,
+                let index = indices.first
+                else { return }
+
+            let id = self.medicineOperator.coreAppState.mainEntryList[index].uuid
+            self.medicineOperator.removeEntry(id: id) { result in
+                if case let .failure(removeError) = result {
+                    self.error = .removError(cause: removeError)
+                }
+            }
+        }
+    }
 	
     var drugEntryView: some View {
         return DrugEntryView(
@@ -115,20 +145,16 @@ struct RootDrugView: View {
 }
 
 struct RootDrugMedicineCell: View {
-    @State var medicineEntry: MedicineEntry
+    let drugList: String // "\(medicineEntry.drugList)"
+    let dateString: String // "\(medicineEntry.date, formatter: dateFormatter)"
 
     var body: some View {
-        NavigationLink(
-            destination: DrugDetailView()
-                .environmentObject(DrugEntryEditorState(sourceEntry: medicineEntry))
-        ) {
-            VStack(alignment: .leading) {
-                Text("\(medicineEntry.drugList)")
-                    .fontWeight(.semibold)
-                
-                Text("\(medicineEntry.date, formatter: dateFormatter)")
-                    .fontWeight(.ultraLight)
-            }
+        VStack(alignment: .leading) {
+            Text(drugList)
+                .fontWeight(.semibold)
+
+            Text(dateString)
+                .fontWeight(.ultraLight)
         }
     }
 }

@@ -65,6 +65,7 @@
 		F05FA182246FAF5B00FF8FE9 /* MedicineLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */; };
 		F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
 		F05FA184246FAF6A00FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
+		F06CE00B247706A10005441E /* TestingAppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06CE00A247706A10005441E /* TestingAppState.swift */; };
 		F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 		F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 /* End PBXBuildFile section */
@@ -120,6 +121,7 @@
 		F02262522471AA8C00F31141 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		F0456CCF24705D630017B04E /* DrugSelectionList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionList.swift; sourceTree = "<group>"; };
 		F0456CDC247061450017B04E /* DrugEntryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryCell.swift; sourceTree = "<group>"; };
+		F06CE00A247706A10005441E /* TestingAppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingAppState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -293,6 +295,7 @@
 			isa = PBXGroup;
 			children = (
 				45DA2BC0232532E500649270 /* ApplicationState.swift */,
+				F06CE00A247706A10005441E /* TestingAppState.swift */,
 			);
 			path = AppState;
 			sourceTree = "<group>";
@@ -467,6 +470,7 @@
 				F022624F2471A8A800F31141 /* DrugEntryEditorView.swift in Sources */,
 				45135960239A2BCC00EB2D31 /* DefaultData.swift in Sources */,
 				459679F723370558001DCBA1 /* AppColors.swift in Sources */,
+				F06CE00B247706A10005441E /* TestingAppState.swift in Sources */,
 				4593B4B6231AFBD000787D91 /* RootAppStartupView.swift in Sources */,
 				F01BBBB4246F939600BBC3A3 /* MedicineLogStore.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* MedicineLogOperator.swift in Sources */,

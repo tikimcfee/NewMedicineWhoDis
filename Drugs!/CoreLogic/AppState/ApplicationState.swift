@@ -26,48 +26,71 @@ extension AppStateError: Identifiable {
     }
 }
 
-public class AppState: FileStorable, ObservableObject {
+// =================================
+
+public struct AppState: EquatableFileStorable {
+
+    public struct Details {
+        public var selectedUuid: String? = nil
+        public var selectedEntry: MedicineEntry = DefaultDrugList.shared.defaultEntry
+        public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
+    }
+
+    public struct MainList {
+        public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
+    }
 
     public enum CodingKeys: CodingKey {
         case listState
     }
-    
-    @Published private(set) var mainEntryList: [MedicineEntry] = []
+
+    // App state
+    public var detailState = Details()
+    public var mainListState = MainList()
+
+    // Saved data
+    public var mainEntryList: [MedicineEntry] = []
 
     public init() { }
 
-    public required init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let codedKeys = try decoder.container(keyedBy: AppState.CodingKeys.self)
         self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
+    }
+
+    func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
+        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
+    }
+
+    mutating func replace(_ medicineEntry: MedicineEntry) {
+        mainEntryList[indexFor(medicineEntry)!] = medicineEntry
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: AppState.CodingKeys.self)
         try container.encode(mainEntryList, forKey: .listState)
     }
-    
+
     public static func == (lhs: AppState, rhs: AppState) -> Bool {
         return lhs.mainEntryList == rhs.mainEntryList
     }
-    
+
     public func hash(into hasher: inout Hasher) {
-		hasher.combine(mainEntryList)
+        hasher.combine(mainEntryList)
     }
 }
 
-extension AppState {
-    func updateEntry(medicineEntry: MedicineEntry) throws {
-        guard let index = mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid }) else {
-            throw AppStateError.updateError
-        }
-        mainEntryList[index] = medicineEntry
+extension MedicineLogOperator {
+    func select(uuid: String) {
+        let selected = coreAppState.mainEntryList.first(where: { $0.uuid == uuid} )!
+        coreAppState.detailState.editorState = DrugEntryEditorState(sourceEntry: selected)
+        coreAppState.detailState.selectedEntry = selected
+        coreAppState.detailState.selectedUuid = uuid
     }
 
-    func addEntry(medicineEntry: MedicineEntry) {
-        mainEntryList.insert(medicineEntry, at: 0)
-    }
-    
-    func removeEntry(id: String) {
-        mainEntryList.removeAll { $0.uuid == id }
+    func saveEditorState() {
+        let entry = coreAppState.detailState.editorState.inProgressEntry.entryMap
+        coreAppState.detailState.selectedEntry.drugsTaken = entry
+        coreAppState.replace(coreAppState.detailState.selectedEntry)
     }
 }

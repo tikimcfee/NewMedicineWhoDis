@@ -1,29 +1,32 @@
 import Foundation
 import SwiftUI
 
-final class DrugEntryEditorState: ObservableObject {
-    @Published var sourceEntry: MedicineEntry
-    @Published var inProgressEntry: InProgressEntry
-    @Published var editorIsVisible: Bool = false
-    @Published var editorError: AppStateError?
+public struct DrugEntryEditorState {
+    var inProgressEntry: InProgressEntry = InProgressEntry()
+    var editorIsVisible: Bool = false
+    var editorError: AppStateError?
+
+    private init() { }
 
     public init (sourceEntry: MedicineEntry) {
-        self.sourceEntry = sourceEntry
         self.inProgressEntry = InProgressEntry(sourceEntry.drugsTaken)
+    }
+
+    public static func emptyState() -> DrugEntryEditorState {
+        return DrugEntryEditorState()
     }
 }
 
 struct DrugEntryEditorView: View {
 
     @EnvironmentObject private var medicineOperator : MedicineLogOperator
-    @EnvironmentObject private var editorState: DrugEntryEditorState
 
     var body: some View {
         return VStack {
-            DrugEntryView(inProgressEntry: editorState.inProgressEntry)
+            DrugEntryView(inProgressEntry: medicineOperator.coreAppState.detailState.editorState.inProgressEntry)
             Components.fullWidthButton("Save changes", saveTapped).padding(8)
         }
-        .alert(item: $editorState.editorError) { error in
+        .alert(item: $medicineOperator.coreAppState.mainListState.editorState.editorError) { error in
             Alert(
                 title: Text("Kaboom 2"),
                 message: Text(error.localizedDescription),
@@ -38,15 +41,14 @@ struct DrugEntryEditorView: View {
         // but doesn't pop. Do it *again*, the data updates and the view pops. The first time,
         // it's because the data hasn't been set. The second, the data is changing from
         // underneath the list / detail, and it's causing it to explode / corrupt.
-        editorState.sourceEntry.drugsTaken = editorState.inProgressEntry.entryMap
-        medicineOperator.updateEntry(medicineEntry: editorState.sourceEntry) { result in
+        medicineOperator.saveEditorState { result in
             switch result {
             case .success:
-                self.editorState.editorIsVisible = false
+                self.medicineOperator.coreAppState.detailState.editorState.editorIsVisible = false
                 break;
 
             case .failure(let error):
-                self.editorState.editorError =
+                self.medicineOperator.coreAppState.detailState.editorState.editorError =
                     error as? AppStateError ?? .updateError
             }
         }

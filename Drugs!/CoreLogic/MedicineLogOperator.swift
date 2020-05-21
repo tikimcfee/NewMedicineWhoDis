@@ -4,7 +4,7 @@ import SwiftUI
 public class MedicineLogOperator: ObservableObject {
 
     private let medicineStore: MedicineLogStore
-    @ObservedObject private var coreAppState: AppState
+    @Published var coreAppState: AppState
 
     private let mainQueue = DispatchQueue.main
 	private let saveQueue: DispatchQueue = DispatchQueue.init(
@@ -12,8 +12,8 @@ public class MedicineLogOperator: ObservableObject {
 		qos: .userInteractive
 	)
     
-    var currentEntries: [MedicineEntry] {
-        return coreAppState.mainEntryList
+    func entry(with id: String) throws -> MedicineEntry {
+        return coreAppState.mainEntryList.first(where: { $0.uuid  == id })!
     }
     
     init(
@@ -29,7 +29,7 @@ public class MedicineLogOperator: ObservableObject {
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         emit()
-        coreAppState.addEntry(medicineEntry: medicineEntry)
+        coreAppState.mainEntryList.insert(medicineEntry, at: 0)
         saveAppState(handler)
     }
 
@@ -38,7 +38,7 @@ public class MedicineLogOperator: ObservableObject {
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         emit()
-        coreAppState.removeEntry(id: id)
+        coreAppState.mainEntryList.removeAll { $0.uuid == id }
         saveAppState(handler)
     }
 
@@ -48,13 +48,27 @@ public class MedicineLogOperator: ObservableObject {
     ) {
         emit()
         do {
-            try coreAppState.updateEntry(medicineEntry: medicineEntry)
+            guard let index = coreAppState.mainEntryList.firstIndex(
+                where: { $0.uuid == medicineEntry.uuid }
+                ) else { throw AppStateError.updateError }
+            coreAppState.mainEntryList[index] = medicineEntry
             saveAppState(handler)
         } catch {
             handler(.failure(error))
         }
     }
 
+    func saveEditorState(
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        emit()
+        saveEditorState()
+        saveAppState(handler)
+    }
+
+}
+
+extension MedicineLogOperator {
     private func emit() {
         DispatchQueue.main.async { [weak self] in
             self?.objectWillChange.send()
@@ -79,5 +93,4 @@ public class MedicineLogOperator: ObservableObject {
             handler(result)
         }
     }
-    
 }

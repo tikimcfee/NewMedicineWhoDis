@@ -3,11 +3,11 @@ import SwiftUI
 struct DrugDetailView: View {
 
     @EnvironmentObject var medicineLogOperator: MedicineLogOperator
-    @EnvironmentObject var drugEntryEditorState: DrugEntryEditorState
 
     var body: some View {
-        let data: [DetailEntryModel] = drugEntryEditorState.sourceEntry.toDetailEntryModels()
-		let count = data.count
+        let data: [DetailEntryModel] = medicineLogOperator.coreAppState.detailState.selectedEntry.toDetailEntryModels()
+
+        let count = data.count
 		let screenTitle: String
 		if count == 1 {
 			screenTitle = "take this?"
@@ -17,29 +17,30 @@ struct DrugDetailView: View {
         
         return VStack(alignment: .leading) {
 			
-			Text("at \(drugEntryEditorState.sourceEntry.date, formatter: dateFormatter)")
+            Text("at \(self.medicineLogOperator.coreAppState.detailState.selectedEntry.date, formatter: dateFormatter)")
 				.font(.title)
 				.underline()
 
             List {
                 ForEach (data, id: \.self) { item in
-                    DetailEntryModelCell(model: item, fromEntry: self.drugEntryEditorState.sourceEntry)
-                        .listRowInsets(EdgeInsets())
+                    DetailEntryModelCell(
+                        model: item,
+                        fromEntry: self.medicineLogOperator.coreAppState.detailState.selectedEntry
+                    ).listRowInsets(EdgeInsets())
                 }
             }
 
             Spacer()
 
             Components.fullWidthButton("Edit this entry") {
-                self.drugEntryEditorState.editorIsVisible = true
+                self.medicineLogOperator.coreAppState.detailState.editorState.editorIsVisible = true
             }
 		}
 		.padding(8.0)
 		.navigationBarTitle(Text(screenTitle))
-        .sheet(isPresented: $drugEntryEditorState.editorIsVisible) {
+        .sheet(isPresented: $medicineLogOperator.coreAppState.detailState.editorState.editorIsVisible) {
             DrugEntryEditorView()
                 .environmentObject(self.medicineLogOperator)
-                .environmentObject(self.drugEntryEditorState)
         }
     }
 }
@@ -111,7 +112,7 @@ struct DetailEntryModelCell: View {
     
 }
 
-struct DetailEntryModel: Identifiable, FileStorable {
+struct DetailEntryModel: Identifiable, EquatableFileStorable {
     var id = UUID()
     let drugName: String
     let countMessage: String
@@ -154,7 +155,6 @@ extension MedicineEntry {
 struct DrugDetailView_Previews: PreviewProvider {
     static var previews: some View {
         DrugDetailView()
-            .environmentObject(DrugEntryEditorState(sourceEntry: DefaultDrugList.shared.defaultEntry))
             .environmentObject(makeTestMedicineOperator())
     }
 }
