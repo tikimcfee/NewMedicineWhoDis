@@ -3,18 +3,12 @@ import SwiftUI
 
 public class MedicineLogOperator: ObservableObject {
 
-    private let medicineStore: MedicineLogStore
     @Published var coreAppState: AppState
 
+    private let medicineStore: MedicineLogStore
     private let mainQueue = DispatchQueue.main
-	private let saveQueue: DispatchQueue = DispatchQueue.init(
-		label: "MedicineLogOperator-Queue",
-		qos: .userInteractive
-	)
-    
-    func entry(with id: String) throws -> MedicineEntry {
-        return coreAppState.mainEntryList.first(where: { $0.uuid  == id })!
-    }
+	private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
+                                               qos: .userInteractive)
     
     init(
         medicineStore: MedicineLogStore,
@@ -24,21 +18,19 @@ public class MedicineLogOperator: ObservableObject {
         self.coreAppState = coreAppState
     }
 
-    func addEntry(
-        medicineEntry: MedicineEntry,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        emit()
-        coreAppState.mainEntryList.insert(medicineEntry, at: 0)
-        saveAppState(handler)
-    }
-
     func removeEntry(
         id: String,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         emit()
         coreAppState.mainEntryList.removeAll { $0.uuid == id }
+        saveAppState(handler)
+    }
+
+    func addEntry(medicineEntry: MedicineEntry,
+                  _ handler: @escaping (Result<Void, Error>) -> Void) {
+        emit()
+        coreAppState.mainEntryList.insert(medicineEntry, at: 0)
         saveAppState(handler)
     }
 
@@ -62,20 +54,30 @@ public class MedicineLogOperator: ObservableObject {
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         emit()
-        saveEditorState()
+
+        let entry = coreAppState.detailState.editorState.inProgressEntry.entryMap
+        coreAppState.detailState.selectedEntry.drugsTaken = entry
+        coreAppState.updateModelInPlace(coreAppState.detailState.selectedEntry)
+
         saveAppState(handler)
     }
 
+    func select(uuid: String) {
+        let selected = coreAppState.mainEntryList.first(where: { $0.uuid == uuid} )!
+        coreAppState.detailState.editorState = DrugEntryEditorState(sourceEntry: selected)
+        coreAppState.detailState.selectedEntry = selected
+        coreAppState.detailState.selectedUuid = uuid
+    }
 }
 
-extension MedicineLogOperator {
-    private func emit() {
+fileprivate extension MedicineLogOperator {
+    func emit() {
         DispatchQueue.main.async { [weak self] in
             self?.objectWillChange.send()
         }
     }
 
-    private func saveAppState(
+    func saveAppState(
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         saveQueue.async {
@@ -85,7 +87,7 @@ extension MedicineLogOperator {
         }
     }
 
-    private func notifyHandler(
+    func notifyHandler(
         _ result: Result<Void, Error>,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {

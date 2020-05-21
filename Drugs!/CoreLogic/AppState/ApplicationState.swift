@@ -58,17 +58,17 @@ public struct AppState: EquatableFileStorable {
         self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
     }
 
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: AppState.CodingKeys.self)
+        try container.encode(mainEntryList, forKey: .listState)
+    }
+
     func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
         return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
     }
 
-    mutating func replace(_ medicineEntry: MedicineEntry) {
+    mutating func updateModelInPlace(_ medicineEntry: MedicineEntry) {
         mainEntryList[indexFor(medicineEntry)!] = medicineEntry
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: AppState.CodingKeys.self)
-        try container.encode(mainEntryList, forKey: .listState)
     }
 
     public static func == (lhs: AppState, rhs: AppState) -> Bool {
@@ -77,20 +77,5 @@ public struct AppState: EquatableFileStorable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(mainEntryList)
-    }
-}
-
-extension MedicineLogOperator {
-    func select(uuid: String) {
-        let selected = coreAppState.mainEntryList.first(where: { $0.uuid == uuid} )!
-        coreAppState.detailState.editorState = DrugEntryEditorState(sourceEntry: selected)
-        coreAppState.detailState.selectedEntry = selected
-        coreAppState.detailState.selectedUuid = uuid
-    }
-
-    func saveEditorState() {
-        let entry = coreAppState.detailState.editorState.inProgressEntry.entryMap
-        coreAppState.detailState.selectedEntry.drugsTaken = entry
-        coreAppState.replace(coreAppState.detailState.selectedEntry)
     }
 }
