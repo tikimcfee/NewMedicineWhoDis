@@ -49,7 +49,7 @@ public class DrugBinding {
 
 public final class DefaultDrugList {
 
-    @ObservedObject static var inProgressEntry: InProgressEntry = InProgressEntry()
+    @State static var inProgressEntry: InProgressEntry = InProgressEntry()
 
     static func drugMapBinding() -> Binding<[Drug : Int]> {
         return Binding<[Drug : Int]>(

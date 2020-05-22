@@ -12,8 +12,8 @@ import SwiftUI
 /**Model and View Extensions */
 // ----------------------------------------------
 
-class InProgressEntry: ObservableObject {
-	@Published var entryMap: [Drug:Int]
+struct InProgressEntry {
+	var entryMap: [Drug:Int]
     init(_ map: [Drug:Int] = [:]) {
         self.entryMap = map
     }
@@ -30,18 +30,18 @@ extension View {
 
 struct DrugEntryView: View {
     
-    @ObservedObject var inProgressEntry: InProgressEntry
+    @Binding var inProgressEntry: InProgressEntry
     @State var currentSelectedDrug: Drug? = nil
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             DrugSelectionListView(
-                inProgressEntry: inProgressEntry,
+                inProgressEntry: $inProgressEntry,
                 currentSelectedDrug: $currentSelectedDrug
             ).padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
 
             DrugEntryNumberPad(
-                inProgressEntry: inProgressEntry,
+                inProgressEntry: $inProgressEntry,
                 currentSelectedDrug: $currentSelectedDrug
             ).padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
 
@@ -61,7 +61,7 @@ struct DrugEntryView: View {
 struct DrugEntryView_Preview: PreviewProvider {
     static var previews: some View {
         DrugEntryView(
-            inProgressEntry: DefaultDrugList.inProgressEntry,
+            inProgressEntry: DefaultDrugList.$inProgressEntry,
             currentSelectedDrug: DefaultDrugList.shared.drugs[4]
         )
     }

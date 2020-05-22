@@ -3,7 +3,7 @@ import SwiftUI
 
 struct DrugEntryViewCell: View {
 
-    @ObservedObject var inProgressEntry: InProgressEntry
+    @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     let trackedDrug: Drug
 
@@ -60,7 +60,7 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugEntryViewCell(
-                inProgressEntry: DefaultDrugList.inProgressEntry,
+                inProgressEntry: DefaultDrugList.$inProgressEntry,
                 currentSelectedDrug: DefaultDrugList.drugBinding(),
                 trackedDrug: DefaultDrugList.shared.drugs[2]
             )

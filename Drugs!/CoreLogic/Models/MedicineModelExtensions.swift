@@ -29,7 +29,10 @@ extension MedicineEntry {
 		if drugsTaken.count == 0 {
 			return "(Nothing taken)"
 		} else {
-			return drugsTaken.keys.map { $0.drugName }.joined(separator: ", ")
+            return drugsTaken.keys
+                .sorted { $0.drugName <= $1.drugName }
+                .map { $0.drugName }
+                .joined(separator: ", ")
 		}
 	}
 	

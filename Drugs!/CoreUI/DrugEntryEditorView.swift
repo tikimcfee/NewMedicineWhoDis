@@ -23,7 +23,7 @@ struct DrugEntryEditorView: View {
 
     var body: some View {
         return VStack {
-            DrugEntryView(inProgressEntry: medicineOperator.coreAppState.detailState.editorState.inProgressEntry)
+            DrugEntryView(inProgressEntry: $medicineOperator.coreAppState.detailState.editorState.inProgressEntry)
             Components.fullWidthButton("Save changes", saveTapped).padding(8)
         }
         .alert(item: $medicineOperator.coreAppState.mainListState.editorState.editorError) { error in
@@ -41,7 +41,7 @@ struct DrugEntryEditorView: View {
         // but doesn't pop. Do it *again*, the data updates and the view pops. The first time,
         // it's because the data hasn't been set. The second, the data is changing from
         // underneath the list / detail, and it's causing it to explode / corrupt.
-        medicineOperator.saveEditorState { result in
+        medicineOperator.detailsView__saveEditorState { result in
             switch result {
             case .success:
                 self.medicineOperator.coreAppState.detailState.editorState.editorIsVisible = false

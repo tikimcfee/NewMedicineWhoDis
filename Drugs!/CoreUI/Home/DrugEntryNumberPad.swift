@@ -11,7 +11,7 @@ import SwiftUI
 
 struct DrugEntryNumberPad: View {
 	
-	@ObservedObject var inProgressEntry: InProgressEntry
+	@Binding var inProgressEntry: InProgressEntry
 	@Binding var currentSelectedDrug: Drug?
 	
 	private var currentDrugCount: Int {
@@ -106,7 +106,7 @@ struct DrugEntryNumberPad_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugEntryNumberPad(
-                inProgressEntry: DefaultDrugList.inProgressEntry,
+                inProgressEntry: DefaultDrugList.$inProgressEntry,
                 currentSelectedDrug: DefaultDrugList.drugBinding()
             )
         }

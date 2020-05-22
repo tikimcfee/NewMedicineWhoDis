@@ -28,17 +28,36 @@ extension AppStateError: Identifiable {
 
 // =================================
 
+public struct Details {
+    public var selectedUuid: String? = nil
+    public var selectedEntry: MedicineEntry = DefaultDrugList.shared.defaultEntry
+    public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
+
+    mutating func saveEdits() -> MedicineEntry {
+        selectedEntry.drugsTaken = editorState.inProgressEntry.entryMap
+        return selectedEntry
+    }
+
+    mutating func setSelected(_ entry: MedicineEntry) {
+        editorState = DrugEntryEditorState(sourceEntry: entry)
+        selectedEntry = entry
+        selectedUuid = entry.uuid
+    }
+}
+
+public struct MainList {
+    public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
+
+    mutating func createEntryFromEditor() -> MedicineEntry {
+        return MedicineEntry(
+            date: Date(),
+            drugsTaken: editorState.inProgressEntry.entryMap
+        )
+
+    }
+}
+
 public struct AppState: EquatableFileStorable {
-
-    public struct Details {
-        public var selectedUuid: String? = nil
-        public var selectedEntry: MedicineEntry = DefaultDrugList.shared.defaultEntry
-        public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
-    }
-
-    public struct MainList {
-        public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
-    }
 
     public enum CodingKeys: CodingKey {
         case listState
@@ -63,19 +82,22 @@ public struct AppState: EquatableFileStorable {
         try container.encode(mainEntryList, forKey: .listState)
     }
 
-    func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
-        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
-    }
-
-    mutating func updateModelInPlace(_ medicineEntry: MedicineEntry) {
-        mainEntryList[indexFor(medicineEntry)!] = medicineEntry
-    }
-
     public static func == (lhs: AppState, rhs: AppState) -> Bool {
         return lhs.mainEntryList == rhs.mainEntryList
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(mainEntryList)
+    }
+}
+
+public extension AppState {
+    func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
+        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
+    }
+
+    subscript(index: Int) -> MedicineEntry {
+        get { return mainEntryList[index] }
+        set { mainEntryList[index] = newValue }
     }
 }

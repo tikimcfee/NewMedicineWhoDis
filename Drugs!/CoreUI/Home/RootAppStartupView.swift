@@ -92,7 +92,7 @@ struct RootDrugView: View {
                 top: 4, leading: 8, bottom: 4, trailing: 8
             ))
             .onTapGesture {
-                self.medicineOperator.select(uuid: entry.uuid)
+                self.medicineOperator.select(entry)
             }
 
         }.onDelete { indices in
@@ -112,7 +112,7 @@ struct RootDrugView: View {
 	
     var drugEntryView: some View {
         return DrugEntryView(
-            inProgressEntry: inProgressEntry
+            inProgressEntry: $inProgressEntry
         )
     }
     
@@ -145,8 +145,8 @@ struct RootDrugView: View {
 }
 
 struct RootDrugMedicineCell: View {
-    let drugList: String // "\(medicineEntry.drugList)"
-    let dateString: String // "\(medicineEntry.date, formatter: dateFormatter)"
+    let drugList: String
+    let dateString: String
 
     var body: some View {
         VStack(alignment: .leading) {

@@ -3,7 +3,7 @@ import SwiftUI
 
 struct DrugSelectionListView: View {
 
-    @ObservedObject var inProgressEntry: InProgressEntry
+    @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     private let drugList = DefaultDrugList.shared.drugs
 
@@ -11,7 +11,7 @@ struct DrugSelectionListView: View {
         return ScrollView {
             ForEach(drugList, id: \.self) { drug in
                 DrugEntryViewCell(
-                    inProgressEntry: self.inProgressEntry,
+                    inProgressEntry: self.$inProgressEntry,
                     currentSelectedDrug: self.$currentSelectedDrug,
                     trackedDrug: drug
                 ).cornerRadius(4).padding(4)
@@ -26,7 +26,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugSelectionListView(
-                inProgressEntry: DefaultDrugList.inProgressEntry,
+                inProgressEntry: DefaultDrugList.$inProgressEntry,
                 currentSelectedDrug: DefaultDrugList.drugBinding()
             )
         }
