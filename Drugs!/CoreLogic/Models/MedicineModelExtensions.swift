@@ -52,6 +52,7 @@ extension Array where Element == MedicineEntry {
         let now = Date()
 
         var drugDates = [Drug: Date]()
+        DefaultDrugList.shared.drugs.forEach { drugDates[$0] = now }
         forEach { entry in
             entry.timesDrugsAreNextAvailable.forEach { drug, date in
                 guard let existing = drugDates[drug] else {
@@ -66,7 +67,7 @@ extension Array where Element == MedicineEntry {
         }
 
         return drugDates.reduce(into: AvailabilityInfo()) { result, entry in
-            result[entry.key] = (entry.value < now, entry.value)
+            result[entry.key] = (entry.value <= now, entry.value)
         }
     }
 }
