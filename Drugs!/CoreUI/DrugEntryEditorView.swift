@@ -27,11 +27,16 @@ private extension Date {
             max(difference.hour!, difference.hour! * -1),
             max(difference.minute!, difference.minute! * -1)
         )
-        let hoursText = hours > 1 ? "hours" : "hour"
-        let minuteText = minutes != 1 ? "minutes" : "minute"
-        let suffix = self < date ? "later" : "earlier"
 
-        return String(format: "%d %@, %d %@ %@", hours, hoursText, minutes, minuteText, suffix)
+        if hours == 0 && minutes == 0 {
+            return "No time change"
+        } else {
+            let hoursText = hours != 1 ? "hours" : "hour"
+            let minuteText = minutes != 1 ? "minutes" : "minute"
+            let suffix = self < date ? "later" : "earlier"
+
+            return String(format: "%d %@, %d %@ %@", hours, hoursText, minutes, minuteText, suffix)
+        }
     }
 }
 

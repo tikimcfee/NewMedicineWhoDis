@@ -29,6 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if let windowScene = scene as? UIWindowScene {
             window = UIWindow(windowScene: windowScene)
+            window!.overrideUserInterfaceStyle = .light
         }
 
 		let log = MedicineLogStore()
