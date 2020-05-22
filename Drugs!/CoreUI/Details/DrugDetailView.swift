@@ -5,7 +5,8 @@ struct DrugDetailView: View {
     @EnvironmentObject var medicineLogOperator: MedicineLogOperator
 
     var body: some View {
-        let data: [DetailEntryModel] = medicineLogOperator.coreAppState.detailState.selectedEntry.toDetailEntryModels()
+        let info = medicineLogOperator.coreAppState.mainEntryList.availabilityInfo()
+        let data: [DetailEntryModel] = medicineLogOperator.coreAppState.detailState.selectedEntry.toDetailEntryModels(info)
 
         let count = data.count
 		let screenTitle: String
@@ -17,9 +18,9 @@ struct DrugDetailView: View {
         
         return VStack(alignment: .leading) {
 			
-            Text("at \(self.medicineLogOperator.coreAppState.detailState.selectedEntry.date, formatter: dateFormatter)")
-				.font(.title)
-				.underline()
+            Text("\(self.medicineLogOperator.coreAppState.detailState.selectedEntry.date, formatter: dateFormatterLong)")
+                .font(.body)
+
 
             List {
                 ForEach (data, id: \.self) { item in
@@ -54,7 +55,7 @@ struct DetailEntryModelCell: View {
 		if model.canTakeAgain {
 			titleColor = Color.black
 		} else {
-			titleColor = Color.gray
+			titleColor = Color.black
 		}
 		
         return VStack(alignment: .leading, spacing: 0) {
@@ -84,8 +85,8 @@ struct DetailEntryModelCell: View {
         }.padding(4.0)
 			.background(
                 model.canTakeAgain
-                    ? Color.timeForNextDoseReady
-                    : Color.timeForNextDose
+                    ? Color.computedCanTake
+                    : Color.computedCannotTake
             )
 			.cornerRadius(4.0)
 			.slightlyRaised()
@@ -123,12 +124,10 @@ struct DetailEntryModel: Identifiable, EquatableFileStorable {
 
 extension MedicineEntry {
 	
-	func toDetailEntryModels() -> [DetailEntryModel] {
-		let now = Date()
-		return timesDrugsAreNextAvailable.map { (drug, date) in
-			
-			let canTakeAgain = now >= date
-			let formattedDate = dateFormatterSmall.string(from: date)
+    func toDetailEntryModels(_ info: AvailabilityInfo) -> [DetailEntryModel] {
+		return timesDrugsAreNextAvailable.map { (drug, calculatedDate) in
+            let canTakeAgain = info[drug]?.canTake == true
+            let formattedDate = dateFormatterSmall.string(from: info[drug]?.when ?? calculatedDate)
 			let ingredientList = drug.ingredientList
 			
 			let text: String

@@ -17,29 +17,6 @@ public struct DrugEntryEditorState {
     }
 }
 
-private extension Date {
-    func distanceString(_ date: Date) -> String {
-        let calendar = Calendar.current
-        let timeComponents = calendar.dateComponents([.hour, .minute], from: self)
-        let nowComponents = calendar.dateComponents([.hour, .minute], from: date)
-        let difference = calendar.dateComponents([.hour, .minute], from: timeComponents, to: nowComponents)
-        let (hours, minutes) = (
-            max(difference.hour!, difference.hour! * -1),
-            max(difference.minute!, difference.minute! * -1)
-        )
-
-        if hours == 0 && minutes == 0 {
-            return "No time change"
-        } else {
-            let hoursText = hours != 1 ? "hours" : "hour"
-            let minuteText = minutes != 1 ? "minutes" : "minute"
-            let suffix = self < date ? "later" : "earlier"
-
-            return String(format: "%d %@, %d %@ %@", hours, hoursText, minutes, minuteText, suffix)
-        }
-    }
-}
-
 struct DrugEntryEditorView: View {
 
     @EnvironmentObject private var medicineOperator : MedicineLogOperator
@@ -63,10 +40,22 @@ struct DrugEntryEditorView: View {
                     Text("\(selectedEntry.date, formatter: dateTimeFormatter)").font(.headline)
                     Spacer()
                 }
+//
+//                HStack {
+//                    Spacer()
+//                    Text("Date:").font(.headline)
+//                    DatePicker(selection: entryBinding.date,
+//                               displayedComponents: .date,
+//                               label: { EmptyView() }
+//                    ).labelsHidden()
+//                        .frame(width: 300, height: 100)
+//                        .clipped()
+//                }
 
                 HStack {
                     Spacer()
-                    Text("New Time:").font(.headline)
+                    Text("Time:").font(.headline)
+                    Spacer()
                     DatePicker(selection: entryBinding.date,
                                displayedComponents: .hourAndMinute,
                                label: { EmptyView() }

@@ -69,7 +69,11 @@ public struct AppState: EquatableFileStorable {
     public var mainListState = MainList()
 
     // Saved data
-    public var mainEntryList: [MedicineEntry] = []
+    private var _backingList: [MedicineEntry] = []
+    public var mainEntryList: [MedicineEntry] {
+        get { return _backingList }
+        set { _backingList = newValue.sorted { $0.date > $1.date } }
+    }
 
     public init() { }
 

@@ -3,17 +3,20 @@ import SwiftUI
 
 struct DrugSelectionListView: View {
 
+    @EnvironmentObject var logOperator: MedicineLogOperator
     @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     private let drugList = DefaultDrugList.shared.drugs
 
     var body: some View {
+        let info = logOperator.coreAppState.mainEntryList.availabilityInfo()
         return ScrollView {
-            ForEach(drugList, id: \.self) { drug in
+            ForEach(DefaultDrugList.shared.drugs, id: \.self) { drug in
                 DrugEntryViewCell(
                     inProgressEntry: self.$inProgressEntry,
                     currentSelectedDrug: self.$currentSelectedDrug,
-                    trackedDrug: drug
+                    trackedDrug: drug,
+                    canTake: info[drug]?.0 == true
                 ).cornerRadius(4).padding(4)
             }
         }

@@ -65,6 +65,10 @@
 		F05FA182246FAF5B00FF8FE9 /* MedicineLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogStore.swift */; };
 		F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
 		F05FA184246FAF6A00FF8FE9 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
+		F06CE02C2477A7E50005441E /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
+		F06CE02D2477A7E60005441E /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
+		F06CE02E2477A7FC0005441E /* DrugDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* DrugDetailView.swift */; };
+		F06CE02F2477A7FC0005441E /* DrugDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* DrugDetailView.swift */; };
 		F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 		F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */; };
 /* End PBXBuildFile section */
@@ -484,6 +488,7 @@
 				F0456CD824705F020017B04E /* AppColors.swift in Sources */,
 				F0456CD624705EF70017B04E /* DefaultData.swift in Sources */,
 				F022624A2471A74700F31141 /* RootAppStartupView.swift in Sources */,
+				F06CE02E2477A7FC0005441E /* DrugDetailView.swift in Sources */,
 				F02262542471AA8C00F31141 /* Components.swift in Sources */,
 				4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */,
 				4517803523612F7500E7C5F7 /* ApplicationState.swift in Sources */,
@@ -491,6 +496,7 @@
 				F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */,
 				F02262502471A8A800F31141 /* DrugEntryEditorView.swift in Sources */,
 				F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
+				F06CE02C2477A7E50005441E /* Formatting.swift in Sources */,
 				4517803323612F7100E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
 				F05FA181246FAF5A00FF8FE9 /* MedicineLogStore.swift in Sources */,
 				F0456CD424705ECF0017B04E /* DrugEntryView.swift in Sources */,
@@ -509,6 +515,7 @@
 				F0456CD924705F030017B04E /* AppColors.swift in Sources */,
 				F0456CD724705EF70017B04E /* DefaultData.swift in Sources */,
 				F022624B2471A74800F31141 /* RootAppStartupView.swift in Sources */,
+				F06CE02F2477A7FC0005441E /* DrugDetailView.swift in Sources */,
 				F02262552471AA8C00F31141 /* Components.swift in Sources */,
 				4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */,
 				4517803623612F7500E7C5F7 /* ApplicationState.swift in Sources */,
@@ -516,6 +523,7 @@
 				F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */,
 				F02262512471A8A800F31141 /* DrugEntryEditorView.swift in Sources */,
 				F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
+				F06CE02D2477A7E60005441E /* Formatting.swift in Sources */,
 				4517803423612F7200E7C5F7 /* MedicineModelDefinitions.swift in Sources */,
 				F05FA182246FAF5B00FF8FE9 /* MedicineLogStore.swift in Sources */,
 				F0456CD524705ED00017B04E /* DrugEntryView.swift in Sources */,

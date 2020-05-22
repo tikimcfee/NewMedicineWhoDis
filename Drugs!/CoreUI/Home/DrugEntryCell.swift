@@ -6,14 +6,16 @@ struct DrugEntryViewCell: View {
     @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     let trackedDrug: Drug
+    let canTake: Bool
 
     var body: some View {
         Button(action: onTap) {
             text()
                 .padding(4)
-                .background(Color.buttonBackground)
-
-
+                .background(canTake
+                    ? Color.computedCanTake
+                    : Color.computedCannotTake
+                )
         }
     }
 
@@ -62,7 +64,8 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
             DrugEntryViewCell(
                 inProgressEntry: DefaultDrugList.$inProgressEntry,
                 currentSelectedDrug: DefaultDrugList.drugBinding(),
-                trackedDrug: DefaultDrugList.shared.drugs[2]
+                trackedDrug: DefaultDrugList.shared.drugs[2],
+                canTake: true
             )
         }
     }

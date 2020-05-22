@@ -44,3 +44,29 @@ extension MedicineEntry {
 		return result
 	}
 }
+
+public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
+
+extension Array where Element == MedicineEntry {
+    func availabilityInfo() -> AvailabilityInfo {
+        let now = Date()
+
+        var drugDates = [Drug: Date]()
+        forEach { entry in
+            entry.timesDrugsAreNextAvailable.forEach { drug, date in
+                guard let existing = drugDates[drug] else {
+                    drugDates[drug] = date
+                    return
+                }
+                // If this date is later, it means we have to wait longer
+                if date > existing {
+                    drugDates[drug] = date
+                }
+            }
+        }
+
+        return drugDates.reduce(into: AvailabilityInfo()) { result, entry in
+            result[entry.key] = (entry.value < now, entry.value)
+        }
+    }
+}

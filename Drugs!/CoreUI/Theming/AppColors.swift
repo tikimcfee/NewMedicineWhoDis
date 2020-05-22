@@ -22,4 +22,7 @@ extension Color {
 	
 	public static let medicineCellSelected = Color.blue
 	public static let medicineCellNotSelected = Color.black
+
+    public static let computedCanTake = Color.init(red: 0.4, green: 0.8, blue: 0.9).opacity(0.6)
+    public static let computedCannotTake = Color.init(red: 0.5, green: 0.5, blue: 0.5).opacity(0.4)
 }

@@ -69,9 +69,29 @@ public final class DefaultDrugList {
 
     private init() { }
 
+    func randomEntry() -> MedicineEntry {
+        let start = Int.random(in: 0..<drugs.count)
+        let end = Int.random(in: start..<drugs.count)
+        let time = -Int.random(in: 0...12)
+        let minutes = -Int.random(in: 0...60)
+        let date = Calendar.current.date(
+            byAdding: .hour, value: time, to: Date()
+        )!.addingTimeInterval(TimeInterval(minutes))
+        return MedicineEntry(
+            date: date,
+            drugsTaken: Array(drugs[start...end]).reduce(into: [Drug: Int]()) { result, drug in
+                result[drug, default: 0] += Int.random(in: 1...4)
+            }
+        )
+    }
+
+    lazy var randomEntries: [MedicineEntry] = {
+        return [randomEntry(), randomEntry(), randomEntry(), randomEntry()]
+    }()
+
     lazy var defaultEntry : MedicineEntry = {
         return MedicineEntry(
-            date: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
+            date: Calendar.current.date(byAdding: .hour, value: -12, to: Date())!,
             drugsTaken: Array(drugs[0...4]).reduce(into: [Drug: Int]()) { result, drug in
                 result[drug, default: 0] += Int.random(in: 1...4)
             }

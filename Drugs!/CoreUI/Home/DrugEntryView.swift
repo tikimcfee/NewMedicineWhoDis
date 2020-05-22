@@ -64,7 +64,7 @@ struct DrugEntryView_Preview: PreviewProvider {
         DrugEntryView(
             inProgressEntry: DefaultDrugList.$inProgressEntry,
             currentSelectedDrug: DefaultDrugList.shared.drugs[4]
-        )
+        ).environmentObject(makeTestMedicineOperator())
     }
 }
 

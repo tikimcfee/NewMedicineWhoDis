@@ -74,9 +74,10 @@ struct RootDrugView: View {
          However, the entire model object is equatabale / hashable. Because of that, the id assumes the
          unequal view instances require a rebuild. I'm assuming this behavior has to be crazy unintentional
          and that I'm doing something absolutely bonkers for this to happen.
-         **/
-        // ForEach(medicineOperator.coreAppState.mainEntryList) { entry in
-        ForEach(medicineOperator.coreAppState.mainEntryList) { entry in
+
+         // ForEach(medicineOperator.coreAppState.mainEntryList, id: \.self) { entry in
+         */
+        ForEach(medicineOperator.coreAppState.mainEntryList, id: \.id) { entry in
             NavigationLink(
                 destination: DrugDetailView(),
                 tag: entry.uuid,
@@ -84,7 +85,7 @@ struct RootDrugView: View {
             ) {
                 RootDrugMedicineCell(
                     drugList: entry.drugList,
-                    dateString: dateFormatter.string(from: entry.date)
+                    dateString: dateFormatterLong.string(from: entry.date)
                 )
             }
             .contentShape(Rectangle())
