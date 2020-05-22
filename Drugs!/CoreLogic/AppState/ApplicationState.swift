@@ -35,6 +35,7 @@ public struct Details {
 
     mutating func saveEdits() -> MedicineEntry {
         selectedEntry.drugsTaken = editorState.inProgressEntry.entryMap
+        selectedEntry.date = editorState.inProgressEntry.date
         return selectedEntry
     }
 

@@ -113,7 +113,7 @@ struct RootDrugView: View {
     var drugEntryView: some View {
         return DrugEntryView(
             inProgressEntry: $inProgressEntry
-        )
+        ).frame(height: 228)
     }
     
 	var saveButton: some View {
