@@ -12,7 +12,7 @@ public struct Drug: EquatableFileStorable {
 
     let drugName: String
     let ingredients: [Ingredient]
-    let hourlyDoseTime: Int
+    let hourlyDoseTime: Double
     
     static func blank(_ name: String? = nil) -> Drug {
         Drug(

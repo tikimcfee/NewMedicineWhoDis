@@ -5,6 +5,7 @@ struct DrugEntryViewCell: View {
 
     @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
+    @State var backgroundColor = Color.computedCannotTake
     let trackedDrug: Drug
     let canTake: Bool
 
@@ -16,6 +17,9 @@ struct DrugEntryViewCell: View {
                     ? Color.computedCanTake
                     : Color.computedCannotTake
                 )
+                .animation(.easeInOut(duration: 0.667))
+                .cornerRadius(4)
+
         }
     }
 
@@ -28,29 +32,32 @@ struct DrugEntryViewCell: View {
     }
 
     private func text() -> some View {
-        var title =
+        let title =
             Text("\(trackedDrug.drugName)")
                 .font(.headline)
                 .fontWeight(.light)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .animation(.none)
 
-        var count =
+        let count =
             Text("(\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0)))")
                 .font(.subheadline)
                 .fontWeight(.thin)
+                .animation(.none)
 
+        let titleColor, countColor: Color
         if trackedDrug == currentSelectedDrug {
-            title = title.foregroundColor(Color.medicineCellSelected)
-            count = count.foregroundColor(Color.medicineCellSelected)
+            titleColor = Color.medicineCellSelected
+            countColor = Color.medicineCellSelected
         } else {
-            title = title.foregroundColor(Color.medicineCellNotSelected)
-            count = count.foregroundColor(Color.medicineCellNotSelected)
+            titleColor = Color.medicineCellNotSelected
+            countColor = Color.medicineCellNotSelected
         }
 
         return HStack {
-            title
-            Spacer()
-            count
-        }.fixedSize(horizontal: false, vertical: true)
+            title.foregroundColor(titleColor)
+            count.foregroundColor(countColor)
+        }
     }
 }
 
