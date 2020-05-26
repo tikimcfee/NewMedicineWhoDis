@@ -29,9 +29,7 @@ extension View {
 	}
 }
 
-
 struct DrugEntryView: View {
-    
     @Binding var inProgressEntry: InProgressEntry
     @State var currentSelectedDrug: Drug? = nil
     
@@ -50,10 +48,6 @@ struct DrugEntryView: View {
         }
         .background(Color(red: 0.8, green: 0.9, blue: 0.9))
         
-    }
-    
-    func resetState(_ map: [Drug:Int] = [:]) {
-        self.inProgressEntry.entryMap = map
     }
 }
 

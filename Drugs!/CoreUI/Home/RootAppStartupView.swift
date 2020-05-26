@@ -68,15 +68,6 @@ struct RootDrugView: View {
     }
 
     var list: some View {
-        /**
-         Here's how to break the app
-         ForEach([List], id:) assumes that ID is unique; meaning, each thing will only ever show up one.
-         However, the entire model object is equatabale / hashable. Because of that, the id assumes the
-         unequal view instances require a rebuild. I'm assuming this behavior has to be crazy unintentional
-         and that I'm doing something absolutely bonkers for this to happen.
-
-         // ForEach(medicineOperator.coreAppState.mainEntryList, id: \.self) { entry in
-         */
         ForEach(medicineOperator.coreAppState.mainEntryList, id: \.id) { entry in
             NavigationLink(
                 destination: DrugDetailView(),
@@ -141,6 +132,9 @@ struct RootDrugView: View {
     }
         
     func createNewEntry(with map: [Drug:Int]) -> MedicineEntry {
+        // NOTE: the date is set AT TIME of creation, NOT from the progress entry
+        // Potential source of date bug if this gets mixed up (also means there's a
+        // date we don't need sometimes...)
         return MedicineEntry(date: Date(), drugsTaken: map)
     }
 }

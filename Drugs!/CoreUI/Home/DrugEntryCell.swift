@@ -5,7 +5,6 @@ struct DrugEntryViewCell: View {
 
     @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
-    @State var backgroundColor = Color.computedCannotTake
     let trackedDrug: Drug
     let canTake: Bool
 
@@ -17,9 +16,7 @@ struct DrugEntryViewCell: View {
                     ? Color.computedCanTake
                     : Color.computedCannotTake
                 )
-                .animation(.easeInOut(duration: 0.667))
                 .cornerRadius(4)
-
         }
     }
 

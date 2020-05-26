@@ -115,6 +115,13 @@ public final class DefaultDrugList {
                 hourlyDoseTime: 24
             ),
             Drug(
+                drugName: "Dramamine",
+                ingredients: [
+                    Ingredient("Dimenhydrinate"),
+                ],
+                hourlyDoseTime: 5
+            ),
+            Drug(
                 drugName: "Excedrin",
                 ingredients: [
                     Ingredient("Acetaminophen"),

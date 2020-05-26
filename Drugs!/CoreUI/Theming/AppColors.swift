@@ -3,7 +3,13 @@ import SwiftUI
 
 public class AppLaunchThemingUtil {
     public static func setGlobalThemes() {
-        UITableView.appearance().separatorStyle = .none
+        let tableViewAppearance = UITableView.appearance()
+        tableViewAppearance.separatorStyle = .none
+        tableViewAppearance.backgroundColor = nil
+
+        let cellAppearance = UITableViewCell.appearance()
+        cellAppearance.backgroundView = nil
+        cellAppearance.backgroundColor = nil
     }
 }
 
