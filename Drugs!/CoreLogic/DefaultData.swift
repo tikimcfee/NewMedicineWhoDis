@@ -101,6 +101,13 @@ public final class DefaultDrugList {
     lazy var drugs: [Drug] = {
         let list = [
             Drug(
+                drugName: "Gabapentin",
+                ingredients: [
+                    Ingredient("Gabapentin")
+                ],
+                hourlyDoseTime: 12
+            ),
+            Drug(
                 drugName: "Tylenol",
                 ingredients: [
                     Ingredient("Acetaminophen")
@@ -119,7 +126,7 @@ public final class DefaultDrugList {
                 ingredients: [
                     Ingredient("Dimenhydrinate"),
                 ],
-                hourlyDoseTime: 5
+                hourlyDoseTime: 24
             ),
             Drug(
                 drugName: "Excedrin",
@@ -142,7 +149,7 @@ public final class DefaultDrugList {
                 ingredients: [
                     Ingredient("Omeprazole")
                 ],
-                hourlyDoseTime: 24
+                hourlyDoseTime: 12
             ),
             Drug(
                 drugName: "Melatonin",
