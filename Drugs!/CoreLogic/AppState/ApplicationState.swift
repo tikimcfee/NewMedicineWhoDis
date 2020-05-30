@@ -50,49 +50,27 @@ public struct MainList {
     public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
 
     mutating func createEntryFromEditor() -> MedicineEntry {
-        return MedicineEntry(
-            date: Date(),
-            drugsTaken: editorState.inProgressEntry.entryMap
-        )
+        return MedicineEntry(Date(), editorState.inProgressEntry.entryMap)
 
     }
 }
 
-public struct AppState: EquatableFileStorable {
+public struct AppState {
 
-    public enum CodingKeys: CodingKey {
-        case listState
-    }
-
-    // App state
     public var detailState = Details()
     public var mainListState = MainList()
+    public var applicationData = ApplicationData()
+
+    init () { }
+
+    init(_ appData: ApplicationData) {
+        self.applicationData = appData
+    }
 
     // Saved data
-    private var _backingList: [MedicineEntry] = []
     public var mainEntryList: [MedicineEntry] {
-        get { return _backingList }
-        set { _backingList = newValue.sorted { $0.date > $1.date } }
-    }
-
-    public init() { }
-
-    public init(from decoder: Decoder) throws {
-        let codedKeys = try decoder.container(keyedBy: AppState.CodingKeys.self)
-        self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: AppState.CodingKeys.self)
-        try container.encode(mainEntryList, forKey: .listState)
-    }
-
-    public static func == (lhs: AppState, rhs: AppState) -> Bool {
-        return lhs.mainEntryList == rhs.mainEntryList
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(mainEntryList)
+        get { return applicationData.mainEntryList }
+        set { applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
     }
 }
 

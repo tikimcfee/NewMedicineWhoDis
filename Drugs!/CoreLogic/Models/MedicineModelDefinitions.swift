@@ -8,28 +8,51 @@
 
 import Foundation
 
-public struct Drug: EquatableFileStorable {
+public struct AvailableDrugList: EquatableFileStorable {
+    var drugs = [Drug]()
 
+    static let defaultDrugs: [Drug] = [
+        Drug("Gabapentin",  [Ingredient("Gabapentin")],     12),
+        Drug("Tylenol",     [Ingredient("Acetaminophen")],  5),
+        Drug("Venlafaxine", [Ingredient("Venlafaxine")],    24),
+        Drug("Dramamine",   [Ingredient("Dimenhydrinate"),], 24),
+        Drug("Excedrin",    [Ingredient("Acetaminophen"),
+                             Ingredient("Aspirin"),
+                             Ingredient("Caffeine")],       5),
+        Drug("Ibuprofen",   [Ingredient("Ibuprofen")],      8),
+        Drug("Omeprazole",  [Ingredient("Omeprazole")],     12),
+        Drug("Melatonin",   [Ingredient("Melatonin")],      24),
+        Drug("Tums",        [Ingredient("Sodium Bicarbonate")], 4),
+        Drug("Vitamins",    [Ingredient("Vitamins")],       0),
+    ]
+}
+
+public struct Drug: EquatableFileStorable, Comparable {
     let drugName: String
     let ingredients: [Ingredient]
     let hourlyDoseTime: Double
-    
-    static func blank(_ name: String? = nil) -> Drug {
-        Drug(
-			drugName: name ?? "<\(UUID.init().uuidString)>",
-            ingredients: [],
-            hourlyDoseTime: 4
-        )
+
+    public init(_ drugName: String,
+                _ ingredients: [Ingredient],
+                _ hourlyDoseTime: Double) {
+        self.drugName = drugName
+        self.ingredients = ingredients
+        self.hourlyDoseTime = hourlyDoseTime
+    }
+
+    static func blank(_ name: String = "<\(UUID.init().uuidString)>") -> Drug {
+        return Drug(name, [], 4)
+    }
+
+    public static func < (lhs: Drug, rhs: Drug) -> Bool {
+        return lhs.drugName < rhs.drugName
     }
 }
 
 public struct Ingredient: EquatableFileStorable {
 
     let ingredientName: String
-
-    init(
-        _ ingredientName: String
-    ) {
+    public init(_ ingredientName: String) {
         self.ingredientName = ingredientName
     }
 }
@@ -40,10 +63,9 @@ public struct MedicineEntry: EquatableFileStorable, Identifiable {
     var date: Date
     var drugsTaken: [Drug:Int]
     public var id: String { return uuid }
-    
     init(
-        date: Date,
-        drugsTaken: [Drug:Int],
+        _ date: Date,
+        _ drugsTaken: [Drug:Int],
         _ uuid: String = UUID.init().uuidString
     ) {
         self.date = date

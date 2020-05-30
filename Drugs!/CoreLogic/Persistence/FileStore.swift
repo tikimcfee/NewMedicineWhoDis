@@ -42,7 +42,7 @@ public class FileStore {
 
     public func saveAppState(_ appState: AppState) -> Error? {
         do {
-            let jsonData = try jsonEncoder.encode(appState)
+            let jsonData = try jsonEncoder.encode(appState.applicationData)
             try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
             return nil
         } catch {
@@ -58,8 +58,9 @@ public class FileStore {
         }
         do {
             let stateData = try Data.init(contentsOf: medicineLogsDefaultFile)
-            let decodedState = try jsonDecoder.decode(AppState.self, from: stateData)
-            return .success(decodedState)
+            let decodedState = try jsonDecoder.decode(ApplicationData.self, from: stateData)
+            let appState = AppState(decodedState)
+            return .success(appState)
         } catch {
             loge { Event(MedicineLogStore.self, "Decoding error : \(error); returning a new CoreAppState", .error) }
             return .failure(error)

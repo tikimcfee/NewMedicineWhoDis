@@ -77,9 +77,8 @@ public final class DefaultDrugList {
         let date = Calendar.current.date(
             byAdding: .hour, value: time, to: Date()
         )!.addingTimeInterval(TimeInterval(minutes))
-        return MedicineEntry(
-            date: date,
-            drugsTaken: Array(drugs[start...end]).reduce(into: [Drug: Int]()) { result, drug in
+        return MedicineEntry(date,
+            Array(drugs[start...end]).reduce(into: [Drug: Int]()) { result, drug in
                 result[drug, default: 0] += Int.random(in: 1...4)
             }
         )
@@ -91,8 +90,8 @@ public final class DefaultDrugList {
 
     lazy var defaultEntry : MedicineEntry = {
         return MedicineEntry(
-            date: Calendar.current.date(byAdding: .hour, value: -12, to: Date())!,
-            drugsTaken: Array(drugs[0...4]).reduce(into: [Drug: Int]()) { result, drug in
+            Calendar.current.date(byAdding: .hour, value: -12, to: Date())!,
+            Array(drugs[0...4]).reduce(into: [Drug: Int]()) { result, drug in
                 result[drug, default: 0] += Int.random(in: 1...4)
             }
         )
@@ -100,83 +99,20 @@ public final class DefaultDrugList {
 
     lazy var drugs: [Drug] = {
         let list = [
-            Drug(
-                drugName: "Gabapentin",
-                ingredients: [
-                    Ingredient("Gabapentin")
-                ],
-                hourlyDoseTime: 12
-            ),
-            Drug(
-                drugName: "Tylenol",
-                ingredients: [
-                    Ingredient("Acetaminophen")
-                ],
-                hourlyDoseTime: 5
-            ),
-            Drug(
-                drugName: "Venlafaxine",
-                ingredients: [
-                    Ingredient("Venlafaxine")
-                ],
-                hourlyDoseTime: 24
-            ),
-            Drug(
-                drugName: "Dramamine",
-                ingredients: [
-                    Ingredient("Dimenhydrinate"),
-                ],
-                hourlyDoseTime: 24
-            ),
-            Drug(
-                drugName: "Excedrin",
-                ingredients: [
-                    Ingredient("Acetaminophen"),
-                    Ingredient("Aspirin"),
-                    Ingredient("Caffeine")
-                ],
-                hourlyDoseTime: 5
-            ),
-            Drug(
-                drugName: "Ibuprofen",
-                ingredients: [
-                    Ingredient("Ibuprofen")
-                ],
-                hourlyDoseTime: 8
-            ),
-            Drug(
-                drugName: "Omeprazole",
-                ingredients: [
-                    Ingredient("Omeprazole")
-                ],
-                hourlyDoseTime: 12
-            ),
-            Drug(
-                drugName: "Melatonin",
-                ingredients: [
-                    Ingredient("Melatonin")
-                ],
-                hourlyDoseTime: 24
-            ),
-            Drug(
-                drugName: "Tums",
-                ingredients: [
-                    Ingredient("Sodium Bicarbonate")
-                ],
-                hourlyDoseTime: 4
-            ),
-            Drug(
-                drugName: "Vitamins",
-                ingredients: [
-                    Ingredient("Vitamins")
-                ],
-                hourlyDoseTime: 0
-            )
+            Drug("Gabapentin",  [Ingredient("Gabapentin")],     12),
+            Drug("Tylenol",     [Ingredient("Acetaminophen")],  5),
+            Drug("Venlafaxine", [Ingredient("Venlafaxine")],    24),
+            Drug("Dramamine",   [Ingredient("Dimenhydrinate"),], 24),
+            Drug("Excedrin",    [Ingredient("Acetaminophen"),
+                                 Ingredient("Aspirin"),
+                                 Ingredient("Caffeine")],       5),
+            Drug("Ibuprofen",   [Ingredient("Ibuprofen")],      8),
+            Drug("Omeprazole",  [Ingredient("Omeprazole")],     12),
+            Drug("Melatonin",   [Ingredient("Melatonin")],      24),
+            Drug("Tums",        [Ingredient("Sodium Bicarbonate")], 4),
+            Drug("Vitamins",    [Ingredient("Vitamins")],       0),
         ]
-
-        return list.sorted { lhs, rhs in
-            return lhs.drugName <= rhs.drugName
-        }
+        return list.sorted()
     }()
 
 }
