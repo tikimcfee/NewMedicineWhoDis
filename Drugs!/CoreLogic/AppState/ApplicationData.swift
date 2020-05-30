@@ -1,7 +1,7 @@
 public struct ApplicationData: EquatableFileStorable {
 
     public enum CodingKeys: CodingKey {
-        case mainEntryList
+        case listState
     }
 
     public var mainEntryList = [MedicineEntry]()
@@ -10,12 +10,12 @@ public struct ApplicationData: EquatableFileStorable {
 
     public init(from decoder: Decoder) throws {
         let codedKeys = try decoder.container(keyedBy: ApplicationData.CodingKeys.self)
-        self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .mainEntryList)
+        self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: ApplicationData.CodingKeys.self)
-        try container.encode(mainEntryList, forKey: .mainEntryList)
+        try container.encode(mainEntryList, forKey: .listState)
     }
 
     public static func == (lhs: ApplicationData, rhs: ApplicationData) -> Bool {
