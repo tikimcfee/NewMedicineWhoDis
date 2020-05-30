@@ -18,7 +18,7 @@ struct AutoCancel: ViewModifier {
         return content
             .onAppear {
                 self.cancellable = self.timer.sink {
-                    print("Refreshing view -> \(self.id)")
+                    logd { Event(self, "Refreshing view -> \(self.id)", .debug) }
                     self.action($0)
                 }
             }

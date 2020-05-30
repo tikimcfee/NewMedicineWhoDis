@@ -9,9 +9,16 @@
 import Foundation
 
 public struct AvailableDrugList: EquatableFileStorable {
-    var drugs = [Drug]()
+    var drugs: [Drug]
 
-    static let defaultDrugs: [Drug] = [
+
+    private init(_ list: [Drug]) {
+        self.drugs = list
+    }
+
+    public static let defaultList = AvailableDrugList(defaultDrugs)
+
+    private static let defaultDrugs: [Drug] = [
         Drug("Gabapentin",  [Ingredient("Gabapentin")],     12),
         Drug("Tylenol",     [Ingredient("Acetaminophen")],  5),
         Drug("Venlafaxine", [Ingredient("Venlafaxine")],    24),

@@ -48,11 +48,6 @@ public struct Details {
 
 public struct MainList {
     public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
-
-    mutating func createEntryFromEditor() -> MedicineEntry {
-        return MedicineEntry(Date(), editorState.inProgressEntry.entryMap)
-
-    }
 }
 
 public struct AppState {
@@ -61,16 +56,15 @@ public struct AppState {
     public var mainListState = MainList()
     public var applicationData = ApplicationData()
 
+    public var mainEntryList: [MedicineEntry] {
+        get { return applicationData.mainEntryList }
+        set { applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
+    }
+
     init () { }
 
     init(_ appData: ApplicationData) {
         self.applicationData = appData
-    }
-
-    // Saved data
-    public var mainEntryList: [MedicineEntry] {
-        get { return applicationData.mainEntryList }
-        set { applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
     }
 }
 
