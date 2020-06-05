@@ -43,16 +43,22 @@ extension Date {
     }
 
     func distanceString(_ date: Date) -> String {
-        let (days, hours, minutes) = timeDifference(from: date)
-
-        if hours == 0 && minutes == 0 {
+        let (_, hours, minutes) = timeDifference(from: date)
+        guard hours > 0 || minutes > 0 else {
             return "No time change"
-        } else {
-            let hoursText = hours != 1 ? "hours" : "hour"
-            let minuteText = minutes != 1 ? "minutes" : "minute"
-            let suffix = self < date ? "later" : "earlier"
-
-            return String(format: "%d %@, %d %@ %@", hours, hoursText, minutes, minuteText, suffix)
         }
+        return ["hour".simplePlural(hours),
+                "minute".simplePlural(minutes)]
+            .filter { $0.count > 0 }
+            .joined(separator: ", ")
+            .appending(self < date ? " later" : " earlier")
+    }
+}
+
+extension String {
+    func simplePlural(_ count: Int) -> String {
+        return count == 0 ? ""
+            : count != 1 ? "\(count) \(self)s"
+            : "\(count) \(self)"
     }
 }

@@ -1,11 +1,3 @@
-//
-//  ApplicationState.swift
-//  Drugs!
-//
-//  Created by Ivan Lugo on 9/8/19.
-//  Copyright © 2019 Ivan Lugo. All rights reserved.
-//
-
 import Foundation
 import Combine
 
@@ -61,10 +53,13 @@ public struct AppState {
         set { applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
     }
 
-    init () { }
+    init () {
+
+    }
 
     init(_ appData: ApplicationData) {
         self.applicationData = appData
+
     }
 }
 
