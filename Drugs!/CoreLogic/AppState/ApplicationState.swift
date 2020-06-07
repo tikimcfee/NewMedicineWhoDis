@@ -22,6 +22,10 @@ extension AppStateError: Identifiable {
 
 public struct Details {
     public var selectedUuid: String? = nil
+    public var haveSelection: Bool {
+        get { return selectedUuid != nil }
+        set { }
+    }
     public var selectedEntry: MedicineEntry = DefaultDrugList.shared.defaultEntry
     public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
 
@@ -35,6 +39,12 @@ public struct Details {
         editorState = DrugEntryEditorState(sourceEntry: entry)
         selectedEntry = entry
         selectedUuid = entry.uuid
+    }
+
+    mutating func removeSelection() {
+        editorState = DrugEntryEditorState.emptyState()
+        selectedEntry = DefaultDrugList.shared.defaultEntry
+        selectedUuid = nil
     }
 }
 
@@ -66,10 +76,5 @@ public struct AppState {
 public extension AppState {
     func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
         return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
-    }
-
-    subscript(index: Int) -> MedicineEntry {
-        get { return mainEntryList[index] }
-        set { mainEntryList[index] = newValue }
     }
 }

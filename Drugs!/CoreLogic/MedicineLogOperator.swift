@@ -69,7 +69,10 @@ fileprivate extension MedicineLogOperator {
         do {
             guard let index = coreAppState.indexFor(medicineEntry)
                 else { throw AppStateError.updateError }
-            coreAppState[index] = medicineEntry
+            coreAppState.applicationData.updateEntryList { list in
+                list[index] = medicineEntry
+                list.sort(by: { $0.date > $1.date })
+            }
             saveAppState(handler)
         } catch {
             handler(.failure(error))

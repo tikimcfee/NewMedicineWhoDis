@@ -10,6 +10,14 @@ public struct ApplicationData: EquatableFileStorable {
 
     public init() { }
 
+    public mutating func updateEntryList(_ handler: (inout [MedicineEntry]) -> Void) {
+        handler(&mainEntryList)
+    }
+
+    public mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
+        handler(&availableDrugList)
+    }
+
     public init(from decoder: Decoder) throws {
         let codedKeys = try decoder.container(keyedBy: ApplicationData.CodingKeys.self)
         self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
