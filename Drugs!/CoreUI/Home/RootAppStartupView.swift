@@ -27,6 +27,10 @@ struct RootDrugView: View {
             medicineList.padding(8)
             drugEntryView
             saveButton.padding(8)
+            NavigationLink(
+                destination: DrugDetailView().onDisappear(perform: { self.medicineOperator.coreAppState.detailState.removeSelection() }),
+                isActive: self.$medicineOperator.coreAppState.detailState.haveSelection
+            ) { EmptyView() }
         }
         .alert(item: $error) { error in
             let message: String
@@ -68,25 +72,20 @@ struct RootDrugView: View {
     }
 
     var list: some View {
-        ForEach(medicineOperator.coreAppState.mainEntryList, id: \.id) { entry in
-            NavigationLink(
-                destination: DrugDetailView(),
-                tag: entry.uuid,
-                selection: self.$medicineOperator.coreAppState.detailState.selectedUuid
-            ) {
-                RootDrugMedicineCell(
-                    drugList: entry.drugList,
-                    dateString: dateFormatterLong.string(from: entry.date)
-                )
+        let data = medicineOperator.coreAppState.mainEntryList
+        return ForEach(data, id: \.id) { entry in
+            VStack {
+                Button(action: { self.medicineOperator.select(entry) }) {
+                    RootDrugMedicineCell(
+                        drugList: entry.drugList,
+                        dateString: dateFormatterLong.string(from: entry.date)
+                    )
+                    .contentShape(Rectangle())
+                    .listRowInsets(EdgeInsets(
+                        top: 4, leading: 8, bottom: 4, trailing: 8
+                    ))
+                }
             }
-            .contentShape(Rectangle())
-            .listRowInsets(EdgeInsets(
-                top: 4, leading: 8, bottom: 4, trailing: 8
-            ))
-            .onTapGesture {
-                self.medicineOperator.select(entry)
-            }
-
         }.onDelete { indices in
             // do not support multi delete yet
             guard indices.count == 1,
