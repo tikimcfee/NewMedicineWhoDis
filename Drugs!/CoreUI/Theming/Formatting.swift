@@ -43,12 +43,13 @@ extension Date {
     }
 
     func distanceString(_ date: Date) -> String {
-        let (_, hours, minutes) = timeDifference(from: date)
-        guard hours > 0 || minutes > 0 else {
+        let (days, hours, minutes) = timeDifference(from: date)
+        guard days > 0 || hours > 0 || minutes > 0 else {
             return "No time change"
         }
-        return ["hour".simplePlural(hours),
-                "minute".simplePlural(minutes)]
+		return ["day".simplePlural(days),
+				"hour".simplePlural(hours),
+				"minute".simplePlural(minutes)]
             .filter { $0.count > 0 }
             .joined(separator: ", ")
             .appending(self < date ? " later" : " earlier")

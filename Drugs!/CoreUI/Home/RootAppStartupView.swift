@@ -48,27 +48,27 @@ struct RootDrugView: View {
     }
 
 	var medicineList: some View {
-        return List {
-            if medicineOperator.coreAppState.mainEntryList.isEmpty {
-                Spacer()
-                Spacer()
-                empty
-            } else {
-                list
-            }
-        }
+		VStack(alignment: .center) {
+			if medicineOperator.coreAppState.mainEntryList.isEmpty {
+				Spacer()
+				empty
+				Spacer()
+			} else {
+				List { list }
+			}
+		}
 	}
 
     var empty: some View {
-        return HStack(alignment: .center)  {
-            Spacer()
-            Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
-                .fontWeight(.light)
-                .font(.callout)
-                .italic()
-                .multilineTextAlignment(.center)
-            Spacer()
-        }
+		HStack(alignment: .center)  {
+			Spacer()
+			Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
+				.fontWeight(.light)
+				.font(.callout)
+				.italic()
+				.multilineTextAlignment(.center)
+			Spacer()
+		}
     }
 
     var list: some View {
@@ -80,10 +80,8 @@ struct RootDrugView: View {
                         drugList: entry.drugList,
                         dateString: dateFormatterLong.string(from: entry.date)
                     )
-                    .contentShape(Rectangle())
-                    .listRowInsets(EdgeInsets(
-                        top: 4, leading: 8, bottom: 4, trailing: 8
-                    ))
+                    
+                    
                 }
             }
         }.onDelete { indices in
