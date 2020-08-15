@@ -20,6 +20,32 @@ extension AppStateError: Identifiable {
 
 // =================================
 
+public struct EditedDrug {
+    let sourceDrug: Drug
+    let updatedDrug: Drug
+}
+
+public struct InProgressDrugEdit {
+    var targetDrug: Drug = Drug("Some New Drug", [], 4) {
+        didSet {
+            updatedName = ""
+            updatedDoseTime = 4
+            updatedIngredients = []
+        }
+    }
+    var updatedName: String = ""
+    var updatedDoseTime: Double = 4
+    var updatedIngredients: [Ingredient] = []
+
+    var hasChanged: Bool {
+        return targetDrug != Drug(updatedName, updatedIngredients, updatedDoseTime)
+    }
+}
+
+public struct DrugListEdit {
+    var inProgressEdit = InProgressDrugEdit()
+}
+
 public struct Details {
     public var selectedUuid: String? = nil
     public var haveSelection: Bool {
@@ -57,6 +83,7 @@ public struct AppState {
     public var detailState = Details()
     public var mainListState = MainList()
     public var applicationData = ApplicationData()
+    public var drugListEdit = DrugListEdit()
 
     public var mainEntryList: [MedicineEntry] {
         get { return applicationData.mainEntryList }

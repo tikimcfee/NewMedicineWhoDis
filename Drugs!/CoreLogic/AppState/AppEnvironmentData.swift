@@ -2,13 +2,17 @@ import Foundation
 import Combine
 import SwiftUI
 
-struct AppEnvironmentKeyDetailsState
-    : EnvironmentKey { static let defaultValue = Details() }
-struct AppEnvironmentKeyMainListState
-    : EnvironmentKey { static let defaultValue = MainList() }
+struct CustomEnvironmentKey {
+    struct DetailsState: EnvironmentKey {
+        static let defaultValue = Details()
+    }
+    struct ListState: EnvironmentKey {
+        static let defaultValue = MainList()
+    }
+}
 
-private typealias DetailKey = AppEnvironmentKeyDetailsState
-private typealias MainListKey = AppEnvironmentKeyMainListState
+private typealias DetailKey = CustomEnvironmentKey.DetailsState
+private typealias MainListKey = CustomEnvironmentKey.ListState
 
 extension EnvironmentValues {
     var detailsState: Details {
@@ -19,18 +23,6 @@ extension EnvironmentValues {
     var mainListState: MainList {
         get { self[MainListKey.self] }
         set { self[MainListKey.self] = newValue }
-    }
-}
-
-struct MedicineEntryKeyPaths {
-    var drugMapPath: WritableKeyPath<MedicineEntry, [Drug:Int]>
-    var datePath: WritableKeyPath<MedicineEntry, Date>
-}
-
-struct SomeView: View {
-    @Environment(\.detailsState) var detailsState: Details
-    var body: some View {
-        return Text("Hello")
     }
 }
 

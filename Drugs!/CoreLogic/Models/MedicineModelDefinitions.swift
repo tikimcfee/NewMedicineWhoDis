@@ -11,7 +11,6 @@ import Foundation
 public struct AvailableDrugList: EquatableFileStorable {
     var drugs: [Drug]
 
-
     private init(_ list: [Drug]) {
         self.drugs = list
     }
@@ -35,9 +34,9 @@ public struct AvailableDrugList: EquatableFileStorable {
 }
 
 public struct Drug: EquatableFileStorable, Comparable {
-    let drugName: String
-    let ingredients: [Ingredient]
-    let hourlyDoseTime: Double
+    private(set) var drugName: String
+    private(set) var ingredients: [Ingredient]
+    private(set) var hourlyDoseTime: Double
 
     public init(_ drugName: String,
                 _ ingredients: [Ingredient],
@@ -53,6 +52,18 @@ public struct Drug: EquatableFileStorable, Comparable {
 
     public static func < (lhs: Drug, rhs: Drug) -> Bool {
         return lhs.drugName < rhs.drugName
+    }
+
+    mutating func update(name: String) {
+        self.drugName = name
+    }
+
+    mutating func update(ingredients: [Ingredient]) {
+        self.ingredients = ingredients
+    }
+
+    mutating func update(doseTime: Double) {
+        self.hourlyDoseTime = doseTime
     }
 }
 
