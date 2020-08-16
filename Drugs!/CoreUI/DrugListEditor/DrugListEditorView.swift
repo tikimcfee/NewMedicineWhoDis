@@ -23,7 +23,7 @@ struct AsButtonMod: ViewModifier {
 
 struct DrugListEditorView: View {
 
-    @EnvironmentObject var medicineLogOperator: MedicineLogOperator
+    @EnvironmentObject var medicineLogOperator: MedicineLogDataManager
 
     var body: some View {
         return VStack(spacing: 0) {

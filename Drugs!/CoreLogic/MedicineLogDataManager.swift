@@ -1,19 +1,19 @@
 import Foundation
 import SwiftUI
 
-public class MedicineLogOperator: ObservableObject {
+public class MedicineLogDataManager: ObservableObject {
 
     @Published var coreAppState: AppState
     var details: Details { return coreAppState.detailState }
     var mainList: MainList { return coreAppState.mainListState }
 
-    private let medicineStore: MedicineLogStore
+    private let medicineStore: MedicineLogFileStore
     private let mainQueue = DispatchQueue.main
 	private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
                                                qos: .userInteractive)
     
     init(
-        medicineStore: MedicineLogStore,
+        medicineStore: MedicineLogFileStore,
         coreAppState: AppState 
     ) {
         self.medicineStore = medicineStore
@@ -24,7 +24,7 @@ public class MedicineLogOperator: ObservableObject {
         id: String,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        coreAppState.mainEntryList.removeAll { $0.uuid == id }
+        coreAppState.applicationDataState.applicationData.mainEntryList.removeAll { $0.uuid == id }
         saveAppState(handler)
     }
 
@@ -32,7 +32,7 @@ public class MedicineLogOperator: ObservableObject {
         medicineEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        coreAppState.mainEntryList.insert(medicineEntry, at: 0)
+        coreAppState.applicationDataState.applicationData.mainEntryList.insert(medicineEntry, at: 0)
         saveAppState(handler)
     }
 
@@ -55,7 +55,7 @@ public class MedicineLogOperator: ObservableObject {
     }
 }
 
-fileprivate extension MedicineLogOperator {
+fileprivate extension MedicineLogDataManager {
     func updateEntry(
         _ medicineEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void

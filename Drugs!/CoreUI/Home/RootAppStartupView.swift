@@ -18,7 +18,7 @@ struct RootAppStartupView: View {
 
 struct RootDrugView: View {
 	
-    @EnvironmentObject private var medicineOperator : MedicineLogOperator
+    @EnvironmentObject private var medicineOperator : MedicineLogDataManager
     @State private var error: AppStateError? = nil
     @State private var inProgressEntry = InProgressEntry()
 
@@ -49,7 +49,7 @@ struct RootDrugView: View {
 
 	var medicineList: some View {
 		VStack(alignment: .center) {
-			if medicineOperator.coreAppState.mainEntryList.isEmpty {
+            if medicineOperator.coreAppState.applicationDataState.applicationData.mainEntryList.isEmpty {
 				Spacer()
 				empty
 				Spacer()
@@ -72,7 +72,7 @@ struct RootDrugView: View {
     }
 
     var list: some View {
-        let data = medicineOperator.coreAppState.mainEntryList
+        let data = medicineOperator.coreAppState.applicationDataState.applicationData.mainEntryList
         return ForEach(data, id: \.id) { entry in
             VStack {
                 Button(action: { self.medicineOperator.select(entry) }) {

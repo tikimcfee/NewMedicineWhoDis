@@ -70,7 +70,7 @@ extension View {
 
 struct DrugEntryEditorView: View {
 	
-	@EnvironmentObject private var medicineOperator : MedicineLogOperator
+	@EnvironmentObject private var medicineOperator : MedicineLogDataManager
 	@State var selectedDate: Date = Date()
 	
 	var body: some View {

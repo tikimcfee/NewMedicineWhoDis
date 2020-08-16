@@ -10,7 +10,7 @@ private extension AvailabilityInfo {
 
 struct DrugSelectionListView: View {
 
-    @EnvironmentObject var logOperator: MedicineLogOperator
+    @EnvironmentObject var logOperator: MedicineLogDataManager
     @Binding var inProgressEntry: InProgressEntry
     @Binding var currentSelectedDrug: Drug?
     @State var refreshDate: Date = Date()
@@ -23,7 +23,7 @@ struct DrugSelectionListView: View {
     }
 
     private var drugCells: some View {
-        let info = logOperator.coreAppState.mainEntryList.availabilityInfo(refreshDate)
+        let info = logOperator.coreAppState.applicationDataState.applicationData.mainEntryList.availabilityInfo(refreshDate)
         return ForEach(DefaultDrugList.shared.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
                 inProgressEntry: self.$inProgressEntry,

@@ -1,6 +1,6 @@
 import Foundation
 
-public class MedicineLogStore {
+public class MedicineLogFileStore {
 
     private let filestore = FileStore()
 

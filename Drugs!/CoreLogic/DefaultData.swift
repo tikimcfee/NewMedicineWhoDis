@@ -117,8 +117,8 @@ public final class DefaultDrugList {
 
 }
 
-public func makeTestMedicineOperator() -> MedicineLogOperator {
-    let medicineStore = MedicineLogStore()
+public func makeTestMedicineOperator() -> MedicineLogDataManager {
+    let medicineStore = MedicineLogFileStore()
     var loaded: AppState? = nil
     medicineStore.load {
         switch $0 {
@@ -128,7 +128,7 @@ public func makeTestMedicineOperator() -> MedicineLogOperator {
             loaded = AppState()
         }
     }
-    return MedicineLogOperator(
+    return MedicineLogDataManager(
         medicineStore: medicineStore,
         coreAppState: loaded ?? AppState()
     )

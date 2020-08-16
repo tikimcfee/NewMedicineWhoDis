@@ -21,30 +21,22 @@ extension AppStateError: Identifiable {
 
 // =================================
 
-public struct DrugListEdit {
-    var inProgressEdit = InProgressDrugEdit()
-}
-
-public struct MainList {
-    public var editorState: DrugEntryEditorState = DrugEntryEditorState.emptyState()
-}
-
 public struct ApplicationDataState {
     @State public var applicationData = ApplicationData()
 }
 
-public struct AppState {
+public final class AppState: ObservableObject {
 
-    @State public var detailState = Details()
-    @State public var mainListState = MainList()
-    @State public var drugListEditState = DrugListEdit()
+    @Published public var applicationDataState = ApplicationDataState()
 
-    @State public var applicationDataState = ApplicationDataState()
+    @Published public var detailState = Details()
+    @Published public var mainListState = MainList()
+    @Published public var drugListEditState = DrugListEdit()
 
-    public var mainEntryList: [MedicineEntry] {
-        get { return applicationDataState.applicationData.mainEntryList }
-        set { applicationDataState.applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
-    }
+//    public var mainEntryList: [MedicineEntry] {
+//        get { return applicationDataState.applicationData.mainEntryList }
+//        set { applicationDataState.applicationData.mainEntryList = newValue.sorted { $0.date > $1.date } }
+//    }
 
     init () { }
 
@@ -55,6 +47,7 @@ public struct AppState {
 
 public extension AppState {
     func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
-        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
+//        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
+        return nil
     }
 }

@@ -32,9 +32,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window!.overrideUserInterfaceStyle = .light
         }
 
-		let log = MedicineLogStore()
+		let log = MedicineLogFileStore()
         let appStateLoadResult = log.load().appState
-        let appOperator = MedicineLogOperator(medicineStore: log, coreAppState: appStateLoadResult)
+        let appOperator = MedicineLogDataManager(medicineStore: log, coreAppState: appStateLoadResult)
         let contentView = RootAppStartupView()
             .environmentObject(appOperator)
 

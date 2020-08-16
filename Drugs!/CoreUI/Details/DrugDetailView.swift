@@ -2,10 +2,10 @@ import SwiftUI
 
 struct DrugDetailView: View {
 
-    @EnvironmentObject var medicineLogOperator: MedicineLogOperator
+    @EnvironmentObject var medicineLogOperator: MedicineLogDataManager
 
     var body: some View {
-        let info = medicineLogOperator.coreAppState.mainEntryList.availabilityInfo()
+        let info = medicineLogOperator.coreAppState.applicationDataState.applicationData.mainEntryList.availabilityInfo()
         let data: [DetailEntryModel] = medicineLogOperator.coreAppState.detailState.selectedEntry.toDetailEntryModels(info)
 
         let count = data.count
