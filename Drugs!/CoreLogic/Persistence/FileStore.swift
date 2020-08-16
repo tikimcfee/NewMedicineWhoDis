@@ -46,9 +46,9 @@ public class FileStore {
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
 
-    public func saveAppState(_ appState: AppState) -> Error? {
+    public func saveApplicationData(_ appData: ApplicationData) -> Error? {
         do {
-            let jsonData = try jsonEncoder.encode(appState.applicationDataState.applicationData)
+            let jsonData = try jsonEncoder.encode(appData)
             try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
             return nil
         } catch {
@@ -57,16 +57,15 @@ public class FileStore {
         }
     }
 
-    public func loadAppState() -> Result<AppState, Error> {
+    public func loadApplicationData() -> Result<ApplicationData, Error> {
         guard medicineLogsDefaultFile.hasData else {
             logd { Event(MedicineLogFileStore.self, "No existing logs; creating new CoreAppState") }
-            return .success(AppState())
+            return .success(ApplicationData())
         }
         do {
-            let stateData = try Data.init(contentsOf: medicineLogsDefaultFile)
-            let decodedState = try jsonDecoder.decode(ApplicationData.self, from: stateData)
-            let appState = AppState(decodedState)
-            return .success(appState)
+            let appData = try Data.init(contentsOf: medicineLogsDefaultFile)
+            let decodedData = try jsonDecoder.decode(ApplicationData.self, from: appData)
+            return .success(decodedData)
         } catch {
             loge { Event(MedicineLogFileStore.self, "Decoding error : \(error); returning a new CoreAppState", .error) }
             return .failure(error)

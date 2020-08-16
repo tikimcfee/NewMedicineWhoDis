@@ -22,16 +22,16 @@ extension AppStateError: Identifiable {
 // =================================
 
 public struct ApplicationDataState {
-    @State public var applicationData = ApplicationData()
+    public var applicationData = ApplicationData()
 }
 
 public final class AppState: ObservableObject {
 
     @Published public var applicationDataState = ApplicationDataState()
 
-    @Published public var detailState = Details()
-    @Published public var mainListState = MainList()
-    @Published public var drugListEditState = DrugListEdit()
+//    @Published public var detailState = Details()
+//    @Published public var mainListState = MainList()
+//    @Published public var drugListEditState = DrugListEdit()
 
 //    public var mainEntryList: [MedicineEntry] {
 //        get { return applicationDataState.applicationData.mainEntryList }
@@ -42,12 +42,5 @@ public final class AppState: ObservableObject {
 
     init(_ appData: ApplicationData) {
         self.applicationDataState = ApplicationDataState(applicationData: appData)
-    }
-}
-
-public extension AppState {
-    func indexFor(_ medicineEntry: MedicineEntry) -> Int? {
-//        return mainEntryList.firstIndex(where: { $0.uuid == medicineEntry.uuid })
-        return nil
     }
 }

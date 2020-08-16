@@ -8,28 +8,45 @@ private extension AvailabilityInfo {
     }
 }
 
+final class DrugSelectionListViewState: ObservableObject {
+    private let dataManager: MedicineLogDataManager
+    private var cancellables = Set<AnyCancellable>()
+
+    @Published var currentInfo = AvailabilityInfo()
+    var currentSelectedDrug: Binding<Drug?>
+    var inProgressEntry: Binding<InProgressEntry>
+
+    init(_ dataManager: MedicineLogDataManager,
+         _ selectionBinding: Binding<Drug?>,
+         _ inProgressBinding: Binding<InProgressEntry>) {
+        self.dataManager = dataManager
+        self.currentSelectedDrug = selectionBinding
+        self.inProgressEntry = inProgressBinding
+
+        // Start publishing data
+        dataManager.availabilityInfoStream
+            .receive(on: RunLoop.main)
+            .assign(to: \.currentInfo, on: self)
+            .store(in: &cancellables)
+    }
+}
+
 struct DrugSelectionListView: View {
 
-    @EnvironmentObject var logOperator: MedicineLogDataManager
-    @Binding var inProgressEntry: InProgressEntry
-    @Binding var currentSelectedDrug: Drug?
-    @State var refreshDate: Date = Date()
-    private let drugList = DefaultDrugList.shared.drugs
+    @EnvironmentObject var viewState: DrugSelectionListViewState
 
     var body: some View {
         return List { drugCells }
             .environment(\.defaultMinListRowHeight, 0)
-            .refreshTimer { self.refreshDate = $0 }
     }
 
     private var drugCells: some View {
-        let info = logOperator.coreAppState.applicationDataState.applicationData.mainEntryList.availabilityInfo(refreshDate)
         return ForEach(DefaultDrugList.shared.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
-                inProgressEntry: self.$inProgressEntry,
-                currentSelectedDrug: self.$currentSelectedDrug,
+                inProgressEntry: self.viewState.inProgressEntry,
+                currentSelectedDrug: self.viewState.currentSelectedDrug,
                 trackedDrug: drug,
-                canTake: info.canTake(drug)
+                canTake: self.viewState.currentInfo.canTake(drug)
             )
         }.listRowInsets(
             EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
@@ -42,10 +59,13 @@ struct DrugSelectionListView: View {
 struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
-            DrugSelectionListView(
-                inProgressEntry: DefaultDrugList.$inProgressEntry,
-                currentSelectedDrug: DefaultDrugList.drugBinding()
-            ).environmentObject(makeTestMedicineOperator())
+            DrugSelectionListView().environmentObject(
+                DrugSelectionListViewState(
+                    makeTestMedicineOperator(),
+                    DefaultDrugList.drugBinding(),
+                    DefaultDrugList.$inProgressEntry
+                )
+            )
         }
     }
 }

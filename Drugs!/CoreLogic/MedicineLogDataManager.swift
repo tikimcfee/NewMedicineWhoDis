@@ -1,83 +1,98 @@
 import Foundation
 import SwiftUI
+import Combine
 
 public class MedicineLogDataManager: ObservableObject {
 
-    @Published var coreAppState: AppState
-    var details: Details { return coreAppState.detailState }
-    var mainList: MainList { return coreAppState.mainListState }
-
     private let medicineStore: MedicineLogFileStore
+    @Published private var appData: ApplicationData
+
     private let mainQueue = DispatchQueue.main
-	private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
+    private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
                                                qos: .userInteractive)
+
+    // todo: maybe make a 'lastSaveError'
     
     init(
         medicineStore: MedicineLogFileStore,
-        coreAppState: AppState 
+        appData: ApplicationData
     ) {
         self.medicineStore = medicineStore
-        self.coreAppState = coreAppState
+        self.appData = appData
     }
 
     func removeEntry(
         id: String,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        coreAppState.applicationDataState.applicationData.mainEntryList.removeAll { $0.uuid == id }
-        saveAppState(handler)
+        appData.updateEntryList{ list in
+            list.removeAll{ $0.uuid == id }
+        }
+        saveAndNotify(handler)
     }
 
     func addEntry(
         medicineEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        coreAppState.applicationDataState.applicationData.mainEntryList.insert(medicineEntry, at: 0)
-        saveAppState(handler)
-    }
-
-    func detailsView__saveEditorState(
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        let updatedEntry = coreAppState.detailState.saveEdits()
-        updateEntry(updatedEntry) { result in
-            switch result {
-            case .success:
-                self.saveAppState(handler)
-            case .failure:
-                handler(result)
-            }
+        appData.updateEntryList{ list in
+            list.insert(medicineEntry, at: 0)
         }
+        saveAndNotify(handler)
     }
 
-    func select(_ entry: MedicineEntry) {
-        coreAppState.detailState.setSelected(entry)
-    }
-}
-
-fileprivate extension MedicineLogDataManager {
     func updateEntry(
-        _ medicineEntry: MedicineEntry,
+        updatedEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         do {
-            guard let index = coreAppState.indexFor(medicineEntry)
+            guard let index = appData.medicineListIndexFor(updatedEntry.id)
                 else { throw AppStateError.updateError }
-            coreAppState.applicationDataState.applicationData.updateEntryList { list in
-                list[index] = medicineEntry
-                list.sort(by: { $0.date > $1.date })
+            appData.updateEntryList{ list in
+                list[index] = updatedEntry
+                list.sort(by: sortEntriesNewestOnTop)
             }
-            saveAppState(handler)
+            saveAndNotify(handler)
         } catch {
             handler(.failure(error))
         }
     }
+}
 
-    func saveAppState(
+extension MedicineLogDataManager {
+
+    var mainEntryListStream: AnyPublisher<[MedicineEntry], Never> {
+        return $appData
+            .map{ $0.mainEntryList }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
+        // Start publishing data
+        let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect().eraseToAnyPublisher()
+        return Publishers.CombineLatest
+            .init(timer, mainEntryListStream)
+            .map{ (updateInterval, list) in
+                list.availabilityInfo(updateInterval)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    var drugListStream: AnyPublisher<AvailableDrugList, Never> {
+        return $appData
+            .map{ $0.availableDrugList }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+}
+
+private extension MedicineLogDataManager {
+    func saveAndNotify(
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         saveQueue.async {
-            self.medicineStore.save(appState: self.coreAppState) { result in
+            self.medicineStore.save(applicationData: self.appData) { result in
                 self.notifyHandler(result, handler)
             }
         }
@@ -93,4 +108,9 @@ fileprivate extension MedicineLogDataManager {
     }
 }
 
+
+// MARK: Default on-save-sorting. This might be a terrible idea.
+private func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
+    return left.date > right.date
+}
 

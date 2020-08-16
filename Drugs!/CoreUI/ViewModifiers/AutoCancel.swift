@@ -16,13 +16,20 @@ struct AutoCancel: ViewModifier {
 
     func body(content: Content) -> some View {
         return content
-            .onAppear {
-                self.cancellable = self.timer.sink {
-                    logd { Event(self, "Refreshing view -> \(self.id)", .debug) }
-                    self.action($0)
-                }
-            }
-            .onDisappear { self.cancellable?.cancel() }
+            .onAppear(perform: setCancellable)
+            .onDisappear(perform: unsetCancellable)
+    }
+
+    private func setCancellable() {
+        cancellable = timer.sink {
+            logd { Event(self, "Refreshing view -> \(id)", .debug) }
+            action($0)
+        }
+    }
+
+    private func unsetCancellable() {
+        cancellable?.cancel()
+        cancellable = nil
     }
 }
 

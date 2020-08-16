@@ -41,6 +41,10 @@ extension ApplicationData {
     public mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
         handler(&availableDrugList)
     }
+
+    public func medicineListIndexFor(_ id: String) -> Int? {
+        return mainEntryList.firstIndex(where: { $0.id == id })
+    }
 }
 
 // MARK: - Helper for simpler handling of decoding keys
