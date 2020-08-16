@@ -5,27 +5,15 @@ public struct ApplicationData: EquatableFileStorable {
         case availableDrugList
     }
 
-    public var mainEntryList = [MedicineEntry]()
-    public var availableDrugList = AvailableDrugList.defaultList
+    public var mainEntryList: [MedicineEntry] = []
+    public var availableDrugList: AvailableDrugList = .defaultList
 
     public init() { }
 
-    public mutating func updateEntryList(_ handler: (inout [MedicineEntry]) -> Void) {
-        handler(&mainEntryList)
-    }
-
-    public mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
-        handler(&availableDrugList)
-    }
-
     public init(from decoder: Decoder) throws {
         let codedKeys = try decoder.container(keyedBy: ApplicationData.CodingKeys.self)
-        self.mainEntryList = try codedKeys.decode(Array<MedicineEntry>.self, forKey: .listState)
-        do {
-            self.availableDrugList = try codedKeys.decode(AvailableDrugList.self, forKey: .availableDrugList)
-        } catch {
-            logd { Event("AppDataInit", "Couldn't load drug list; reverting to default; \(error)", .debug) }
-        }
+        self.mainEntryList = codedKeys.decodedEntryList
+        self.availableDrugList = codedKeys.decodedDrugList
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -43,5 +31,26 @@ public struct ApplicationData: EquatableFileStorable {
         hasher.combine(mainEntryList)
         hasher.combine(availableDrugList)
     }
+}
 
+extension ApplicationData {
+    public mutating func updateEntryList(_ handler: (inout [MedicineEntry]) -> Void) {
+        handler(&mainEntryList)
+    }
+
+    public mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
+        handler(&availableDrugList)
+    }
+}
+
+// MARK: - Helper for simpler handling of decoding keys
+extension KeyedDecodingContainer where Key == ApplicationData.CodingKeys {
+    var decodedEntryList: [MedicineEntry] {
+        return (try? decode(Array<MedicineEntry>.self, forKey: .listState))
+            ?? []
+    }
+    var decodedDrugList: AvailableDrugList {
+        return (try? decode(AvailableDrugList.self, forKey: .availableDrugList))
+            ?? AvailableDrugList.defaultList
+    }
 }

@@ -55,11 +55,11 @@ struct DrugListEditorView: View {
                         Spacer()
                         Image.init(systemName: "pencil")
                             .padding(4)
-                            .bordingBorder
+                            .boringBorder
                             .asButton {
                                 self.medicineLogOperator
                                     .coreAppState
-                                    .drugListEdit
+                                    .drugListEditState
                                     .inProgressEdit
                                     .targetDrug = drug
                             }
@@ -67,7 +67,7 @@ struct DrugListEditorView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(4)
-                    .bordingBorder
+                    .boringBorder
                 }
             }.padding(.horizontal, 16.0)
         }
@@ -91,7 +91,7 @@ struct DrugListEditorView: View {
 
 private extension DrugListEditorView {
     var editState: DrugListEdit {
-        return medicineLogOperator.coreAppState.drugListEdit
+        return medicineLogOperator.coreAppState.drugListEditState
     }
 
     var currentDrugName: String {
@@ -99,11 +99,11 @@ private extension DrugListEditorView {
     }
 
     var inProgressEdit: Binding<InProgressDrugEdit> {
-        return $medicineLogOperator.coreAppState.drugListEdit.inProgressEdit
+        return $medicineLogOperator.coreAppState.drugListEditState.inProgressEdit
     }
 
     var drugList: [Drug] {
-        return medicineLogOperator.coreAppState.applicationData.availableDrugList.drugs.sorted()
+        return medicineLogOperator.coreAppState.applicationDataState.applicationData.availableDrugList.drugs.sorted()
     }
 }
 

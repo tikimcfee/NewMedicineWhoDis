@@ -56,12 +56,6 @@ public class MedicineLogOperator: ObservableObject {
 }
 
 fileprivate extension MedicineLogOperator {
-    func emit() {
-        DispatchQueue.main.async { [weak self] in
-            self?.objectWillChange.send()
-        }
-    }
-
     func updateEntry(
         _ medicineEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
@@ -69,7 +63,7 @@ fileprivate extension MedicineLogOperator {
         do {
             guard let index = coreAppState.indexFor(medicineEntry)
                 else { throw AppStateError.updateError }
-            coreAppState.applicationData.updateEntryList { list in
+            coreAppState.applicationDataState.applicationData.updateEntryList { list in
                 list[index] = medicineEntry
                 list.sort(by: { $0.date > $1.date })
             }
@@ -98,3 +92,5 @@ fileprivate extension MedicineLogOperator {
         }
     }
 }
+
+

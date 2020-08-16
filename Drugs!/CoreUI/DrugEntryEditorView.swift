@@ -55,7 +55,7 @@ struct BoringBorder: ViewModifier {
 }
 
 extension View {
-	var bordingBorder: some View {
+	var boringBorder: some View {
 		return modifier(BoringBorder())
 	}
 	
@@ -119,7 +119,7 @@ struct DrugEntryEditorView: View {
 				.font(.subheadline)
 				.padding(.horizontal, 24)
 				.frame(width: 196)
-				.bordingBorder
+				.boringBorder
 		}
 	}
 	

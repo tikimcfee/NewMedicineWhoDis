@@ -54,7 +54,7 @@ struct RootDrugView: View {
 				empty
 				Spacer()
 			} else {
-				List { list }
+				LazyVStack { list }
 			}
 		}
 	}
@@ -80,20 +80,6 @@ struct RootDrugView: View {
                         drugList: entry.drugList,
                         dateString: dateFormatterLong.string(from: entry.date)
                     )
-                    
-                    
-                }
-            }
-        }.onDelete { indices in
-            // do not support multi delete yet
-            guard indices.count == 1,
-                let index = indices.first
-                else { return }
-
-            let id = self.medicineOperator.coreAppState.mainEntryList[index].uuid
-            self.medicineOperator.removeEntry(id: id) { result in
-                if case let .failure(removeError) = result {
-                    self.error = .removError(cause: removeError)
                 }
             }
         }

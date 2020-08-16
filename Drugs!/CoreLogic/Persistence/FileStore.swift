@@ -48,7 +48,7 @@ public class FileStore {
 
     public func saveAppState(_ appState: AppState) -> Error? {
         do {
-            let jsonData = try jsonEncoder.encode(appState.applicationData)
+            let jsonData = try jsonEncoder.encode(appState.applicationDataState.applicationData)
             try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
             return nil
         } catch {
