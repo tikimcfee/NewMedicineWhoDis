@@ -84,7 +84,7 @@ public class MedicineLogDataManager: ObservableObject {
         Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)
             .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
-                print(updateInterval)
+                logd { Event("Publishing refresh time \(updateInterval)", .debug) }
                 return list.availabilityInfo(updateInterval, drugs)
             }
             .eraseToAnyPublisher()
@@ -117,4 +117,3 @@ private extension MedicineLogDataManager {
 private func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
     return left.date > right.date
 }
-

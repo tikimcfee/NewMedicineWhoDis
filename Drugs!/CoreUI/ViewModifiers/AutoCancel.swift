@@ -22,7 +22,7 @@ struct AutoCancel: ViewModifier {
 
     private func setCancellable() {
         cancellable = timer.sink {
-            logd { Event(self, "Refreshing view -> \(id)", .debug) }
+            logd { Event("Refreshing view -> \(id)", .debug) }
             action($0)
         }
     }

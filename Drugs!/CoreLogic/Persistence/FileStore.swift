@@ -52,14 +52,14 @@ public class FileStore {
             try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
             return nil
         } catch {
-            loge { Event(MedicineLogFileStore.self, "Encoding error : \(error)", .error) }
+            loge { Event("Encoding error : \(error)", .error) }
             return error
         }
     }
 
     public func loadApplicationData() -> Result<ApplicationData, Error> {
         guard medicineLogsDefaultFile.hasData else {
-            logd { Event(MedicineLogFileStore.self, "No existing logs; creating new CoreAppState") }
+            logd { Event("No existing logs; creating new CoreAppState") }
             return .success(ApplicationData())
         }
         do {
@@ -67,7 +67,7 @@ public class FileStore {
             let decodedData = try jsonDecoder.decode(ApplicationData.self, from: appData)
             return .success(decodedData)
         } catch {
-            loge { Event(MedicineLogFileStore.self, "Decoding error : \(error); returning a new CoreAppState", .error) }
+            loge { Event("Decoding error : \(error); returning a new CoreAppState", .error) }
             return .failure(error)
         }
     }

@@ -11,7 +11,9 @@ import Foundation
 let APP_EVENTS = AppEvents()
 
 public func eTag(_ object: Any?) -> String {
-	return String(describing: type(of: object))
+    guard case let .some(thing) = object
+        else { return "" }
+	return String(describing: thing)
 }
 
 public enum Criticality: String {
@@ -24,20 +26,19 @@ public struct Event: CustomStringConvertible {
 	let criticality: Criticality
 	
 	init (
-		_ tagObject: Any? = nil,
 		_ message: String = "",
-		_ criticality: Criticality = .debug
+        _ criticality: Criticality = .debug,
+        _ tag: String = #file
 	) {
-		self.tag = eTag(tagObject)
+		self.tag = URL(fileURLWithPath: tag).lastPathComponent
 		self.message = message
 		self.criticality = criticality
 	}
 	
 	public var description: String {
-		return "["
-			+ "\(tag).."
-			+ "\(criticality.rawValue)"
-			+ "]::\(message)"
+		return "(\(criticality.rawValue))"
+			+ " \(tag)"
+			+ " --| \(message)"
 	}
 }
 
@@ -57,8 +58,10 @@ public func loge(_ event: () -> Event) {
 	out(event)
 }
 
+import OSLog
 fileprivate func out(_ event: () -> Event) {
 	let theEvent = event()
 	AppEvents.add(theEvent)
 	print(theEvent)
+
 }

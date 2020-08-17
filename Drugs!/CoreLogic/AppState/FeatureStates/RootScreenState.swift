@@ -41,7 +41,7 @@ public final class RootScreenState: ObservableObject {
     func deleteEntry(at index: Int) {
         guard index < currentEntries.count else { return }
         dataManager.removeEntry(id: currentEntries[index].id) { result in
-            logd { Event(RootDrugView.self, "Deleted entry at \(index)", .debug) }
+            logd { Event("Deleted entry at \(index)", .debug) }
         }
     }
 
@@ -50,7 +50,7 @@ public final class RootScreenState: ObservableObject {
         let hasEntries = drugMap.count > 0
         let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
         guard hasEntries && hasNonZeroEntries else {
-            logd { Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
+            logd { Event("Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
             return
         }
 

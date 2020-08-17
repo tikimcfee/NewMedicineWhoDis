@@ -1,8 +1,9 @@
-import Foundation
+import Combine
 import SwiftUI
 
 public final class DrugEntryEditorState: ObservableObject {
     private let dataManager: MedicineLogDataManager
+    private var cancellables = Set<AnyCancellable>()
 
     @Published public var editorIsVisible: Bool = false
     @Published public var entryPadState: DrugSelectionPadViewState
@@ -17,6 +18,10 @@ public final class DrugEntryEditorState: ObservableObject {
     public init(dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
         self.entryPadState = DrugSelectionPadViewState(dataManager: dataManager)
+
+        entryPadState.$inProgressEntry
+            .assign(to: \.inProgressEntry, on: self)
+            .store(in: &cancellables)
 	}
 
     func saveEdits() {
@@ -99,12 +104,12 @@ struct DrugEntryEditorView: View {
 	private var timePicker: some View {
 		VStack {
 			DatePicker(
-				selection: entryBinding.date,
+                selection: $editorState.inProgressEntry.date,
 				displayedComponents: .init(arrayLiteral: .date,.hourAndMinute),
 				label: { EmptyView() }
 			).labelsHidden()
-			.frame(height: 128)
-			.clipped()
+			.frame(height: 64)
+//			.clipped()
 		}
 	}
 	
@@ -112,9 +117,6 @@ struct DrugEntryEditorView: View {
 
 // Data
 extension DrugEntryEditorView {
-    var entryBinding: Binding<InProgressEntry> {
-        return $editorState.inProgressEntry
-    }
 
     var errorBinding: Binding<AppStateError?> {
         return $editorState.editorError
@@ -122,7 +124,7 @@ extension DrugEntryEditorView {
 
     var distance: String {
         return editorState.sourceEntry.date
-            .distanceString(entryBinding.date.wrappedValue)
+            .distanceString($editorState.inProgressEntry.date.wrappedValue)
     }
 }
 

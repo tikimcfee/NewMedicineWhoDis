@@ -76,7 +76,6 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
             $selectedEntry.compactMap{ $0 },
             dataManager.availabilityInfoStream
         ).map{ (entry, info) in
-            print(entry)
             return MedicineEntryDetailsViewModel(
                 title: entry.drugsTaken.count > 1 ? ".. take these?" : ".. take this?",
                 displayDate: dateFormatterLong.string(from: entry.date),
