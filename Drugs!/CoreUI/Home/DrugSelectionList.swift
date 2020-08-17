@@ -36,8 +36,12 @@ struct DrugSelectionListView: View {
     @EnvironmentObject var viewState: DrugSelectionListViewState
 
     var body: some View {
-        return List { drugCells }
-            .environment(\.defaultMinListRowHeight, 0)
+        return ScrollView {
+            VStack(spacing: 0) { drugCells }
+                .listStyle(PlainListStyle())
+                .listRowBackground(Color.clear)
+                .environment(\.defaultMinListRowHeight, 0)
+        }
     }
 
     private var drugCells: some View {
@@ -48,9 +52,8 @@ struct DrugSelectionListView: View {
                 trackedDrug: drug,
                 canTake: self.viewState.currentInfo.canTake(drug)
             )
-        }.listRowInsets(
-            EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-        ).animation(.default)
+        }.padding(4.0)
+        .animation(.default)
     }
 }
 

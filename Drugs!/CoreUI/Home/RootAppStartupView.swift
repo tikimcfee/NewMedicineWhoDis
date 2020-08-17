@@ -21,7 +21,7 @@ struct RootDrugView: View {
 
     var body: some View {
         return VStack(spacing: 0) {
-            medicineList.padding(8.0)
+            medicineList.padding(4.0)
             drugEntryView
             saveButton.padding(4.0)
             NavigationLink(
@@ -57,33 +57,18 @@ struct RootDrugView: View {
     }
 
 	var medicineList: some View {
-        return ScrollView {
-            LazyVStack(alignment: .leading, spacing: 4.0) {
-                if rootScreenState.currentEntries.isEmpty {
-                    Spacer()
-                    HStack(alignment: .center)  {
-                        Spacer()
-                        Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
-                            .fontWeight(.light)
-                            .font(.callout)
-                            .italic()
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                    }
-                    Spacer()
-                } else {
-                    ForEach(rootScreenState.currentEntries, id: \.id) { entry in
-                        Button(action: { self.rootScreenState.detailsState.setSelected(entry) }) {
-                            RootDrugMedicineCell(
-                                drugList: entry.drugList,
-                                dateString: dateFormatterLong.string(from: entry.date)
-                            )
-                        }.foregroundColor(.primary)
-                        Divider().background(Color.viewBorder)
-                    }
+        return List {
+            ForEach(rootScreenState.currentEntries, id: \.id) { entry in
+                Button(action: { self.rootScreenState.detailsState.setSelected(entry) }) {
+                    RootDrugMedicineCell(
+                        drugList: entry.drugList,
+                        dateString: dateFormatterLong.string(from: entry.date)
+                    )
                 }
+                .foregroundColor(.primary)
             }
-        }
+        }.listStyle(PlainListStyle())
+        .animation(.default)
 	}
 	
     var drugEntryView: some View {
