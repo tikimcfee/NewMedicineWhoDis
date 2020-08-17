@@ -21,8 +21,10 @@ struct MedicineEntryDetailsView: View {
 		}
 		.padding(8.0)
         .navigationBarTitle(Text(detailsState.viewModel.title))
-        .sheet(isPresented: self.$detailsState.editorIsVisible) {
+        .sheet(isPresented: $detailsState.editorIsVisible) {
             DrugEntryEditorView()
+                .environmentObject(detailsState.editorState!)
+                .environmentObject(detailsState.dataManager)
         }
     }
 }

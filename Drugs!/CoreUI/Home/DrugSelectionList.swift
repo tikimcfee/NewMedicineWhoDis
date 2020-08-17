@@ -8,15 +8,11 @@ final class DrugSelectionListViewState: ObservableObject {
 
     @Published var currentInfo = AvailabilityInfo()
     @Published var availableDrugs = AvailableDrugList.defaultList
-    var currentSelectedDrug: Binding<Drug?>
-    var inProgressEntry: Binding<InProgressEntry>
+    @Published var currentSelectedDrug: Drug?
+    @Published var inProgressEntry = InProgressEntry()
 
-    init(_ dataManager: MedicineLogDataManager,
-         _ selectionBinding: Binding<Drug?>,
-         _ inProgressBinding: Binding<InProgressEntry>) {
+    init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
-        self.currentSelectedDrug = selectionBinding
-        self.inProgressEntry = inProgressBinding
 
         // Start publishing data
         dataManager.availabilityInfoStream
@@ -47,13 +43,12 @@ struct DrugSelectionListView: View {
     private var drugCells: some View {
         return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
-                inProgressEntry: self.viewState.inProgressEntry,
-                currentSelectedDrug: self.viewState.currentSelectedDrug,
+                inProgressEntry: $viewState.inProgressEntry,
+                currentSelectedDrug: $viewState.currentSelectedDrug,
                 trackedDrug: drug,
-                canTake: self.viewState.currentInfo.canTake(drug)
+                canTake: viewState.currentInfo.canTake(drug)
             )
         }.padding(4.0)
-        .animation(.default)
     }
 }
 
@@ -68,11 +63,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugSelectionListView().environmentObject(
-                DrugSelectionListViewState(
-                    makeTestMedicineOperator(),
-                    DefaultDrugList.drugBinding(),
-                    DefaultDrugList.$inProgressEntry
-                )
+                DrugSelectionListViewState(makeTestMedicineOperator())
             )
         }
     }

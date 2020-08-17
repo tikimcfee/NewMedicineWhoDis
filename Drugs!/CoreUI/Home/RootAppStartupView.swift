@@ -69,15 +69,14 @@ struct RootDrugView: View {
             }.onDelete(perform: { indexSet in
                 guard let removedIndex = indexSet.first else { return }
                 self.rootScreenState.deleteEntry(at: removedIndex)
-            })
+            }).animation(.default)
         }.listStyle(PlainListStyle())
-        .animation(.default)
 	}
 	
     var drugEntryView: some View {
-        return CreateNewDrugEntryPadView(
-            inProgressEntry: $rootScreenState.inProgressEntry
-        ).frame(height: 228)
+        return DrugSelectionPadView()
+            .frame(height: 228)
+            .environmentObject(rootScreenState.createEntryPadState)
     }
     
 	var saveButton: some View {

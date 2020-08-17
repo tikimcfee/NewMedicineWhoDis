@@ -3,18 +3,20 @@ import SwiftUI
 
 public final class DrugEntryEditorState: ObservableObject {
     private let dataManager: MedicineLogDataManager
-    @Published var sourceEntry: MedicineEntry
 
     @Published public var editorIsVisible: Bool = false
-	@Published var inProgressEntry: InProgressEntry = InProgressEntry()
+    @Published public var entryPadState: DrugSelectionPadViewState
     @Published var editorError: AppStateError? = nil
+    @Published var inProgressEntry: InProgressEntry = InProgressEntry()
+    @Published var sourceEntry: MedicineEntry = DefaultDrugList.shared.randomEntry() {
+        willSet {
+            inProgressEntry = InProgressEntry(newValue.drugsTaken, newValue.date)
+        }
+    }
 	
-    public init(dataManager: MedicineLogDataManager,
-                sourceEntry: MedicineEntry) {
+    public init(dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
-        self.sourceEntry = sourceEntry
-		self.inProgressEntry = InProgressEntry(sourceEntry.drugsTaken,
-                                               sourceEntry.date)
+        self.entryPadState = DrugSelectionPadViewState(dataManager: dataManager)
 	}
 
     func saveEdits() {
@@ -45,12 +47,11 @@ struct DrugEntryEditorView: View {
 	
 	var body: some View {
 		return VStack(spacing: 0) {
-			CreateNewDrugEntryPadView(
-                inProgressEntry: $editorState.inProgressEntry
-			)
+			DrugSelectionPadView()
             .frame(height: 300)
 			.darkBoringBorder
 			.padding(8)
+            .environmentObject(editorState.entryPadState)
 			
 			VStack(alignment: .trailing, spacing: 8) {
                 time("Original Time:", editorState.sourceEntry.date)
@@ -68,7 +69,7 @@ struct DrugEntryEditorView: View {
 		.alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
-				message: Text(error.localizedDescription),
+                message: Text(error.localizedDescription),
 				dismissButton: .default(Text("Well that sucks."))
 			)
 		}

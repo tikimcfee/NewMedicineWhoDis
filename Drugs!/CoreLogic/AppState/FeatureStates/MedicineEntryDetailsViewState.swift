@@ -15,7 +15,9 @@ public struct MedicineEntryDetailsViewModel {
 }
 
 public final class MedicineEntryDetailsViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
+    public let dataManager: MedicineLogDataManager
+    private var haveSelectionCancellable: AnyCancellable?
+    private var listeningCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
 
     // Input
@@ -30,28 +32,51 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
 
-        $selectedEntry
+        haveSelectionCancellable = $selectedEntry
             .map { $0 != nil }
             .receive(on: RunLoop.main)
             .assign(to: \.haveSelection, on: self)
-            .store(in: &cancellables)
 
-        $selectedEntry
-            .compactMap { $0 }
-            .map {
-                return DrugEntryEditorState(
-                    dataManager: dataManager,
-                    sourceEntry: $0
-                )
-            }
+        listeningCancellable = $haveSelection
+            .sink(receiveValue: { [weak self] in
+                $0 ? self?.startListening() : self?.stopListening()
+            })
+    }
+
+    func setSelected(_ entry: MedicineEntry) {
+        selectedEntry = entry
+    }
+
+    func removeSelection() {
+        selectedEntry = nil
+        editorState = nil
+    }
+
+    func startEditing() {
+        guard let entry = selectedEntry else { fatalError("Started editing without a selection") }
+        editorState = DrugEntryEditorState(dataManager: dataManager)
+        editorState?.sourceEntry = entry
+        editorState?.editorIsVisible = true
+        editorState?.$editorIsVisible
             .receive(on: RunLoop.main)
-            .assign(to: \.editorState, on: self)
+            .assign(to: \.editorIsVisible, on: self)
             .store(in: &cancellables)
+    }
 
+    func getUpdatedEntry() -> MedicineEntry? {
+        guard var selectedEntry = selectedEntry,
+              let editorState = editorState else { return nil }
+        selectedEntry.drugsTaken = editorState.inProgressEntry.entryMap
+        selectedEntry.date = editorState.inProgressEntry.date
+        return selectedEntry
+    }
+
+    private func startListening() {
         Publishers.CombineLatest.init(
             $selectedEntry.compactMap{ $0 },
             dataManager.availabilityInfoStream
         ).map{ (entry, info) in
+            print(entry)
             return MedicineEntryDetailsViewModel(
                 title: entry.drugsTaken.count > 1 ? ".. take these?" : ".. take this?",
                 displayDate: dateFormatterLong.string(from: entry.date),
@@ -64,32 +89,8 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
         .store(in: &cancellables)
     }
 
-    func setSelected(_ entry: MedicineEntry) {
-        selectedEntry = entry
-    }
-
-    func removeSelection() {
-        selectedEntry = nil
-    }
-
-    func startEditing() {
-        guard let selectedEntry = selectedEntry else { return }
-        editorState = DrugEntryEditorState(
-            dataManager: dataManager,
-            sourceEntry: selectedEntry
-        )
-        editorState?.$editorIsVisible
-            .receive(on: RunLoop.main)
-            .sink( receiveValue: { [weak self] in self?.editorIsVisible = $0 })
-            .store(in: &cancellables)
-    }
-
-    func getUpdatedEntry() -> MedicineEntry? {
-        guard var selectedEntry = selectedEntry,
-              let editorState = editorState else { return nil }
-        selectedEntry.drugsTaken = editorState.inProgressEntry.entryMap
-        selectedEntry.date = editorState.inProgressEntry.date
-        return selectedEntry
+    private func stopListening() {
+        cancellables = Set()
     }
 }
 

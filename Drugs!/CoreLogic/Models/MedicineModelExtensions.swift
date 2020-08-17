@@ -49,9 +49,10 @@ extension MedicineEntry {
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
 extension Array where Element == MedicineEntry {
-    func availabilityInfo(_ startDate: Date = Date()) -> AvailabilityInfo {
+    func availabilityInfo(_ startDate: Date = Date(),
+                          _ availableDrugs: AvailableDrugList) -> AvailabilityInfo {
         var drugDates = [Drug: Date]()
-        DefaultDrugList.shared.drugs.forEach { drugDates[$0] = startDate }
+        availableDrugs.drugs.forEach { drugDates[$0] = startDate }
         forEach { entry in
             entry.timesDrugsAreNextAvailable.forEach { drug, dateDrugIsAvailable in
                 guard let lastKnownTakenDate = drugDates[drug] else {
@@ -64,7 +65,6 @@ extension Array where Element == MedicineEntry {
                 }
             }
         }
-
         return drugDates.reduce(into: AvailabilityInfo()) { result, entry in
             result[entry.key] = (entry.value <= startDate, entry.value)
         }

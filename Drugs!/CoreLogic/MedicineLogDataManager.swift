@@ -57,37 +57,36 @@ public class MedicineLogDataManager: ObservableObject {
             handler(.failure(error))
         }
     }
-}
 
-// TODO: Reuse publishers
-extension MedicineLogDataManager {
+    var refreshTimer: AnyPublisher<Date, Never> {
+        return Timer
+            .publish(every: 5, on: .main, in: .common)
+            .autoconnect()
+            .map{ $0 as Date }
+            .merge(with: Just(.init()))
+            .eraseToAnyPublisher()
+    }
 
     var mainEntryListStream: AnyPublisher<[MedicineEntry], Never> {
-        return $appData
+        $appData
             .map{ $0.mainEntryList }
-            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+
+    var drugListStream: AnyPublisher<AvailableDrugList, Never> {
+        $appData
+            .map{ $0.availableDrugList }
             .eraseToAnyPublisher()
     }
 
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
-        // Start publishing data
-        let timer = Timer
-            .publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .eraseToAnyPublisher()
-            .merge(with: Just(.init()))
-        return Publishers.CombineLatest
-            .init(timer, mainEntryListStream)
-            .map{ (updateInterval, list) in
-                list.availabilityInfo(updateInterval)
+        Publishers.CombineLatest3
+            .init(refreshTimer, mainEntryListStream, drugListStream)
+            .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
+                print(updateInterval)
+                return list.availabilityInfo(updateInterval, drugs)
             }
-            .eraseToAnyPublisher()
-    }
-
-    var drugListStream: AnyPublisher<AvailableDrugList, Never> {
-        return $appData
-            .map{ $0.availableDrugList }
-            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }

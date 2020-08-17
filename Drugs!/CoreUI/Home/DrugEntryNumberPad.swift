@@ -11,12 +11,11 @@ import SwiftUI
 
 struct DrugEntryNumberPad: View {
 	
-	@Binding var inProgressEntry: InProgressEntry
-	@Binding var currentSelectedDrug: Drug?
+    @EnvironmentObject var selectionListViewState: DrugSelectionListViewState
 	
 	private var currentDrugCount: Int {
-		guard let drug = currentSelectedDrug else { return 0 }
-		return self.inProgressEntry.entryMap[drug] ?? 0
+        guard let drug = selectionListViewState.currentSelectedDrug else { return 0 }
+        return selectionListViewState.inProgressEntry.entryMap[drug] ?? 0
 	}
 	
 	var body: some View {
@@ -45,7 +44,7 @@ struct DrugEntryNumberPad: View {
 	
 	private var headerLabel: some View {
 		var headerText: Text
-		if let selectedDrug = currentSelectedDrug {
+        if let selectedDrug = selectionListViewState.currentSelectedDrug {
 			let title = "\(selectedDrug.drugName) (\(currentDrugCount))"
 			
 			headerText = Text(title)
@@ -72,13 +71,13 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func onTap(of number: Int) {
-		if let drug = self.currentSelectedDrug {
+        if let drug = selectionListViewState.currentSelectedDrug {
 			// toggle selection
-			if let lastSelection = self.inProgressEntry.entryMap[drug],
+            if let lastSelection = selectionListViewState.inProgressEntry.entryMap[drug],
 				lastSelection == number {
-				self.inProgressEntry.entryMap[drug] = nil
+                selectionListViewState.inProgressEntry.entryMap[drug] = nil
 			} else {
-				self.inProgressEntry.entryMap[drug] = number
+                selectionListViewState.inProgressEntry.entryMap[drug] = number
 			}
 		}
 	}
@@ -90,8 +89,8 @@ struct DrugEntryNumberPad: View {
 			.background(Color.buttonBackground)
             .clipShape(Circle())
 		
-		if let drug = currentSelectedDrug,
-			(inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
+        if let drug = selectionListViewState.currentSelectedDrug,
+           (selectionListViewState.inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
 			return text.foregroundColor(Color.medicineCellSelected)
 		} else {
 			return text.foregroundColor(Color.medicineCellNotSelected)
@@ -105,10 +104,10 @@ struct DrugEntryNumberPad: View {
 struct DrugEntryNumberPad_Preview: PreviewProvider {
     static var previews: some View {
         Group {
-            DrugEntryNumberPad(
-                inProgressEntry: DefaultDrugList.$inProgressEntry,
-                currentSelectedDrug: DefaultDrugList.drugBinding()
-            )
+            DrugEntryNumberPad()
+                .environmentObject(DrugSelectionListViewState(
+                    makeTestMedicineOperator()
+                ))
         }
     }
 }
