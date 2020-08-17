@@ -23,7 +23,7 @@ struct AsButtonMod: ViewModifier {
 
 struct DrugListEditorView: View {
 
-    @EnvironmentObject var medicineLogOperator: MedicineLogDataManager
+    @EnvironmentObject var drugListEditorState: DrugListEditorViewState
 
     var body: some View {
         return VStack(spacing: 0) {
@@ -57,11 +57,7 @@ struct DrugListEditorView: View {
                             .padding(4)
                             .boringBorder
                             .asButton {
-                                self.medicineLogOperator
-                                    .coreAppState
-                                    .drugListEditState
-                                    .inProgressEdit
-                                    .targetDrug = drug
+                                drugListEditorState.inProgressEdit.targetDrug = drug
                             }
 
                     }
@@ -90,20 +86,16 @@ struct DrugListEditorView: View {
 }
 
 private extension DrugListEditorView {
-    var editState: DrugListEdit {
-        return medicineLogOperator.coreAppState.drugListEditState
-    }
-
     var currentDrugName: String {
-        return editState.inProgressEdit.targetDrug.drugName
+        return drugListEditorState.inProgressEdit.targetDrug.drugName
     }
 
     var inProgressEdit: Binding<InProgressDrugEdit> {
-        return $medicineLogOperator.coreAppState.drugListEditState.inProgressEdit
+        return $drugListEditorState.inProgressEdit
     }
 
     var drugList: [Drug] {
-        return medicineLogOperator.coreAppState.applicationDataState.applicationData.availableDrugList.drugs.sorted()
+        return drugListEditorState.currentDrugList.drugs
     }
 }
 

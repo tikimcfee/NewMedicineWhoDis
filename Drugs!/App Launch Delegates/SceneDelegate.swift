@@ -9,12 +9,12 @@
 import UIKit
 import SwiftUI
 
-private extension Result where Success == AppState, Failure == Error {
-    var appState: AppState {
-        if case .success(let appState) = self {
-            return appState
+public extension Result where Success == ApplicationData, Failure == Error {
+    var applicationData: ApplicationData {
+        if case .success(let appData) = self {
+            return appData
         } else {
-            return AppState()
+            return ApplicationData()
         }
     }
 }
@@ -33,10 +33,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
 
 		let log = MedicineLogFileStore()
-        let appStateLoadResult = log.load().appState
-        let appOperator = MedicineLogDataManager(medicineStore: log, coreAppState: appStateLoadResult)
+        let appDataResult = log.load().applicationData
+        let dataManager = MedicineLogDataManager(medicineStore: log, appData: appDataResult)
+        let rootState = RootScreenState(dataManager)
         let contentView = RootAppStartupView()
-            .environmentObject(appOperator)
+            .environmentObject(dataManager)
+            .environmentObject(rootState)
 
         self.window?.rootViewController = UIHostingController(rootView: contentView)
         self.window?.makeKeyAndVisible()

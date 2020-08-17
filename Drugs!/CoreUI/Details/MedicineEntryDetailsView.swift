@@ -1,54 +1,34 @@
 import SwiftUI
 
-struct DrugDetailView: View {
+struct MedicineEntryDetailsView: View {
 
-    @EnvironmentObject var medicineLogOperator: MedicineLogDataManager
+    @EnvironmentObject var detailsState: MedicineEntryDetailsViewState
 
     var body: some View {
-        let info = medicineLogOperator.coreAppState.applicationDataState.applicationData.mainEntryList.availabilityInfo()
-        let data: [DetailEntryModel] = medicineLogOperator.coreAppState.detailState.selectedEntry.toDetailEntryModels(info)
-
-        let count = data.count
-		let screenTitle: String
-		if count == 1 {
-			screenTitle = "take this?"
-		} else {
-			screenTitle = "take these?"
-		}
-        
         return VStack(alignment: .leading) {
-			
-            Text("\(self.medicineLogOperator.coreAppState.detailState.selectedEntry.date, formatter: dateFormatterLong)")
+            Text(detailsState.viewModel.displayDate)
                 .font(.body)
-
-
-            List {
-                ForEach (data, id: \.self) { item in
-                    DetailEntryModelCell(
-                        model: item,
-                        fromEntry: self.medicineLogOperator.coreAppState.detailState.selectedEntry
-                    ).listRowInsets(EdgeInsets())
+            LazyVStack {
+                ForEach (detailsState.viewModel.displayModels, id: \.self) { item in
+                    DetailEntryModelCell(model: item)
+                        .listRowInsets(EdgeInsets())
                 }
             }
-
             Spacer()
-
             Components.fullWidthButton("Edit this entry") {
-                self.medicineLogOperator.coreAppState.detailState.editorState.editorIsVisible = true
+                detailsState.startEditing()
             }
 		}
 		.padding(8.0)
-		.navigationBarTitle(Text(screenTitle))
-        .sheet(isPresented: $medicineLogOperator.coreAppState.detailState.editorState.editorIsVisible) {
+        .navigationBarTitle(Text(detailsState.viewModel.title))
+        .sheet(isPresented: self.$detailsState.editorIsVisible) {
             DrugEntryEditorView()
-                .environmentObject(self.medicineLogOperator)
         }
     }
 }
 
 struct DetailEntryModelCell: View {
     let model: DetailEntryModel
-    let fromEntry: MedicineEntry
     
     var body: some View {
 		let titleColor: Color
@@ -113,8 +93,8 @@ struct DetailEntryModelCell: View {
     
 }
 
-struct DetailEntryModel: Identifiable, EquatableFileStorable {
-    var id = UUID()
+public struct DetailEntryModel: Identifiable, EquatableFileStorable {
+    public var id = UUID()
     let drugName: String
     let countMessage: String
     let timeForNextDose: String
@@ -122,38 +102,11 @@ struct DetailEntryModel: Identifiable, EquatableFileStorable {
 	let ingredientList: String
 }
 
-extension MedicineEntry {
-	
-    func toDetailEntryModels(_ info: AvailabilityInfo) -> [DetailEntryModel] {
-		return timesDrugsAreNextAvailable.map { (drug, calculatedDate) in
-            let canTakeAgain = info[drug]?.canTake == true
-            let formattedDate = dateFormatterSmall.string(from: info[drug]?.when ?? calculatedDate)
-			let ingredientList = drug.ingredientList
-			
-			let text: String
-			if canTakeAgain {
-				text = "You can take some \(drug.drugName) now"
-			} else {
-				text = "Wait 'till about \(formattedDate)"
-			}
-			
-            return DetailEntryModel(
-                drugName: drug.drugName,
-                countMessage: "\(drugsTaken[drug]!)",
-                timeForNextDose: text,
-                canTakeAgain: canTakeAgain,
-				ingredientList: ingredientList
-            )
-        }.sorted { $0.drugName < $1.drugName }
-	}
-	
-}
-
 #if DEBUG
 
 struct DrugDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        DrugDetailView()
+        MedicineEntryDetailsView()
             .environmentObject(makeTestMedicineOperator())
     }
 }

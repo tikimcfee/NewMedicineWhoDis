@@ -1,99 +1,71 @@
 import Foundation
 import SwiftUI
 
-public struct DrugEntryEditorState {
-	var inProgressEntry: InProgressEntry = InProgressEntry()
-	var editorIsVisible: Bool = false
-	var editorError: AppStateError? = nil
-	
-	private init() { }
-	
-	public init(sourceEntry: MedicineEntry) {
-		self.inProgressEntry = InProgressEntry(sourceEntry.drugsTaken, sourceEntry.date)
-	}
-	
-	public static func emptyState() -> DrugEntryEditorState {
-		return DrugEntryEditorState()
-	}
-}
+public final class DrugEntryEditorState: ObservableObject {
+    private let dataManager: MedicineLogDataManager
+    @Published var sourceEntry: MedicineEntry
 
-// Data
-extension DrugEntryEditorView {
-	var selectedEntry: MedicineEntry {
-		return medicineOperator.coreAppState.detailState.selectedEntry
-	}
+    @Published public var editorIsVisible: Bool = false
+	@Published var inProgressEntry: InProgressEntry = InProgressEntry()
+    @Published var editorError: AppStateError? = nil
 	
-	var entryBinding: Binding<InProgressEntry> {
-		return $medicineOperator.coreAppState.detailState.editorState.inProgressEntry
+    public init(dataManager: MedicineLogDataManager,
+                sourceEntry: MedicineEntry) {
+        self.dataManager = dataManager
+        self.sourceEntry = sourceEntry
+		self.inProgressEntry = InProgressEntry(sourceEntry.drugsTaken,
+                                               sourceEntry.date)
 	}
-	
-	var errorBinding: Binding<AppStateError?> {
-		return $medicineOperator.coreAppState.detailState.editorState.editorError
-	}
-	
-	var distance: String {
-		return selectedEntry.date.distanceString(entryBinding.date.wrappedValue)
-	}
-}
 
-struct ScreenWide: ViewModifier {
-	func body(content: Content) -> some View {
-		return content.frame(maxWidth: UIScreen.main.bounds.width)
-	}
-}
+    func saveEdits() {
+        guard sourceEntry.date != inProgressEntry.date
+                && sourceEntry.drugsTaken != inProgressEntry.entryMap
+        else { return }
 
-struct BoringBorder: ViewModifier {
-	public let color: Color
-	public init(_ color: Color = Color.gray) {
-		self.color = color
-	}
-	func body(content: Content) -> some View {
-		return content.overlay(
-			RoundedRectangle(cornerRadius: 4).stroke(color)
-		)
-	}
-}
+        sourceEntry.date = inProgressEntry.date
+        sourceEntry.drugsTaken = inProgressEntry.entryMap
 
-extension View {
-	var boringBorder: some View {
-		return modifier(BoringBorder())
-	}
-	
-	var darkBoringBorder: some View {
-		return modifier(BoringBorder(.black))
-	}
-	
-	var screenWide: some View {
-		return modifier(ScreenWide())
-	}
+        dataManager.updateEntry(updatedEntry: sourceEntry) { result in
+            switch result {
+                case .success:
+                    self.editorIsVisible = false
+                    self.editorError = nil
+
+                case .failure(let error):
+                    self.editorError = error as? AppStateError ?? .updateError
+            }
+        }
+    }
 }
 
 struct DrugEntryEditorView: View {
 	
-	@EnvironmentObject private var medicineOperator : MedicineLogDataManager
+	@EnvironmentObject private var editorState: DrugEntryEditorState
 	@State var selectedDate: Date = Date()
 	
 	var body: some View {
 		return VStack(spacing: 0) {
-			DrugEntryView(
-				inProgressEntry: entryBinding
-			).frame(height: 300)
+			CreateNewDrugEntryPadView(
+                inProgressEntry: $editorState.inProgressEntry
+			)
+            .frame(height: 300)
 			.darkBoringBorder
 			.padding(8)
 			
 			VStack(alignment: .trailing, spacing: 8) {
-				time("Original Time:", selectedEntry.date)
-				time("New Time:", entryBinding.date.wrappedValue)
+                time("Original Time:", editorState.sourceEntry.date)
+                time("New Time:", editorState.inProgressEntry.date)
 				timePicker
 					.screenWide
 					.darkBoringBorder
 				updatedDifferenceView
-			}.screenWide
+			}
+            .screenWide
 			.padding(8)
 			
-			Components.fullWidthButton("Save changes", saveTapped).padding(8)
+            Components.fullWidthButton("Save changes", editorState.saveEdits).padding(8)
 		}.background(Color(red: 0.8, green: 0.9, blue: 0.9))
-		.alert(item: errorBinding) { error in
+		.alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
 				message: Text(error.localizedDescription),
@@ -135,28 +107,60 @@ struct DrugEntryEditorView: View {
 		}
 	}
 	
-	private func saveTapped() {
-		medicineOperator.detailsView__saveEditorState { result in
-			switch result {
-				case .success:
-					self.medicineOperator.coreAppState.detailState.editorState.editorIsVisible = false
-					break;
-					
-				case .failure(let error):
-					self.medicineOperator.coreAppState.detailState.editorState.editorError =
-						error as? AppStateError ?? .updateError
-			}
-		}
-	}
-	
+}
+
+// Data
+extension DrugEntryEditorView {
+    var entryBinding: Binding<InProgressEntry> {
+        return $editorState.inProgressEntry
+    }
+
+    var errorBinding: Binding<AppStateError?> {
+        return $editorState.editorError
+    }
+
+    var distance: String {
+        return editorState.sourceEntry.date
+            .distanceString(entryBinding.date.wrappedValue)
+    }
+}
+
+struct ScreenWide: ViewModifier {
+    func body(content: Content) -> some View {
+        return content.frame(maxWidth: UIScreen.main.bounds.width)
+    }
+}
+
+struct BoringBorder: ViewModifier {
+    public let color: Color
+    public init(_ color: Color = Color.gray) {
+        self.color = color
+    }
+    func body(content: Content) -> some View {
+        return content.overlay(
+            RoundedRectangle(cornerRadius: 4).stroke(color)
+        )
+    }
+}
+
+extension View {
+    var boringBorder: some View {
+        return modifier(BoringBorder())
+    }
+
+    var darkBoringBorder: some View {
+        return modifier(BoringBorder(.black))
+    }
+
+    var screenWide: some View {
+        return modifier(ScreenWide())
+    }
 }
 
 #if DEBUG
-
 struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
 		return DrugEntryEditorView().environmentObject(makeTestMedicineOperator())
 	}
 }
-
 #endif

@@ -19,6 +19,10 @@ struct InProgressEntry {
         self.entryMap = map
         self.date = date
     }
+    mutating func reset() {
+        entryMap = [:]
+        date = Date()
+    }
 }
 
 extension View {
@@ -29,25 +33,26 @@ extension View {
 	}
 }
 
-struct DrugEntryView: View {
+struct CreateNewDrugEntryPadView: View {
+    @EnvironmentObject var dataManager: MedicineLogDataManager
     @Binding var inProgressEntry: InProgressEntry
     @State var currentSelectedDrug: Drug? = nil
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            DrugSelectionListView(
-                inProgressEntry: $inProgressEntry,
-                currentSelectedDrug: $currentSelectedDrug
-            ).padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
-
+            DrugSelectionListView()
+                .padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
+                .environmentObject(DrugSelectionListViewState(
+                    dataManager,
+                    $currentSelectedDrug,
+                    $inProgressEntry
+                ))
             DrugEntryNumberPad(
                 inProgressEntry: $inProgressEntry,
                 currentSelectedDrug: $currentSelectedDrug
             ).padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
-
         }
         .background(Color(red: 0.8, green: 0.9, blue: 0.9))
-        
     }
 }
 
@@ -55,7 +60,7 @@ struct DrugEntryView: View {
 
 struct DrugEntryView_Preview: PreviewProvider {
     static var previews: some View {
-        DrugEntryView(
+        CreateNewDrugEntryPadView(
             inProgressEntry: DefaultDrugList.$inProgressEntry,
             currentSelectedDrug: DefaultDrugList.shared.drugs[4]
         ).environmentObject(makeTestMedicineOperator())

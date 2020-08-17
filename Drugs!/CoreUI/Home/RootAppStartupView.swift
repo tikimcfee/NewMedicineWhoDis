@@ -1,7 +1,7 @@
 import SwiftUI
+import Combine
 
 struct RootAppStartupView: View {
-
     var body: some View {
         NavigationView {
             RootDrugView()
@@ -13,112 +13,90 @@ struct RootAppStartupView: View {
 			DoubleColumnNavigationViewStyle()
 		)
     }
-	
 }
 
 struct RootDrugView: View {
-	
-    @EnvironmentObject private var medicineOperator : MedicineLogDataManager
-    @State private var error: AppStateError? = nil
-    @State private var inProgressEntry = InProgressEntry()
+
+    @EnvironmentObject private var rootScreenState: RootScreenState
 
     var body: some View {
         return VStack(spacing: 0) {
-            medicineList.padding(8)
+            medicineList.padding(8.0)
             drugEntryView
-            saveButton.padding(8)
+            saveButton.padding(4.0)
             NavigationLink(
-                destination: DrugDetailView().onDisappear(perform: { self.medicineOperator.coreAppState.detailState.removeSelection() }),
-                isActive: self.$medicineOperator.coreAppState.detailState.haveSelection
+                destination: makeNewDetailsView(),
+                // TODO: for some reason, this does not work:
+                // $rootScreenState.detailsState.haveSelection
+                // I had to manually sink() inner state to the outer one,
+                // and use the binding from that. Not great, but it works.
+                isActive: $rootScreenState.haveSelection
             ) { EmptyView() }
         }
-        .alert(item: $error) { error in
-            let message: String
-            if case let AppStateError.saveError(cause) = error {
-                message = cause.localizedDescription
-            } else {
-                message = "No error; something went wrong while something else went wrong. Damn."
-            }
-            return Alert(
-                title: Text("Kaboom"),
-                message: Text(message),
-                dismissButton: .default(Text("Well that sucks."))
-            )
+        .alert(item: $rootScreenState.saveError, content: makeAlert)
+    }
+
+    private func makeNewDetailsView() -> some View {
+        return MedicineEntryDetailsView()
+            .environmentObject(rootScreenState.detailsState)
+            .onDisappear(perform: { rootScreenState.detailsState.removeSelection() })
+    }
+
+    private func makeAlert(_ error: Error) -> Alert {
+        let message: String
+        if case let AppStateError.saveError(cause) = error {
+            message = cause.localizedDescription
+        } else {
+            message = "No error; something went wrong while something else went wrong. Damn."
         }
+        return Alert(
+            title: Text("Kaboom"),
+            message: Text(message),
+            dismissButton: .default(Text("Well that sucks."))
+        )
     }
 
 	var medicineList: some View {
-		VStack(alignment: .center) {
-            if medicineOperator.coreAppState.applicationDataState.applicationData.mainEntryList.isEmpty {
-				Spacer()
-				empty
-				Spacer()
-			} else {
-				LazyVStack { list }
-			}
-		}
-	}
-
-    var empty: some View {
-		HStack(alignment: .center)  {
-			Spacer()
-			Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
-				.fontWeight(.light)
-				.font(.callout)
-				.italic()
-				.multilineTextAlignment(.center)
-			Spacer()
-		}
-    }
-
-    var list: some View {
-        let data = medicineOperator.coreAppState.applicationDataState.applicationData.mainEntryList
-        return ForEach(data, id: \.id) { entry in
-            VStack {
-                Button(action: { self.medicineOperator.select(entry) }) {
-                    RootDrugMedicineCell(
-                        drugList: entry.drugList,
-                        dateString: dateFormatterLong.string(from: entry.date)
-                    )
+        return ScrollView {
+            LazyVStack(alignment: .leading, spacing: 4.0) {
+                if rootScreenState.currentEntries.isEmpty {
+                    Spacer()
+                    HStack(alignment: .center)  {
+                        Spacer()
+                        Text("No logs yet.\n\n\nTap a name, then a number.\nThen, 'Take some drugs'")
+                            .fontWeight(.light)
+                            .font(.callout)
+                            .italic()
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    Spacer()
+                } else {
+                    ForEach(rootScreenState.currentEntries, id: \.id) { entry in
+                        Button(action: { self.rootScreenState.detailsState.setSelected(entry) }) {
+                            RootDrugMedicineCell(
+                                drugList: entry.drugList,
+                                dateString: dateFormatterLong.string(from: entry.date)
+                            )
+                        }.foregroundColor(.primary)
+                        Divider().background(Color.viewBorder)
+                    }
                 }
             }
         }
-    }
+	}
 	
     var drugEntryView: some View {
-        return DrugEntryView(
-            inProgressEntry: $inProgressEntry
+        return CreateNewDrugEntryPadView(
+            inProgressEntry: $rootScreenState.inProgressEntry
         ).frame(height: 228)
     }
     
 	var saveButton: some View {
-        return Components.fullWidthButton("Take some drugs", saveTapped)
-    }
-    
-    private func saveTapped() {
-        let drugMap = inProgressEntry.entryMap
-        let hasEntries = drugMap.count > 0
-        let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
-        guard hasEntries && hasNonZeroEntries else {
-            logd { Event(RootDrugView.self, "Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
-            return
-        }
-
-        medicineOperator.addEntry(medicineEntry: createNewEntry(with: drugMap)) { result in
-            switch result {
-            case .success:
-                self.inProgressEntry.entryMap = [:]
-            case .failure(let saveError):
-                self.error = .saveError(cause: saveError)
-            }
-        }
-    }
-        
-    func createNewEntry(with map: [Drug:Int]) -> MedicineEntry {
-        // NOTE: the date is set AT TIME of creation, NOT from the progress entry
-        // Potential source of date bug if this gets mixed up (also means there's a
-        // date we don't need sometimes...)
-        return MedicineEntry(Date(), map)
+        return Components.fullWidthButton(
+            "Take some drugs",
+            rootScreenState.saveNewEntry
+        )
     }
 }
 
@@ -140,9 +118,12 @@ struct RootDrugMedicineCell: View {
 #if DEBUG
 
 struct ContentView_Previews: PreviewProvider {
+    private static let data = makeTestMedicineOperator()
     static var previews: some View {
         Group {
-            RootAppStartupView().environmentObject(makeTestMedicineOperator())
+            RootAppStartupView()
+                .environmentObject(data)
+                .environmentObject(RootScreenState(data))
         }
     }
 }

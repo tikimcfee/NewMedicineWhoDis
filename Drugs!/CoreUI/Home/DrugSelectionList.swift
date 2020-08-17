@@ -2,17 +2,12 @@ import Foundation
 import SwiftUI
 import Combine
 
-private extension AvailabilityInfo {
-    func canTake(_ drug: Drug) -> Bool {
-        return self[drug]?.canTake == true
-    }
-}
-
 final class DrugSelectionListViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 
     @Published var currentInfo = AvailabilityInfo()
+    @Published var availableDrugs = AvailableDrugList.defaultList
     var currentSelectedDrug: Binding<Drug?>
     var inProgressEntry: Binding<InProgressEntry>
 
@@ -28,6 +23,11 @@ final class DrugSelectionListViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .assign(to: \.currentInfo, on: self)
             .store(in: &cancellables)
+
+        dataManager.drugListStream
+            .receive(on: RunLoop.main)
+            .assign(to: \.availableDrugs, on: self)
+            .store(in: &cancellables)
     }
 }
 
@@ -41,7 +41,7 @@ struct DrugSelectionListView: View {
     }
 
     private var drugCells: some View {
-        return ForEach(DefaultDrugList.shared.drugs, id: \.drugName) { drug in
+        return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
                 inProgressEntry: self.viewState.inProgressEntry,
                 currentSelectedDrug: self.viewState.currentSelectedDrug,
@@ -54,8 +54,13 @@ struct DrugSelectionListView: View {
     }
 }
 
-#if DEBUG
+private extension AvailabilityInfo {
+    func canTake(_ drug: Drug) -> Bool {
+        return self[drug]?.canTake == true
+    }
+}
 
+#if DEBUG
 struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
@@ -69,5 +74,4 @@ struct DrugSelectionListView_Preview: PreviewProvider {
         }
     }
 }
-
 #endif

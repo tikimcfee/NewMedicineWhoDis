@@ -59,6 +59,7 @@ public class MedicineLogDataManager: ObservableObject {
     }
 }
 
+// TODO: Reuse publishers
 extension MedicineLogDataManager {
 
     var mainEntryListStream: AnyPublisher<[MedicineEntry], Never> {
@@ -70,7 +71,11 @@ extension MedicineLogDataManager {
 
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
         // Start publishing data
-        let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect().eraseToAnyPublisher()
+        let timer = Timer
+            .publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .eraseToAnyPublisher()
+            .merge(with: Just(.init()))
         return Publishers.CombineLatest
             .init(timer, mainEntryListStream)
             .map{ (updateInterval, list) in
