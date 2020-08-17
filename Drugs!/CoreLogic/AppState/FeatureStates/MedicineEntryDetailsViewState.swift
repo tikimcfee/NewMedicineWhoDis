@@ -53,7 +53,7 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
             dataManager.availabilityInfoStream
         ).map{ (entry, info) in
             return MedicineEntryDetailsViewModel(
-                title: info.count > 1 ? ".. take these?" : ".. take this?",
+                title: entry.drugsTaken.count > 1 ? ".. take these?" : ".. take this?",
                 displayDate: dateFormatterLong.string(from: entry.date),
                 displayModels: entry.toDetailEntryModels(info)
             )

@@ -59,14 +59,17 @@ struct RootDrugView: View {
 	var medicineList: some View {
         return List {
             ForEach(rootScreenState.currentEntries, id: \.id) { entry in
-                Button(action: { self.rootScreenState.detailsState.setSelected(entry) }) {
+                Button(action: { self.rootScreenState.selectForDetails(entry)}) {
                     RootDrugMedicineCell(
                         drugList: entry.drugList,
                         dateString: dateFormatterLong.string(from: entry.date)
                     )
                 }
                 .foregroundColor(.primary)
-            }
+            }.onDelete(perform: { indexSet in
+                guard let removedIndex = indexSet.first else { return }
+                self.rootScreenState.deleteEntry(at: removedIndex)
+            })
         }.listStyle(PlainListStyle())
         .animation(.default)
 	}

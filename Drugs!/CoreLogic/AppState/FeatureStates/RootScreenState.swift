@@ -34,6 +34,13 @@ public final class RootScreenState: ObservableObject {
         detailsState.setSelected(entry)
     }
 
+    func deleteEntry(at index: Int) {
+        guard index < currentEntries.count else { return }
+        dataManager.removeEntry(id: currentEntries[index].id) { result in
+            logd { Event(RootDrugView.self, "Deleted entry at \(index)", .debug) }
+        }
+    }
+
     func saveNewEntry() {
         let drugMap = inProgressEntry.entryMap
         let hasEntries = drugMap.count > 0
