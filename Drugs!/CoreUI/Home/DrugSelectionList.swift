@@ -2,17 +2,23 @@ import Foundation
 import SwiftUI
 import Combine
 
-final class DrugSelectionListViewState: ObservableObject {
+final class DrugSelectionContainerInProgressState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 
     @Published var currentInfo = AvailabilityInfo()
     @Published var availableDrugs = AvailableDrugList.defaultList
     @Published var currentSelectedDrug: Drug?
-    @Published var inProgressEntry = InProgressEntry()
+    @Published private var inProgressEntry: InProgressEntry
+
+    var inProgressEntrySubject: CurrentValueSubject<InProgressEntry, Never>
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
+
+        let initialEntry = InProgressEntry()
+        self.inProgressEntrySubject = .init(initialEntry)
+        self.inProgressEntry = initialEntry
 
         // Start publishing data
         dataManager.availabilityInfoStream
@@ -24,12 +30,29 @@ final class DrugSelectionListViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .assign(to: \.availableDrugs, on: self)
             .store(in: &cancellables)
+
+        inProgressEntrySubject
+            .assign(to: \.inProgressEntry, on: self)
+            .store(in: &cancellables)
+    }
+
+    func update(entry: InProgressEntry) {
+        inProgressEntrySubject.send(entry)
+    }
+
+    func forDrug(_ drug: Drug, set count: Int?) {
+        inProgressEntry.entryMap[drug] = count
+        inProgressEntrySubject.send(inProgressEntry)
+    }
+
+    func count(for drug: Drug) -> Int? {
+        return inProgressEntry.entryMap[drug]
     }
 }
 
 struct DrugSelectionListView: View {
 
-    @EnvironmentObject var viewState: DrugSelectionListViewState
+    @EnvironmentObject var viewState: DrugSelectionContainerInProgressState
 
     var body: some View {
         return ScrollView {
@@ -43,7 +66,7 @@ struct DrugSelectionListView: View {
     private var drugCells: some View {
         return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
-                inProgressEntry: $viewState.inProgressEntry,
+                inProgressEntry: $viewState.inProgressEntrySubject.value,
                 currentSelectedDrug: $viewState.currentSelectedDrug,
                 trackedDrug: drug,
                 canTake: viewState.currentInfo.canTake(drug)
@@ -63,7 +86,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugSelectionListView().environmentObject(
-                DrugSelectionListViewState(makeTestMedicineOperator())
+                DrugSelectionContainerInProgressState(makeTestMedicineOperator())
             )
         }
     }

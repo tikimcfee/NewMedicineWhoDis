@@ -6,31 +6,31 @@ public final class DrugEntryEditorState: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     @Published public var editorIsVisible: Bool = false
-    @Published public var entryPadState: DrugSelectionPadViewState
+    @Published public var entryPadState: DrugSelectionContainerViewState
     @Published var editorError: AppStateError? = nil
     @Published var inProgressEntry: InProgressEntry = InProgressEntry()
-    @Published var sourceEntry: MedicineEntry = DefaultDrugList.shared.randomEntry() {
-        willSet {
-            inProgressEntry = InProgressEntry(newValue.drugsTaken, newValue.date)
-        }
-    }
-	
-    public init(dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-        self.entryPadState = DrugSelectionPadViewState(dataManager: dataManager)
 
-        entryPadState.$inProgressEntry
+    var sourceEntry: MedicineEntry
+	
+    public init(dataManager: MedicineLogDataManager,
+                sourceEntry: MedicineEntry) {
+        self.dataManager = dataManager
+        self.sourceEntry = sourceEntry
+        self.entryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
+        entryPadState.setInProgressEntry(sourceEntry.editableEntry)
+        entryPadState.padStateStream
             .assign(to: \.inProgressEntry, on: self)
             .store(in: &cancellables)
 	}
 
     func saveEdits() {
         guard sourceEntry.date != inProgressEntry.date
-                && sourceEntry.drugsTaken != inProgressEntry.entryMap
+                || sourceEntry.drugsTaken != inProgressEntry.entryMap
         else { return }
 
-        sourceEntry.date = inProgressEntry.date
-        sourceEntry.drugsTaken = inProgressEntry.entryMap
+        var safeCopy = sourceEntry
+        safeCopy.date = inProgressEntry.date
+        safeCopy.drugsTaken = inProgressEntry.entryMap
 
         dataManager.updateEntry(updatedEntry: sourceEntry) { result in
             switch result {
@@ -52,7 +52,7 @@ struct DrugEntryEditorView: View {
 	
 	var body: some View {
 		return VStack(spacing: 0) {
-			DrugSelectionPadView()
+			DrugSelectionContainerView()
             .frame(height: 300)
 			.darkBoringBorder
 			.padding(8)
@@ -117,7 +117,6 @@ struct DrugEntryEditorView: View {
 
 // Data
 extension DrugEntryEditorView {
-
     var errorBinding: Binding<AppStateError?> {
         return $editorState.editorError
     }

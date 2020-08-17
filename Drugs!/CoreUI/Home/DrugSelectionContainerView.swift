@@ -22,29 +22,31 @@ extension View {
 	}
 }
 
-public final class DrugSelectionPadViewState: ObservableObject {
+typealias PadState = (InProgressEntry, Drug?)
+
+public final class DrugSelectionContainerViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 
-    @Published var inProgressEntry = InProgressEntry()
-    @Published var currentSelectedDrug: Drug?
-    @Published var selectionState: DrugSelectionListViewState
+    // Inner state
+    @Published var selectionState: DrugSelectionContainerInProgressState
 
     init(dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
-        self.selectionState = DrugSelectionListViewState(dataManager)
+        self.selectionState = DrugSelectionContainerInProgressState(dataManager)
+    }
 
-        selectionState.$inProgressEntry
-            .assign(to: \.inProgressEntry, on: self)
-            .store(in: &cancellables)
-        selectionState.$currentSelectedDrug
-            .assign(to: \.currentSelectedDrug, on: self)
-            .store(in: &cancellables)
+    func setInProgressEntry(_ entry: InProgressEntry) {
+        selectionState.update(entry: entry)
+    }
+
+    var padStateStream: AnyPublisher<InProgressEntry, Never> {
+        return selectionState.inProgressEntrySubject.eraseToAnyPublisher()
     }
 }
 
-struct DrugSelectionPadView: View {
-    @EnvironmentObject var viewState: DrugSelectionPadViewState
+struct DrugSelectionContainerView: View {
+    @EnvironmentObject var viewState: DrugSelectionContainerViewState
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
@@ -62,9 +64,9 @@ struct DrugSelectionPadView: View {
 
 struct DrugEntryView_Preview: PreviewProvider {
     static var previews: some View {
-        DrugSelectionPadView()
+        DrugSelectionContainerView()
             .environmentObject(
-                DrugSelectionPadViewState(
+                DrugSelectionContainerViewState(
                     dataManager: makeTestMedicineOperator()
                 )
             )

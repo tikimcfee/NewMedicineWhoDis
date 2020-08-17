@@ -54,8 +54,7 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
 
     func startEditing() {
         guard let entry = selectedEntry else { fatalError("Started editing without a selection") }
-        editorState = DrugEntryEditorState(dataManager: dataManager)
-        editorState?.sourceEntry = entry
+        editorState = DrugEntryEditorState(dataManager: dataManager, sourceEntry: entry)
         editorState?.editorIsVisible = true
         editorState?.$editorIsVisible
             .receive(on: RunLoop.main)
@@ -81,7 +80,6 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
                 displayDate: dateFormatterLong.string(from: entry.date),
                 displayModels: entry.toDetailEntryModels(info)
             )
-
         }
         .receive(on: RunLoop.main)
         .assign(to: \.viewModel, on: self)

@@ -74,7 +74,7 @@ struct RootDrugView: View {
 	}
 	
     var drugEntryView: some View {
-        return DrugSelectionPadView()
+        return DrugSelectionContainerView()
             .frame(height: 228)
             .environmentObject(rootScreenState.createEntryPadState)
     }

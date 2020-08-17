@@ -11,11 +11,11 @@ import SwiftUI
 
 struct DrugEntryNumberPad: View {
 	
-    @EnvironmentObject var selectionListViewState: DrugSelectionListViewState
+    @EnvironmentObject var selectionListViewState: DrugSelectionContainerInProgressState
 	
 	private var currentDrugCount: Int {
         guard let drug = selectionListViewState.currentSelectedDrug else { return 0 }
-        return selectionListViewState.inProgressEntry.entryMap[drug] ?? 0
+        return selectionListViewState.count(for: drug) ?? 0
 	}
 	
 	var body: some View {
@@ -25,7 +25,6 @@ struct DrugEntryNumberPad: View {
 				buttonGrid
 			}
 		}
-		
 	}
 	
 	private var buttonGrid: some View {
@@ -73,11 +72,10 @@ struct DrugEntryNumberPad: View {
 	private func onTap(of number: Int) {
         if let drug = selectionListViewState.currentSelectedDrug {
 			// toggle selection
-            if let lastSelection = selectionListViewState.inProgressEntry.entryMap[drug],
-				lastSelection == number {
-                selectionListViewState.inProgressEntry.entryMap[drug] = nil
+            if let lastSelection = selectionListViewState.count(for: drug), lastSelection == number {
+                selectionListViewState.forDrug(drug, set: nil)
 			} else {
-                selectionListViewState.inProgressEntry.entryMap[drug] = number
+                selectionListViewState.forDrug(drug, set: number)
 			}
 		}
 	}
@@ -89,9 +87,9 @@ struct DrugEntryNumberPad: View {
 			.background(Color.buttonBackground)
             .clipShape(Circle())
 		
-        if let drug = selectionListViewState.currentSelectedDrug,
-           (selectionListViewState.inProgressEntry.entryMap[drug] ?? nil) == trackedNumber {
-			return text.foregroundColor(Color.medicineCellSelected)
+        if let currentDrug = selectionListViewState.currentSelectedDrug,
+           selectionListViewState.count(for: currentDrug) == trackedNumber {
+            return text.foregroundColor(Color.medicineCellSelected)
 		} else {
 			return text.foregroundColor(Color.medicineCellNotSelected)
 		}
@@ -105,7 +103,7 @@ struct DrugEntryNumberPad_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugEntryNumberPad()
-                .environmentObject(DrugSelectionListViewState(
+                .environmentObject(DrugSelectionContainerInProgressState(
                     makeTestMedicineOperator()
                 ))
         }

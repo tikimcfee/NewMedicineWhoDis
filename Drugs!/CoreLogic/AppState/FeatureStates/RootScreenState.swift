@@ -8,7 +8,7 @@ public final class RootScreenState: ObservableObject {
     // Output
     @Published var currentEntries = [MedicineEntry]()
     @Published var detailsState: MedicineEntryDetailsViewState
-    @Published var createEntryPadState: DrugSelectionPadViewState
+    @Published var createEntryPadState: DrugSelectionContainerViewState
 
     // Root 'new entry' state
     @Published var haveSelection = false
@@ -18,7 +18,7 @@ public final class RootScreenState: ObservableObject {
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
         self.detailsState = MedicineEntryDetailsViewState(dataManager)
-        self.createEntryPadState = DrugSelectionPadViewState(dataManager: dataManager)
+        self.createEntryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
 
         dataManager.mainEntryListStream
             .receive(on: RunLoop.main)
@@ -28,8 +28,8 @@ public final class RootScreenState: ObservableObject {
         detailsState.$haveSelection
             .assign(to: \.haveSelection, on: self)
             .store(in: &cancellables)
-
-        createEntryPadState.$inProgressEntry
+        
+        createEntryPadState.padStateStream
             .assign(to: \.inProgressEntry, on: self)
             .store(in: &cancellables)
     }

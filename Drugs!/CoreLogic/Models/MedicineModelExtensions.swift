@@ -31,7 +31,6 @@ extension MedicineEntry {
 		} else {
             return drugsTaken
                 .sorted { $0.key.drugName < $1.key.drugName }
-//                .map { "\($0.key.drugName) (\($0.value))" }
                 .map { $0.key.drugName }
                 .joined(separator: ", ")
 		}
@@ -44,6 +43,11 @@ extension MedicineEntry {
 		}
 		return result
 	}
+
+    var editableEntry: InProgressEntry {
+        return InProgressEntry(drugsTaken,
+                               date)
+    }
 }
 
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
