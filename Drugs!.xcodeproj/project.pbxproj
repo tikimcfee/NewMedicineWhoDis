@@ -352,8 +352,8 @@
 		F0C035BE2467AE3F00599A4D /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
 				45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */,
+				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";

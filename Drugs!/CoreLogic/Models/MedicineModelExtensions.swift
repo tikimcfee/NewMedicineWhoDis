@@ -50,6 +50,24 @@ extension MedicineEntry {
     }
 }
 
+extension AvailableDrugList {
+    public static let defaultList = AvailableDrugList(defaultDrugs)
+    private static let defaultDrugs: [Drug] = [
+        Drug("Gabapentin",  [Ingredient("Gabapentin")],     12),
+        Drug("Tylenol",     [Ingredient("Acetaminophen")],  5),
+        Drug("Venlafaxine", [Ingredient("Venlafaxine")],    24),
+        Drug("Dramamine",   [Ingredient("Dimenhydrinate"),], 24),
+        Drug("Excedrin",    [Ingredient("Acetaminophen"),
+                             Ingredient("Aspirin"),
+                             Ingredient("Caffeine")],       5),
+        Drug("Ibuprofen",   [Ingredient("Ibuprofen")],      8),
+        Drug("Omeprazole",  [Ingredient("Omeprazole")],     12),
+        Drug("Melatonin",   [Ingredient("Melatonin")],      24),
+        Drug("Tums",        [Ingredient("Sodium Bicarbonate")], 4),
+        Drug("Vitamins",    [Ingredient("Vitamins")],       0),
+    ]
+}
+
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
 extension Array where Element == MedicineEntry {
