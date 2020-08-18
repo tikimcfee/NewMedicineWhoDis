@@ -80,13 +80,15 @@ public class MedicineLogDataManager: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    static var _trackedStreamNumber = 0
-    var streamRequestNumber: Int {
-        get { Self._trackedStreamNumber = Self._trackedStreamNumber + 1; return Self._trackedStreamNumber }
-        set { Self._trackedStreamNumber = newValue }
+    // Cheat code to track memory leaks on streams. Dolls out a unique value every time we create a new stream
+    // Reason: CurrentValueSubject (and others?) seems to leak when using .assign(to: \.keypath, on: self)
+    private static var _streamId = 0
+    private var streamId: Int {
+        get { Self._streamId = Self._streamId + 1; return Self._streamId }
+        set { Self._streamId = newValue }
     }
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
-        let streamNumber = streamRequestNumber
+        let streamNumber = streamId
         var refreshCount = 0
         return Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)

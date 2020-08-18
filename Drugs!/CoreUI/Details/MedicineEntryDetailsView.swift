@@ -9,10 +9,12 @@ struct MedicineEntryDetailsView: View {
         return VStack(alignment: .leading) {
             Text(detailsState.viewModel.displayDate)
                 .font(.body)
-            VStack {
-                ForEach (detailsState.viewModel.displayModels, id: \.self) { item in
-                    DetailEntryModelCell(model: item)
-                        .listRowInsets(EdgeInsets())
+            ScrollView {
+                VStack {
+                    ForEach (detailsState.viewModel.displayModels, id: \.self) { item in
+                        DetailEntryModelCell(model: item)
+                            .listRowInsets(EdgeInsets())
+                    }
                 }
             }
             Spacer()

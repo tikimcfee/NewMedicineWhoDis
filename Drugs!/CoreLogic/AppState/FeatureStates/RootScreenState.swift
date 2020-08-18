@@ -57,7 +57,7 @@ public final class RootScreenState: ObservableObject {
         dataManager.addEntry(medicineEntry: createNewEntry(with: drugMap)) { result in
             switch result {
             case .success:
-                self.inProgressEntry.reset()
+                self.createEntryPadState.setInProgressEntry(InProgressEntry())
             case .failure(let saveError):
                 self.saveError = .saveError(cause: saveError)
             }
