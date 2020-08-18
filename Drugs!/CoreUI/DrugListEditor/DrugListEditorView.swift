@@ -26,20 +26,23 @@ struct DrugListEditorView: View {
     @EnvironmentObject var drugListEditorState: DrugListEditorViewState
 
     var body: some View {
-        return VStack(spacing: 0) {
+        return VStack {
             subviewDrugList
             subviewEditor
         }
     }
 
     private func textGroup(_ drug: Drug) -> some View {
-        return Group {
-            Text(drug.drugName)
-            if drug.ingredientList != "" {
-                Text(drug.ingredientList)
-                    .font(.footnote)
+        return HStack(alignment: .center) {
+            VStack(alignment: .leading) {
+                Text(drug.drugName)
+                if drug.ingredientList != "" {
+                    Text(drug.ingredientList)
+                        .font(.footnote)
+                }
             }
-            Text(String.init(format: "Every %.0f hours", drug.hourlyDoseTime))
+            Spacer()
+            Text(String.init(format: "%.0f hours", drug.hourlyDoseTime))
                 .font(.footnote)
         }
     }
@@ -52,7 +55,7 @@ struct DrugListEditorView: View {
                         textGroup(drug)
                         Spacer()
                         Image.init(systemName: "pencil")
-                            .padding(4)
+                            .padding(8)
                             .boringBorder
                             .asButton {
                                 drugListEditorState.inProgressEdit.targetDrug = drug
@@ -72,14 +75,15 @@ struct DrugListEditorView: View {
             HStack {
                 Text("Name:")
                 TextField.init(currentDrugName, text: inProgressEdit.updatedName)
-            }
-            HStack {
-                Text("Dose time:")
-                TextField.init(currentDrugName, text: inProgressEdit.updatedName)
+                Picker(selection: $drugListEditorState.inProgressEdit.updatedDoseTime, label: EmptyView()) {
+                    ForEach((1..<25)) { hour in
+                        Text("\("hour".simplePlural(hour))").tag(hour)
+                    }
+                }.frame(maxWidth: 128, maxHeight: 64).clipped().boringBorder
             }
         }
         .padding()
-        .background(Color(red: 0.8, green: 0.9, blue: 0.9))
+        .background(Color(red: 0.8, green: 0.9, blue: 0.9)).boringBorder
     }
 }
 
@@ -100,7 +104,9 @@ private extension DrugListEditorView {
 #if DEBUG
 struct DrugListEditorView_Previews: PreviewProvider {
     static var previews: some View {
-        DrugListEditorView().environmentObject(makeTestMedicineOperator())
+        DrugListEditorView().environmentObject(
+            DrugListEditorViewState(makeTestMedicineOperator())
+        )
     }
 }
 #endif

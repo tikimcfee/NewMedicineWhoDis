@@ -9,11 +9,11 @@ public struct InProgressDrugEdit {
         }
     }
     var updatedName: String = ""
-    var updatedDoseTime: Double = 4
+    var updatedDoseTime: Int = 4
     var updatedIngredients: [Ingredient] = []
 
     var hasChanged: Bool {
-        return targetDrug != Drug(updatedName, updatedIngredients, updatedDoseTime)
+        return targetDrug != Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
     }
 }
 
