@@ -11,7 +11,7 @@ import Foundation
 public struct AvailableDrugList: EquatableFileStorable {
     var drugs: [Drug]
 
-    private init(_ list: [Drug]) {
+    init(_ list: [Drug]) {
         self.drugs = list
     }
 }

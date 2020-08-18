@@ -49,6 +49,8 @@ public class DrugBinding {
 
 public final class DefaultDrugList {
 
+    public static let shared = DefaultDrugList()
+
     @State static var inProgressEntry: InProgressEntry = InProgressEntry()
 
     static func drugMapBinding() -> Binding<[Drug : Int]> {
@@ -64,8 +66,6 @@ public final class DefaultDrugList {
             set: { (Drug) in }
         )
     }
-
-    public static let shared = DefaultDrugList()
 
     private init() { }
 

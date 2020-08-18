@@ -8,8 +8,6 @@
 
 import Foundation
 
-let APP_EVENTS = AppEvents()
-
 public func eTag(_ object: Any?) -> String {
     guard case let .some(thing) = object
         else { return "" }

@@ -1,21 +1,7 @@
 import SwiftUI
 import Combine
 
-struct RootAppStartupView: View {
-    var body: some View {
-        NavigationView {
-            RootDrugView()
-				.navigationBarTitle(
-					Text("When did I..."), 
-					displayMode: .inline
-				)
-        }.navigationViewStyle(
-			DoubleColumnNavigationViewStyle()
-		)
-    }
-}
-
-struct RootDrugView: View {
+struct HomeDrugView: View {
 
     @EnvironmentObject private var rootScreenState: RootScreenState
 
@@ -56,7 +42,7 @@ struct RootDrugView: View {
         return List {
             ForEach(rootScreenState.currentEntries, id: \.id) { entry in
                 Button(action: { self.rootScreenState.selectForDetails(entry)}) {
-                    RootDrugMedicineCell(
+                    HomeMedicineInfoCell(
                         drugList: entry.drugList,
                         dateString: dateFormatterLong.string(from: entry.date)
                     )
@@ -83,7 +69,7 @@ struct RootDrugView: View {
     }
 }
 
-struct RootDrugMedicineCell: View {
+struct HomeMedicineInfoCell: View {
     let drugList: String
     let dateString: String
 
