@@ -26,7 +26,7 @@ struct RootDrugView: View {
             saveButton.padding(4.0)
             NavigationLink(
                 destination: makeNewDetailsView(),
-                isActive: $rootScreenState.haveSelection
+                isActive: $rootScreenState.isMedicineEntrySelected
             ) { EmptyView() }
         }
         .alert(item: $rootScreenState.saveError, content: makeAlert)

@@ -40,7 +40,7 @@ public final class DrugSelectionContainerViewState: ObservableObject {
         selectionState.update(entry: entry)
     }
 
-    var padStateStream: AnyPublisher<InProgressEntry, Never> {
+    var inProgressEntryStream: AnyPublisher<InProgressEntry, Never> {
         return selectionState.containerStateStream()
     }
 }

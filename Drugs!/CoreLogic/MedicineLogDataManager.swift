@@ -103,13 +103,13 @@ public class MedicineLogDataManager: ObservableObject {
 
 // Combine API... oh lawd here we go
 extension MedicineLogDataManager {
-    func getLatestEntryStream(for targetId: String?) -> AnyPublisher<MedicineEntry?, Never> {
+    func liveChanges(for publisher: Published<String?>.Publisher) -> AnyPublisher<MedicineEntry?, Never> {
         // TODO: This is sssssllllooooowww... consider backing the store with a dict
-        guard let targetId = targetId else {
-            return Just(nil).eraseToAnyPublisher()
-        }
-        return mainEntryListStream.map {
-            $0.first(where: { $0.id == targetId })
+        return Publishers.CombineLatest(
+            mainEntryListStream,
+            publisher.compactMap{ $0 }
+        ).map{ list, targetId in
+            list.first(where: { $0.id == targetId })
         }.eraseToAnyPublisher()
     }
 }

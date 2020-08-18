@@ -11,7 +11,7 @@ public final class RootScreenState: ObservableObject {
     @Published var createEntryPadState: DrugSelectionContainerViewState
 
     // Root 'new entry' state
-    @Published var haveSelection = false
+    @Published var isMedicineEntrySelected = false
     @Published var inProgressEntry = InProgressEntry()
     @Published var saveError: AppStateError? = nil
 
@@ -25,11 +25,11 @@ public final class RootScreenState: ObservableObject {
             .assign(to: \.currentEntries, on: self)
             .store(in: &cancellables)
 
-        detailsState.$haveSelection
-            .assign(to: \.haveSelection, on: self)
+        detailsState.$isMedicineEntrySelected
+            .assign(to: \.isMedicineEntrySelected, on: self)
             .store(in: &cancellables)
         
-        createEntryPadState.padStateStream
+        createEntryPadState.inProgressEntryStream
             .assign(to: \.inProgressEntry, on: self)
             .store(in: &cancellables)
     }
