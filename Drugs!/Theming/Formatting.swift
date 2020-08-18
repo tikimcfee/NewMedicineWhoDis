@@ -42,7 +42,9 @@ extension Date {
         )
     }
 
-    func distanceString(_ date: Date) -> String {
+    func distanceString(_ date: Date,
+                        postfixSelfIsBefore: String = "later",
+                        postfixSelfIsAfter: String = "earlier") -> String {
         let (days, hours, minutes) = timeDifference(from: date)
         guard days > 0 || hours > 0 || minutes > 0 else {
             return "No time change"
@@ -52,7 +54,8 @@ extension Date {
 				"minute".simplePlural(minutes)]
             .filter { $0.count > 0 }
             .joined(separator: ", ")
-            .appending(self < date ? " later" : " earlier")
+            .appending(" ")
+            .appending(self < date ? postfixSelfIsBefore : postfixSelfIsAfter)
     }
 }
 

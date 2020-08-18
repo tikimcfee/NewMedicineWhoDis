@@ -72,6 +72,7 @@
 		F06CE02D2477A7E60005441E /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
 		F06CE02E2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* MedicineEntryDetailsView.swift */; };
 		F06CE02F2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679F823371772001DCBA1 /* MedicineEntryDetailsView.swift */; };
+		F075605D24EC5A4F00E81463 /* GlobalUtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F075605C24EC5A4F00E81463 /* GlobalUtilityFunctions.swift */; };
 		F07E207E24E9CBFF004DFB8C /* RootScreenState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07E207D24E9CBFF004DFB8C /* RootScreenState.swift */; };
 		F07E208024E9CC2B004DFB8C /* DrugListEditState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07E207F24E9CC2B004DFB8C /* DrugListEditState.swift */; };
 		F094CF4E247B710300CE50BA /* AutoCancel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F094CF4D247B710300CE50BA /* AutoCancel.swift */; };
@@ -142,6 +143,7 @@
 		F0456CCF24705D630017B04E /* DrugSelectionList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionList.swift; sourceTree = "<group>"; };
 		F0456CDC247061450017B04E /* DrugEntryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryCell.swift; sourceTree = "<group>"; };
 		F051DACC24EBC20200D095C9 /* slow-spring-board.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "slow-spring-board.caf"; sourceTree = "<group>"; };
+		F075605C24EC5A4F00E81463 /* GlobalUtilityFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalUtilityFunctions.swift; sourceTree = "<group>"; };
 		F07E207D24E9CBFF004DFB8C /* RootScreenState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootScreenState.swift; sourceTree = "<group>"; };
 		F07E207F24E9CC2B004DFB8C /* DrugListEditState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugListEditState.swift; sourceTree = "<group>"; };
 		F094CF4D247B710300CE50BA /* AutoCancel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCancel.swift; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 				4513595F239A2BCC00EB2D31 /* DefaultData.swift */,
 				45DA2BBE2324C93E00649270 /* MedicineLogDataManager.swift */,
 				45452B8C235D49D400273D79 /* TestingPlayground.playground */,
+				F075605C24EC5A4F00E81463 /* GlobalUtilityFunctions.swift */,
 			);
 			path = CoreLogic;
 			sourceTree = "<group>";
@@ -540,6 +543,7 @@
 				459679FB2337204C001DCBA1 /* Formatting.swift in Sources */,
 				F094CF4E247B710300CE50BA /* AutoCancel.swift in Sources */,
 				F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */,
+				F075605D24EC5A4F00E81463 /* GlobalUtilityFunctions.swift in Sources */,
 				45452B8B235D308700273D79 /* CoreInsights.swift in Sources */,
 				45DA2BC1232532E500649270 /* AppStateError.swift in Sources */,
 				F0BB568124E760FB00BF91F2 /* MedicineEntryDetailsViewState.swift in Sources */,
