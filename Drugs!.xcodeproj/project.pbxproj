@@ -46,6 +46,7 @@
 		F02262542471AA8C00F31141 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02262522471AA8C00F31141 /* Components.swift */; };
 		F02262552471AA8C00F31141 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02262522471AA8C00F31141 /* Components.swift */; };
 		F02892F024EB87B7005A40D9 /* RootAppStartupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02892EF24EB87B7005A40D9 /* RootAppStartupView.swift */; };
+		F02892F524EBA28A005A40D9 /* NotificationInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F02892F424EBA28A005A40D9 /* NotificationInfoView.swift */; };
 		F0456CD024705D630017B04E /* DrugSelectionList.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CCF24705D630017B04E /* DrugSelectionList.swift */; };
 		F0456CD124705D630017B04E /* DrugSelectionList.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CCF24705D630017B04E /* DrugSelectionList.swift */; };
 		F0456CD224705D630017B04E /* DrugSelectionList.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CCF24705D630017B04E /* DrugSelectionList.swift */; };
@@ -60,6 +61,7 @@
 		F0456CDD247061450017B04E /* DrugEntryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CDC247061450017B04E /* DrugEntryCell.swift */; };
 		F0456CDE247061450017B04E /* DrugEntryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CDC247061450017B04E /* DrugEntryCell.swift */; };
 		F0456CDF247061450017B04E /* DrugEntryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CDC247061450017B04E /* DrugEntryCell.swift */; };
+		F051DACD24EBC20200D095C9 /* slow-spring-board.caf in Resources */ = {isa = PBXBuildFile; fileRef = F051DACC24EBC20200D095C9 /* slow-spring-board.caf */; };
 		F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
 		F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
 		F05FA181246FAF5A00FF8FE9 /* MedicineLogFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogFileStore.swift */; };
@@ -136,8 +138,10 @@
 		F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryEditorView.swift; sourceTree = "<group>"; };
 		F02262522471AA8C00F31141 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		F02892EF24EB87B7005A40D9 /* RootAppStartupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootAppStartupView.swift; sourceTree = "<group>"; };
+		F02892F424EBA28A005A40D9 /* NotificationInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationInfoView.swift; sourceTree = "<group>"; };
 		F0456CCF24705D630017B04E /* DrugSelectionList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionList.swift; sourceTree = "<group>"; };
 		F0456CDC247061450017B04E /* DrugEntryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryCell.swift; sourceTree = "<group>"; };
+		F051DACC24EBC20200D095C9 /* slow-spring-board.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "slow-spring-board.caf"; sourceTree = "<group>"; };
 		F07E207D24E9CBFF004DFB8C /* RootScreenState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootScreenState.swift; sourceTree = "<group>"; };
 		F07E207F24E9CC2B004DFB8C /* DrugListEditState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugListEditState.swift; sourceTree = "<group>"; };
 		F094CF4D247B710300CE50BA /* AutoCancel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCancel.swift; sourceTree = "<group>"; };
@@ -194,6 +198,7 @@
 		4593B4B0231AFBD000787D91 /* Drugs! */ = {
 			isa = PBXGroup;
 			children = (
+				F051DACC24EBC20200D095C9 /* slow-spring-board.caf */,
 				4593B4BF231AFBD100787D91 /* Info.plist */,
 				4593B4B7231AFBD100787D91 /* Assets.xcassets */,
 				45DA2BB92324B21600649270 /* Standard App Files */,
@@ -268,6 +273,7 @@
 		45DA2BBB2324B28A00649270 /* CoreUI */ = {
 			isa = PBXGroup;
 			children = (
+				F02892F324EBA23F005A40D9 /* Reminders */,
 				F02892F124EB88C7005A40D9 /* Selection */,
 				F02892F224EB896C005A40D9 /* EntryEditing */,
 				F0D289C0248D50DC00FEBA51 /* DrugListEditor */,
@@ -348,6 +354,14 @@
 				F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */,
 			);
 			path = EntryEditing;
+			sourceTree = "<group>";
+		};
+		F02892F324EBA23F005A40D9 /* Reminders */ = {
+			isa = PBXGroup;
+			children = (
+				F02892F424EBA28A005A40D9 /* NotificationInfoView.swift */,
+			);
+			path = Reminders;
 			sourceTree = "<group>";
 		};
 		F071B3A424E7603500C8FB98 /* FeatureStates */ = {
@@ -495,6 +509,7 @@
 			files = (
 				4593B4BE231AFBD100787D91 /* LaunchScreen.storyboard in Resources */,
 				4593B4BB231AFBD100787D91 /* Preview Assets.xcassets in Resources */,
+				F051DACD24EBC20200D095C9 /* slow-spring-board.caf in Resources */,
 				4593B4B8231AFBD100787D91 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -533,6 +548,7 @@
 				45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */,
 				45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */,
 				459679F923371772001DCBA1 /* MedicineEntryDetailsView.swift in Sources */,
+				F02892F524EBA28A005A40D9 /* NotificationInfoView.swift in Sources */,
 				F02262532471AA8C00F31141 /* Components.swift in Sources */,
 				45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */,
 				F07E207E24E9CBFF004DFB8C /* RootScreenState.swift in Sources */,
