@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 struct MedicineEntryDetailsView: View {
@@ -8,7 +9,7 @@ struct MedicineEntryDetailsView: View {
         return VStack(alignment: .leading) {
             Text(detailsState.viewModel.displayDate)
                 .font(.body)
-            LazyVStack {
+            VStack {
                 ForEach (detailsState.viewModel.displayModels, id: \.self) { item in
                     DetailEntryModelCell(model: item)
                         .listRowInsets(EdgeInsets())
@@ -104,13 +105,19 @@ public struct DetailEntryModel: Identifiable, EquatableFileStorable {
 	let ingredientList: String
 }
 
-#if DEBUG
 
+#if DEBUG
 struct DrugDetailView_Previews: PreviewProvider {
+    @State var selected: MedicineEntry = DefaultDrugList.shared.defaultEntry
+    static var cancellable: AnyCancellable?
     static var previews: some View {
-        MedicineEntryDetailsView()
-            .environmentObject(makeTestMedicineOperator())
+        let data = makeTestMedicineOperator()
+        let state = MedicineEntryDetailsViewState(data)
+        cancellable = data.mainEntryListStream.sink(receiveValue: {
+            guard let first = $0.first else { return }
+            state.setSelected(first)
+        })
+        return MedicineEntryDetailsView().environmentObject(state)
     }
 }
-
 #endif

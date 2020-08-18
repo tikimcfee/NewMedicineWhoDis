@@ -9,9 +9,9 @@ final class DrugSelectionContainerInProgressState: ObservableObject {
     @Published var currentInfo = AvailabilityInfo()
     @Published var availableDrugs = AvailableDrugList.defaultList
     @Published var currentSelectedDrug: Drug?
-    @Published private var inProgressEntry: InProgressEntry
+    @Published var inProgressEntry: InProgressEntry
 
-    var inProgressEntrySubject: CurrentValueSubject<InProgressEntry, Never>
+    private var inProgressEntrySubject: CurrentValueSubject<InProgressEntry, Never>
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
@@ -23,16 +23,16 @@ final class DrugSelectionContainerInProgressState: ObservableObject {
         // Start publishing data
         dataManager.availabilityInfoStream
             .receive(on: RunLoop.main)
-            .assign(to: \.currentInfo, on: self)
+            .sink(receiveValue: { [weak self] in self?.currentInfo = $0 })
             .store(in: &cancellables)
 
         dataManager.drugListStream
             .receive(on: RunLoop.main)
-            .assign(to: \.availableDrugs, on: self)
+            .sink(receiveValue: { [weak self] in self?.availableDrugs = $0 })
             .store(in: &cancellables)
 
         inProgressEntrySubject
-            .assign(to: \.inProgressEntry, on: self)
+            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0 })
             .store(in: &cancellables)
     }
 
@@ -47,6 +47,10 @@ final class DrugSelectionContainerInProgressState: ObservableObject {
 
     func count(for drug: Drug) -> Int? {
         return inProgressEntry.entryMap[drug]
+    }
+
+    func containerStateStream() -> AnyPublisher<InProgressEntry, Never> {
+        return inProgressEntrySubject.eraseToAnyPublisher()
     }
 }
 
@@ -66,7 +70,7 @@ struct DrugSelectionListView: View {
     private var drugCells: some View {
         return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
-                inProgressEntry: $viewState.inProgressEntrySubject.value,
+                inProgressEntry: $viewState.inProgressEntry,
                 currentSelectedDrug: $viewState.currentSelectedDrug,
                 trackedDrug: drug,
                 canTake: viewState.currentInfo.canTake(drug)

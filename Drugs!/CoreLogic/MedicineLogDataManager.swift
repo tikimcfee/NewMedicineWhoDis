@@ -80,14 +80,35 @@ public class MedicineLogDataManager: ObservableObject {
             .eraseToAnyPublisher()
     }
 
+    static var _trackedStreamNumber = 0
+    var streamRequestNumber: Int {
+        get { Self._trackedStreamNumber = Self._trackedStreamNumber + 1; return Self._trackedStreamNumber }
+        set { Self._trackedStreamNumber = newValue }
+    }
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
-        Publishers.CombineLatest3
+        let streamNumber = streamRequestNumber
+        var refreshCount = 0
+        return Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)
             .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
-                logd { Event("Publishing refresh time \(updateInterval)", .debug) }
+                logd { Event("Publishing refresh to [\(streamNumber)] (\(refreshCount) times) ", .debug) }
+                refreshCount = refreshCount + 1
                 return list.availabilityInfo(updateInterval, drugs)
             }
             .eraseToAnyPublisher()
+    }
+}
+
+// Combine API... oh lawd here we go
+extension MedicineLogDataManager {
+    func getLatestEntryStream(for targetId: String?) -> AnyPublisher<MedicineEntry?, Never> {
+        // TODO: This is sssssllllooooowww... consider backing the store with a dict
+        guard let targetId = targetId else {
+            return Just(nil).eraseToAnyPublisher()
+        }
+        return mainEntryListStream.map {
+            $0.first(where: { $0.id == targetId })
+        }.eraseToAnyPublisher()
     }
 }
 

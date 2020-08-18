@@ -41,7 +41,7 @@ public final class DrugSelectionContainerViewState: ObservableObject {
     }
 
     var padStateStream: AnyPublisher<InProgressEntry, Never> {
-        return selectionState.inProgressEntrySubject.eraseToAnyPublisher()
+        return selectionState.containerStateStream()
     }
 }
 

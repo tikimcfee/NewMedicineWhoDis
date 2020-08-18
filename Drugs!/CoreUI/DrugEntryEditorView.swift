@@ -19,7 +19,7 @@ public final class DrugEntryEditorState: ObservableObject {
         self.entryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
         entryPadState.setInProgressEntry(sourceEntry.editableEntry)
         entryPadState.padStateStream
-            .assign(to: \.inProgressEntry, on: self)
+            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0 })
             .store(in: &cancellables)
 	}
 
@@ -32,7 +32,8 @@ public final class DrugEntryEditorState: ObservableObject {
         safeCopy.date = inProgressEntry.date
         safeCopy.drugsTaken = inProgressEntry.entryMap
 
-        dataManager.updateEntry(updatedEntry: sourceEntry) { result in
+        dataManager.updateEntry(updatedEntry: safeCopy) { [weak self] result in
+            guard let self = self else { return }
             switch result {
                 case .success:
                     self.editorIsVisible = false
@@ -70,7 +71,9 @@ struct DrugEntryEditorView: View {
 			.padding(8)
 			
             Components.fullWidthButton("Save changes", editorState.saveEdits).padding(8)
-		}.background(Color(red: 0.8, green: 0.9, blue: 0.9))
+		}
+        .background(Color(red: 0.8, green: 0.9, blue: 0.9))
+        .onDisappear(perform: { editorState.editorIsVisible = false })
 		.alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),

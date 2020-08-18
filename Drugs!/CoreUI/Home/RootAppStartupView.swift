@@ -26,10 +26,6 @@ struct RootDrugView: View {
             saveButton.padding(4.0)
             NavigationLink(
                 destination: makeNewDetailsView(),
-                // TODO: for some reason, this does not work:
-                // $rootScreenState.detailsState.haveSelection
-                // I had to manually sink() inner state to the outer one,
-                // and use the binding from that. Not great, but it works.
                 isActive: $rootScreenState.haveSelection
             ) { EmptyView() }
         }

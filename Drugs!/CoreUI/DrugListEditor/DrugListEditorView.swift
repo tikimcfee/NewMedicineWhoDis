@@ -46,12 +46,10 @@ struct DrugListEditorView: View {
 
     private var subviewDrugList: some View {
         return ScrollView {
-            LazyVStack{
+            VStack{
                 ForEach(drugList, id: \.self) { drug in
                     HStack {
-                        VStack(alignment: .leading) {
-                            textGroup(drug)
-                        }
+                        textGroup(drug)
                         Spacer()
                         Image.init(systemName: "pencil")
                             .padding(4)
