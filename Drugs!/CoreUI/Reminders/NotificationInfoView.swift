@@ -22,11 +22,20 @@ public final class NotificationInfoViewState: ObservableObject {
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
+    }
 
+    func didAppear() {
+        requestPermissions()
+        fetchCurrentNotifications()
         Timer.publish(every: 5, on: .current, in: .common)
             .autoconnect()
             .sink(receiveValue: { [weak self] _ in self?.fetchCurrentNotifications() })
             .store(in: &cancellables)
+    }
+
+    func didDisappear() {
+        print("Stopping!")
+        cancellables = Set()
     }
 
     var permissionStateStream: AnyPublisher<Bool, Never> {
@@ -104,7 +113,10 @@ public struct NotificationInfoView: View {
                     .padding(8)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }.boringBorder
-            testButtons
+
+            // TODO: Remove test buttons or abstract cleanly
+//            testButtons
+
         }.padding(8)
         .alert(item: $deleteRequestModel) { model in
             Alert(
@@ -121,12 +133,12 @@ public struct NotificationInfoView: View {
                 ? AnyView(ActivityIndicator(isAnimating: .constant(true), style: .medium))
                 : AnyView(EmptyView())
         )
-        .onAppear(
-            perform: {
-                viewState.requestPermissions()
-                viewState.fetchCurrentNotifications()
-            }
-        )
+        .onAppear(perform: {
+            viewState.didAppear()
+        })
+        .onDisappear(perform: {
+            viewState.didDisappear()
+        })
     }
 
     private var notificationListView: some View {
