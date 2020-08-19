@@ -2,11 +2,19 @@ import SwiftUI
 import Combine
 
 struct RootAppStartupView: View {
+    @EnvironmentObject var dataManager: MedicineLogDataManager
+
     var body: some View {
         NavigationView {
-            HomeDrugView()
+//            HomeDrugView()
+//                .navigationBarTitle(
+//                    Text("When did I..."),
+//                    displayMode: .inline
+//                )
+            NotificationInfoView()
+                .environmentObject(NotificationInfoViewState(dataManager))
                 .navigationBarTitle(
-                    Text("When did I..."),
+                    Text("Upcoming notifications:"),
                     displayMode: .inline
                 )
         }.navigationViewStyle(

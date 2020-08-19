@@ -7,21 +7,36 @@ public struct NotificationInfoViewModel: Identifiable {
     let titleText: String
     let messageText: String
     let triggerDateText: String
+    let deleteTitleName: String
+    let triggerDate: Date
     public var id: String { return notificationId }
 }
 
 public final class NotificationInfoViewState: ObservableObject {
+    private let dataManager: MedicineLogDataManager
+    private var cancellables = Set<AnyCancellable>()
 
     @Published var permissionsGranted = false
     @Published var notificationModels = [NotificationInfoViewModel]()
-    private var cancellables = Set<AnyCancellable>()
+    @Published var fetchActive = false
 
-    init() {
+    init(_ dataManager: MedicineLogDataManager) {
+        self.dataManager = dataManager
 
+        Timer.publish(every: 5, on: .current, in: .common)
+            .autoconnect()
+            .sink(receiveValue: { [weak self] _ in self?.fetchCurrentNotifications() })
+            .store(in: &cancellables)
     }
 
     var permissionStateStream: AnyPublisher<Bool, Never> {
         return $permissionsGranted.eraseToAnyPublisher()
+    }
+
+    func removeExistingNotification(_ notificationId: String) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [notificationId])
+        fetchCurrentNotifications()
     }
 
     func removeCurrentNotifications() {
@@ -33,11 +48,20 @@ public final class NotificationInfoViewState: ObservableObject {
     }
 
     func fetchCurrentNotifications() {
-        let center = UNUserNotificationCenter.current()
-        center.getPendingNotificationRequests { [weak self] requests in
-            let viewModels = requests.compactMap{ $0.asInfoViewModel }
-            asyncMain {
-                self?.notificationModels = viewModels
+        guard !fetchActive else { return }
+        asyncMain { [weak self] in
+            self?.fetchActive = true
+            logd{ Event("Fetching pending notifications...", .debug) }
+            let center = UNUserNotificationCenter.current()
+            center.getPendingNotificationRequests { requests in
+                let viewModels = requests
+                    .compactMap{ $0.asInfoViewModel }
+                    .sorted { $0.triggerDate > $1.triggerDate}
+
+                asyncMain {
+                    self?.notificationModels = viewModels
+                    self?.fetchActive = false
+                }
             }
         }
     }
@@ -55,7 +79,7 @@ public final class NotificationInfoViewState: ObservableObject {
         }
     }
 
-    func scheduleForDrug(_ drug: Drug = Drug.init("TestDrug", [], 0.001)) {
+    func scheduleForDrug(_ drug: Drug = Drug.init("TestDrug", [], 0.1)) {
         let notificationCenter = UNUserNotificationCenter.current()
         let request = drug.asNotificationRequest
         notificationCenter.add(request) { [weak self] error in
@@ -71,26 +95,32 @@ public final class NotificationInfoViewState: ObservableObject {
 public struct NotificationInfoView: View {
     @EnvironmentObject private var viewState: NotificationInfoViewState
 
+    @State private var deleteRequestModel: NotificationInfoViewModel? = nil
+
     public var body: some View {
-        return VStack(alignment: .center) {
+        VStack(alignment: .leading) {
             ScrollView {
                 notificationListView
+                    .padding(8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }.boringBorder
-
-            Button(action: { viewState.requestPermissions() }) {
-                Text("Request notification permissions")
-            }.padding(8).boringBorder
-
-            if viewState.permissionsGranted {
-                Button(action: { viewState.scheduleForDrug() }) {
-                    Text("Schedule default notification test")
-                }.padding(8).boringBorder
-
-                Button(action: { viewState.removeCurrentNotifications() }) {
-                    Text("Clear pending notifications")
-                }.padding(8).boringBorder
-            }
+            testButtons
+        }.padding(8)
+        .alert(item: $deleteRequestModel) { model in
+            Alert(
+                title: Text("Delete reminder for \(model.deleteTitleName)?"),
+                message: nil,
+                primaryButton: .default(Text("Keep it")),
+                secondaryButton: .destructive(Text("Delete it")) {
+                    viewState.removeExistingNotification(model.notificationId)
+                }
+            )
         }
+        .navigationBarItems(
+            leading: viewState.fetchActive
+                ? AnyView(ActivityIndicator(isAnimating: .constant(true), style: .medium))
+                : AnyView(EmptyView())
+        )
         .onAppear(
             perform: {
                 viewState.requestPermissions()
@@ -100,17 +130,50 @@ public struct NotificationInfoView: View {
     }
 
     private var notificationListView: some View {
-        return ForEach(viewState.notificationModels, id: \.notificationId) { model in
-            VStack(alignment: .leading, spacing: 4) {
-                VStack(alignment: .leading) {
-                    Text(model.titleText).font(.body).fontWeight(.semibold)
-                    Text(model.messageText).font(.subheadline)
-                }.padding(8).frame(maxWidth: .infinity, alignment: .leading).boringBorder
-                Text(model.triggerDateText).font(.caption)
-                    .fontWeight(.light)
-                Text(model.notificationId).font(.caption)
-                    .fontWeight(.ultraLight)
-            }.padding(8)
+        ForEach(viewState.notificationModels, id: \.notificationId) { model in
+            VStack(alignment: .leading, spacing: 2) {
+                // Preview box
+                ZStack(alignment: .trailing) {
+                    VStack(alignment: .leading) {
+                        Text(model.titleText).font(.headline).fontWeight(.light)
+                        Text(model.messageText).font(.subheadline).fontWeight(.thin)
+                    }.padding(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .boringBorder
+
+                    // Remove
+                    Image(systemName: "minus.circle.fill")
+                        .imageScale(.large)
+                        .foregroundColor(Color.init(.displayP3, red: 1, green: 0, blue: 0))
+                        .padding(8)
+                        .asButton { deleteRequestModel = model }
+                }.background(Color(.displayP3, red: 0, green: 0, blue: 0, opacity: 0.1))
+
+                // Schedule info
+                Text(model.triggerDateText)
+                    .font(.caption)
+                    .fontWeight(.thin)
+                    .italic()
+            }
+            Divider()
+        }.animation(.default)
+    }
+
+    private var testButtons: some View {
+        VStack(spacing: 2) {
+            if viewState.permissionsGranted {
+                Components.fullWidthButton("Schedule default notification test") {
+                    viewState.scheduleForDrug()
+                }
+
+                Components.fullWidthButton("Clear pending notifications") {
+                    viewState.removeCurrentNotifications()
+                }
+            } else {
+                Components.fullWidthButton("Request notification permissions") {
+                    viewState.requestPermissions()
+                }
+            }
         }
     }
 }
@@ -125,6 +188,7 @@ extension Drug {
         content.title = "You can take \(drugName)"
         content.body = "Scheduled reminder for \(dateFormatterSmall.string(from: sourceDate))."
         content.sound = UNNotificationSound(named: .init("slow-spring-board.caf"))
+        content.userInfo = ["drugName": drugName]
 
         // Create time to notify
         let requestedComponents = calendar.dateComponents(
@@ -152,7 +216,7 @@ extension UNNotificationRequest {
     var asInfoViewModel: NotificationInfoViewModel? {
         guard let trigger = trigger as? UNCalendarNotificationTrigger,
               let triggerDate = trigger.nextTriggerDate(),
-              let formattedTriggerDate = dateFormatterSmall.string(for: triggerDate)
+              let drugName = content.userInfo["drugName"] as? String
             else { return nil }
         
         let timeUntilTrigger = Date().distanceString(triggerDate,
@@ -162,7 +226,9 @@ extension UNNotificationRequest {
             notificationId: identifier,
             titleText: content.title,
             messageText: content.body,
-            triggerDateText: "Scheduled for \(formattedTriggerDate), \(timeUntilTrigger)."
+            triggerDateText: "Scheduled for \(timeUntilTrigger).",
+            deleteTitleName: drugName,
+            triggerDate: triggerDate
         )
     }
 }
@@ -176,7 +242,7 @@ struct NotificationInfoView_Previews: PreviewProvider {
     }
 
     static var previews: some View {
-        let state = NotificationInfoViewState()
+        let state = NotificationInfoViewState(makeTestMedicineOperator())
         state.notificationModels = testModels()
         return NotificationInfoView().environmentObject(state)
     }
