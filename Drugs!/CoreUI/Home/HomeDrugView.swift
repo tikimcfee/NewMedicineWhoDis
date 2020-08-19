@@ -90,9 +90,13 @@ struct ContentView_Previews: PreviewProvider {
     private static let data = makeTestMedicineOperator()
     static var previews: some View {
         Group {
+            let dataManager = makeTestMedicineOperator()
+            let notificationState = NotificationInfoViewState(dataManager)
+            let scheduler = NotificationScheduler(notificationState: notificationState)
+            let rootState = RootScreenState(dataManager, scheduler)
             RootAppStartupView()
                 .environmentObject(data)
-                .environmentObject(RootScreenState(data))
+                .environmentObject(rootState)
         }
     }
 }

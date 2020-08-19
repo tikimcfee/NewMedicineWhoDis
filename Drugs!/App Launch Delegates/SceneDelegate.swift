@@ -35,10 +35,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 		let log = MedicineLogFileStore()
         let appDataResult = log.load().applicationData
         let dataManager = MedicineLogDataManager(medicineStore: log, appData: appDataResult)
-        let rootState = RootScreenState(dataManager)
+        let notificationState = NotificationInfoViewState(dataManager)
+        let notificationScheduler = NotificationScheduler(notificationState: notificationState)
+        let rootState = RootScreenState(dataManager, notificationScheduler)
         let contentView = RootAppStartupView()
             .environmentObject(dataManager)
             .environmentObject(rootState)
+            .environmentObject(notificationState)
 
         self.window?.rootViewController = UIHostingController(rootView: contentView)
         self.window?.makeKeyAndVisible()

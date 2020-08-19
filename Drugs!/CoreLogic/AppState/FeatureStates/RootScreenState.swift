@@ -3,6 +3,7 @@ import Combine
 
 public final class RootScreenState: ObservableObject {
     private let dataManager: MedicineLogDataManager
+    private let notificationScheduler: NotificationScheduler
     private var cancellables = Set<AnyCancellable>()
 
     // Output
@@ -15,10 +16,12 @@ public final class RootScreenState: ObservableObject {
     @Published var inProgressEntry = InProgressEntry()
     @Published var saveError: AppStateError? = nil
 
-    init(_ dataManager: MedicineLogDataManager) {
+    init(_ dataManager: MedicineLogDataManager,
+         _ notificationScheduler: NotificationScheduler) {
         self.dataManager = dataManager
         self.detailsState = MedicineEntryDetailsViewState(dataManager)
         self.createEntryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
+        self.notificationScheduler = notificationScheduler
 
         dataManager.mainEntryListStream
             .receive(on: RunLoop.main)
@@ -54,12 +57,15 @@ public final class RootScreenState: ObservableObject {
             return
         }
 
-        dataManager.addEntry(medicineEntry: createNewEntry(with: drugMap)) { result in
+        let newEntry = createNewEntry(with: drugMap)
+        dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
             switch result {
             case .success:
-                self.createEntryPadState.setInProgressEntry(InProgressEntry())
+                self?.createEntryPadState.setInProgressEntry(InProgressEntry())
+                self?.notificationScheduler
+                    .scheduleLocalNotifications(for: Array(drugMap.keys))
             case .failure(let saveError):
-                self.saveError = .saveError(cause: saveError)
+                self?.saveError = .saveError(cause: saveError)
             }
         }
     }

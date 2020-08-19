@@ -2,7 +2,7 @@ import UserNotifications
 import Combine
 import SwiftUI
 
-public struct NotificationInfoViewModel: Identifiable {
+public struct NotificationInfoViewModel: Identifiable, Equatable {
     let notificationId: String
     let titleText: String
     let messageText: String
@@ -12,30 +12,68 @@ public struct NotificationInfoViewModel: Identifiable {
     public var id: String { return notificationId }
 }
 
+public struct NotificationScheduler {
+    public let notificationState: NotificationInfoViewState
+
+    func scheduleLocalNotification(for drug: Drug) {
+        notificationState.scheduleForDrug(drug)
+    }
+
+    func scheduleLocalNotifications(for drugs: [Drug]) {
+        drugs.forEach{ scheduleLocalNotification(for: $0) }
+    }
+}
+
 public final class NotificationInfoViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 
-    @Published var permissionsGranted = false
+    // Internal
+    @Published private var pendingRequests = [UNNotificationRequest]()
+
+    // Input
+    @Published var updateTicker = Date()
+
+    // View state
     @Published var notificationModels = [NotificationInfoViewModel]()
+    @Published var permissionsGranted = false
     @Published var fetchActive = false
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
-    }
 
-    func didAppear() {
-        requestPermissions()
-        fetchCurrentNotifications()
-        Timer.publish(every: 5, on: .current, in: .common)
-            .autoconnect()
-            .sink(receiveValue: { [weak self] _ in self?.fetchCurrentNotifications() })
+        $updateTicker
+            .map{ date in
+                logd{ Event("Ticker got new date: \(date). Fetching pending notifications...", .debug) }
+
+                let requestGroup = DispatchGroup.init()
+
+                // There's gotta be a better way to make this synchronous in the stream...
+                requestGroup.enter()
+                let center = UNUserNotificationCenter.current()
+                var fetchedRequests: [UNNotificationRequest] = []
+                center.getPendingNotificationRequests { requests in
+                    fetchedRequests = requests
+                    requestGroup.leave()
+                }
+                requestGroup.wait()
+
+                logd{ Event("Ticker refreshed fetch requests: \(fetchedRequests.count)", .debug) }
+                return fetchedRequests
+            }
+            .sink(receiveValue: { [weak self] in self?.pendingRequests = $0 })
             .store(in: &cancellables)
-    }
 
-    func didDisappear() {
-        print("Stopping!")
-        cancellables = Set()
+        $pendingRequests
+            .map{ requests in requests
+                .compactMap{ $0.asInfoViewModel }
+                .sorted{ $0.deleteTitleName < $1.deleteTitleName }
+            }
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in
+                self?.notificationModels = $0
+            })
+            .store(in: &cancellables)
     }
 
     var permissionStateStream: AnyPublisher<Bool, Never> {
@@ -63,12 +101,8 @@ public final class NotificationInfoViewState: ObservableObject {
             logd{ Event("Fetching pending notifications...", .debug) }
             let center = UNUserNotificationCenter.current()
             center.getPendingNotificationRequests { requests in
-                let viewModels = requests
-                    .compactMap{ $0.asInfoViewModel }
-                    .sorted { $0.triggerDate > $1.triggerDate}
-
                 asyncMain {
-                    self?.notificationModels = viewModels
+                    self?.pendingRequests = requests
                     self?.fetchActive = false
                 }
             }
@@ -103,7 +137,6 @@ public final class NotificationInfoViewState: ObservableObject {
 
 public struct NotificationInfoView: View {
     @EnvironmentObject private var viewState: NotificationInfoViewState
-
     @State private var deleteRequestModel: NotificationInfoViewModel? = nil
 
     public var body: some View {
@@ -115,9 +148,10 @@ public struct NotificationInfoView: View {
             }.boringBorder
 
             // TODO: Remove test buttons or abstract cleanly
-//            testButtons
+            testButtons
 
-        }.padding(8)
+        }
+        .padding(8)
         .alert(item: $deleteRequestModel) { model in
             Alert(
                 title: Text("Delete reminder for \(model.deleteTitleName)?"),
@@ -133,11 +167,8 @@ public struct NotificationInfoView: View {
                 ? AnyView(ActivityIndicator(isAnimating: .constant(true), style: .medium))
                 : AnyView(EmptyView())
         )
-        .onAppear(perform: {
-            viewState.didAppear()
-        })
-        .onDisappear(perform: {
-            viewState.didDisappear()
+        .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect(), perform: { date in
+            viewState.updateTicker = date
         })
     }
 
@@ -225,11 +256,22 @@ extension Drug {
 }
 
 extension UNNotificationRequest {
+    var logInfo: String {
+        return String(describing: trigger)
+            .appending("\n--")
+            .appending(String(describing: (trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()))
+            .appending("\n--")
+            .appending(String(describing: content.userInfo["drugName"] as? String))
+    }
+
     var asInfoViewModel: NotificationInfoViewModel? {
         guard let trigger = trigger as? UNCalendarNotificationTrigger,
               let triggerDate = trigger.nextTriggerDate(),
               let drugName = content.userInfo["drugName"] as? String
-            else { return nil }
+        else {
+            loge{ Event("Notification missing data: \(logInfo)", .error) }
+            return nil
+        }
         
         let timeUntilTrigger = Date().distanceString(triggerDate,
                                                      postfixSelfIsBefore: "from now",

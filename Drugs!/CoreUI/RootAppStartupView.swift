@@ -2,8 +2,6 @@ import SwiftUI
 import Combine
 
 struct RootAppStartupView: View {
-    @EnvironmentObject var dataManager: MedicineLogDataManager
-
     var body: some View {
         TabView {
             NavigationView {
@@ -19,7 +17,6 @@ struct RootAppStartupView: View {
             }
 
             NotificationInfoView()
-                .environmentObject(NotificationInfoViewState(dataManager))
                 .tabItem {
                     Image(systemName: "calendar.badge.clock")
                     Text("Reminders")
@@ -32,7 +29,9 @@ struct RootAppStartupView: View {
 struct RootAppStartupView_Previews: PreviewProvider {
     static var previews: some View {
         let dataManager = makeTestMedicineOperator()
-        let rootState = RootScreenState(dataManager)
+        let notificationState = NotificationInfoViewState(dataManager)
+        let scheduler = NotificationScheduler(notificationState: notificationState)
+        let rootState = RootScreenState(dataManager, scheduler)
         return RootAppStartupView()
             .environmentObject(dataManager)
             .environmentObject(rootState)
