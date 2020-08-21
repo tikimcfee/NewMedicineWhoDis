@@ -1,6 +1,12 @@
 import SwiftUI
 import Combine
 
+protocol ACoolNameForAStartStopPublisher {
+    var isPublishing: Bool { get }
+    func startPublishing()
+    func stopPublishing()
+}
+
 public final class RootScreenState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private let notificationScheduler: NotificationScheduler

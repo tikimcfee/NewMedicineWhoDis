@@ -12,129 +12,6 @@ public struct NotificationInfoViewModel: Identifiable, Equatable {
     public var id: String { return notificationId }
 }
 
-public struct NotificationScheduler {
-    public let notificationState: NotificationInfoViewState
-
-    func scheduleLocalNotification(for drug: Drug) {
-        notificationState.scheduleForDrug(drug)
-    }
-
-    func scheduleLocalNotifications(for drugs: [Drug]) {
-        drugs.forEach{ scheduleLocalNotification(for: $0) }
-    }
-}
-
-public final class NotificationInfoViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
-    private var cancellables = Set<AnyCancellable>()
-
-    // Internal
-    @Published private var pendingRequests = [UNNotificationRequest]()
-
-    // Input
-    @Published var updateTicker = Date()
-
-    // View state
-    @Published var notificationModels = [NotificationInfoViewModel]()
-    @Published var permissionsGranted = false
-    @Published var fetchActive = false
-
-    init(_ dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-
-        $updateTicker
-            .map{ date in
-                logd{ Event("Ticker got new date: \(date). Fetching pending notifications...", .debug) }
-
-                let requestGroup = DispatchGroup.init()
-
-                // There's gotta be a better way to make this synchronous in the stream...
-                requestGroup.enter()
-                let center = UNUserNotificationCenter.current()
-                var fetchedRequests: [UNNotificationRequest] = []
-                center.getPendingNotificationRequests { requests in
-                    fetchedRequests = requests
-                    requestGroup.leave()
-                }
-                requestGroup.wait()
-
-                logd{ Event("Ticker refreshed fetch requests: \(fetchedRequests.count)", .debug) }
-                return fetchedRequests
-            }
-            .sink(receiveValue: { [weak self] in self?.pendingRequests = $0 })
-            .store(in: &cancellables)
-
-        $pendingRequests
-            .map{ requests in requests
-                .compactMap{ $0.asInfoViewModel }
-                .sorted{ $0.deleteTitleName < $1.deleteTitleName }
-            }
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in
-                self?.notificationModels = $0
-            })
-            .store(in: &cancellables)
-    }
-
-    var permissionStateStream: AnyPublisher<Bool, Never> {
-        return $permissionsGranted.eraseToAnyPublisher()
-    }
-
-    func removeExistingNotification(_ notificationId: String) {
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [notificationId])
-        fetchCurrentNotifications()
-    }
-
-    func removeCurrentNotifications() {
-        let center = UNUserNotificationCenter.current()
-        center.removeAllPendingNotificationRequests()
-        DispatchQueue.main.async { [weak self] in
-            self?.notificationModels = []
-        }
-    }
-
-    func fetchCurrentNotifications() {
-        guard !fetchActive else { return }
-        asyncMain { [weak self] in
-            self?.fetchActive = true
-            logd{ Event("Fetching pending notifications...", .debug) }
-            let center = UNUserNotificationCenter.current()
-            center.getPendingNotificationRequests { requests in
-                asyncMain {
-                    self?.pendingRequests = requests
-                    self?.fetchActive = false
-                }
-            }
-        }
-    }
-
-    func requestPermissions() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { [weak self] granted, error in
-            if let error = error {
-                loge{ Event("Failed to acquire notificaiton permissions: \(error)", .error)}
-            }
-            logd{ Event("Notifcation grant state: \(granted)", .debug)}
-            asyncMain {
-                self?.permissionsGranted = granted
-            }
-        }
-    }
-
-    func scheduleForDrug(_ drug: Drug = Drug.init("TestDrug", [], 0.1)) {
-        let notificationCenter = UNUserNotificationCenter.current()
-        let request = drug.asNotificationRequest
-        notificationCenter.add(request) { [weak self] error in
-            if let error = error {
-                loge{ Event("Failed to schedule notification: \(error)", .error) }
-            }
-            logd{ Event("Notification scheduling resolved", .debug) }
-            self?.fetchCurrentNotifications()
-        }
-    }
-}
-
 public struct NotificationInfoView: View {
     @EnvironmentObject private var viewState: NotificationInfoViewState
     @State private var deleteRequestModel: NotificationInfoViewModel? = nil
@@ -162,14 +39,11 @@ public struct NotificationInfoView: View {
                 }
             )
         }
-        .navigationBarItems(
-            leading: viewState.fetchActive
-                ? AnyView(ActivityIndicator(isAnimating: .constant(true), style: .medium))
-                : AnyView(EmptyView())
-        )
-        .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect(), perform: { date in
-            viewState.updateTicker = date
+        .onAppear(perform: {
+                    viewState.startPublishing()
+
         })
+        .onDisappear(perform: { viewState.stopPublishing() })
     }
 
     private var notificationListView: some View {
