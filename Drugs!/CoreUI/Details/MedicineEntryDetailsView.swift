@@ -14,6 +14,7 @@ struct MedicineEntryDetailsView: View {
                     ForEach (detailsState.viewModel.displayModels, id: \.self) { item in
                         DetailEntryModelCell(model: item)
                             .listRowInsets(EdgeInsets())
+                            .drawingGroup() // this thing apparrently takes forever to render
                     }
                 }
             }

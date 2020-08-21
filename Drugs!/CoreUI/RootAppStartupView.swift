@@ -27,7 +27,7 @@ struct RootAppStartupView: View {
                 }
             }
         }.tabItem {
-            Image(systemName: "scroll.fill")
+            Image(systemName: "list.bullet")
             Text("Medicine Log")
         }.tag(TabTags.home)
     }
@@ -43,7 +43,7 @@ struct RootAppStartupView: View {
                 }
             }
         }.tabItem {
-            Image(systemName: "calendar.badge.clock")
+            Image(systemName: "calendar.circle.fill")
             Text("Reminders")
         }.tag(TabTags.notifications)
     }
