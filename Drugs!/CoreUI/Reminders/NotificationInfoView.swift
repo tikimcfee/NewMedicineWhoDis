@@ -39,10 +39,7 @@ public struct NotificationInfoView: View {
                 }
             )
         }
-        .onAppear(perform: {
-                    viewState.startPublishing()
-
-        })
+        .onAppear(perform: { viewState.startPublishing() })
         .onDisappear(perform: { viewState.stopPublishing() })
     }
 
