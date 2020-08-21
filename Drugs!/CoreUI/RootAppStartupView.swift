@@ -1,45 +1,61 @@
 import SwiftUI
 import Combine
 
+enum TabTags {
+    case home, notifications
+}
+
 struct RootAppStartupView: View {
-    @State var selectionTag: Int = 0
+
+    @State var selectionTag: TabTags = .home
 
     var body: some View {
         TabView(selection: $selectionTag) {
-            if selectionTag == 0 {
-                NavigationView {
-                    HomeDrugView().navigationBarTitle(
-                        Text("When did I..."),
-                        displayMode: .inline
-                    )
-                }
-                .navigationViewStyle(StackNavigationViewStyle())
-                .tabItem {
-                    Image(systemName: "scroll.fill")
-                    Text("Medicine Log")
-                }
-                .tag(0)
-            }else {
-                Text("WUT 0").tabItem {
-                    Image(systemName: "calendar.badge.clock")
-                    Text("Medicine Log")
-                }.tag(0)
-            }
-
-            if selectionTag == 1 {
-                NotificationInfoView()
-                    .tabItem {
-                        Image(systemName: "calendar.badge.clock")
-                        Text("Reminders")
-                    }.tag(1)
-            } else {
-                Text("WUT 1").tabItem {
-                    Image(systemName: "calendar.badge.clock")
-                    Text("Reminders")
-                }.tag(1)
-            }
-
+            homeViewOrEmpty
+            infoViewOrEmpty
         }
+    }
+
+    private var homeViewOrEmpty: some View {
+        Group {
+            if selectionTag == .home {
+                homeView
+            } else {
+                VStack {
+                    ActivityIndicator(isAnimating: .constant(true), style: .large)
+                    Text("Loading home...")
+                }
+            }
+        }.tabItem {
+            Image(systemName: "scroll.fill")
+            Text("Medicine Log")
+        }.tag(TabTags.home)
+    }
+
+    private var infoViewOrEmpty: some View {
+        Group {
+            if selectionTag == .notifications {
+                NotificationInfoView()
+            } else {
+                VStack {
+                    ActivityIndicator(isAnimating: .constant(true), style: .large)
+                    Text("Loading reminders...")
+                }
+            }
+        }.tabItem {
+            Image(systemName: "calendar.badge.clock")
+            Text("Reminders")
+        }.tag(TabTags.notifications)
+    }
+
+    private var homeView: some View {
+        NavigationView {
+            HomeDrugView().navigationBarTitle(
+                Text("When did I..."),
+                displayMode: .inline
+            )
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

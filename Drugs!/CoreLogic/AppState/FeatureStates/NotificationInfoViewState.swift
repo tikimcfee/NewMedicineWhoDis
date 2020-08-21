@@ -1,49 +1,11 @@
 import Combine
 import SwiftUI
 
-class TimerWrapper : ObservableObject {
-    private static let defaultInterval = 2.0
-    private var timer : Timer!
-
-    @Published var now: Date = Date()
-
-    func start(withTimeInterval interval: Double = defaultInterval) {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(
-            withTimeInterval: interval,
-            repeats: true
-        ){ [weak self] _ in
-            self?.now = Date()
-        }
-    }
-
-    func stop() {
-        timer?.invalidate()
-    }
-
-    deinit {
-        timer?.invalidate()
-        timer = nil
-    }
-}
-
 public final class NotificationInfoViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
     private let manualUpdateSubject = {
         PassthroughSubject<Date, Never>()
-    }()
-//    private let timerWrapper = TimerWrapper()
-
-    private lazy var timerStream: AnyPublisher<Date, Never> = {
-//        timerWrapper.$now
-        Timer.publish(every: 2, on: .current, in: .common)
-            .autoconnect()
-            .map{ _ in Date() }
-            .merge(with: manualUpdateSubject)
-            .merge(with: Just(.init()))
-            .receive(on: DispatchQueue.global())
-            .eraseToAnyPublisher()
     }()
 
     // View state
@@ -51,28 +13,15 @@ public final class NotificationInfoViewState: ObservableObject {
     @Published var permissionsGranted = false
     @Published var fetchActive = false
 
-    // Unpublished state to avoid automatic objectWillChange calls
-    private var publishing = false
-
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
     }
 
     public func startPublishing() {
-        guard !publishing else {
-            logd{ Event("Unbalanced startPublishing()") }
-            return
-        }
-//        timerWrapper.start()
-        publishing = true
+        stopPublishing()
         modelStream
             .subscribe(on: DispatchQueue.global())
             .receive(on: DispatchQueue.main)
-            .handleEvents(
-                receiveSubscription: { _ in logd{ Event("ModelStream subscription started") } },
-                receiveOutput: { model in logd{ Event("Model produced: \(model.count)") } },
-                receiveCancel: { logd{ Event("ModelStream subscription cancelled") } }
-            )
             .sink(receiveValue: { [weak self] value in
                 self?.notificationModels = value
             })
@@ -80,17 +29,21 @@ public final class NotificationInfoViewState: ObservableObject {
     }
 
     public func stopPublishing() {
-        guard publishing else {
-            logd{ Event("Unbalanced stopPublishing()") }
-            return
-        }
-//        timerWrapper.stop()
         cancellables = Set()
-        publishing = false
     }
 
-    var pendingRequestStream: AnyPublisher<[UNNotificationRequest], Never> {
-        return timerStream
+    private func timerStream() -> AnyPublisher<Date, Never> {
+        Timer.publish(every: 2, on: .current, in: .common)
+            .autoconnect()
+            .map{ _ in Date() }
+            .merge(with: manualUpdateSubject)
+            .merge(with: Just(.init()))
+            .receive(on: DispatchQueue.global())
+            .eraseToAnyPublisher()
+    }
+
+    private var pendingRequestStream: AnyPublisher<[UNNotificationRequest], Never> {
+        return timerStream()
             .handleEvents(receiveOutput: { date in
                 logd{ Event("\(date): Fetching pending notifications") }
             })
@@ -111,12 +64,19 @@ public final class NotificationInfoViewState: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    var modelStream: AnyPublisher<[NotificationInfoViewModel], Never> {
-        return pendingRequestStream.map{ requests in
-            requests
-                .compactMap{ $0.asInfoViewModel }
-                .sorted{ $0.deleteTitleName < $1.deleteTitleName }
-        }.eraseToAnyPublisher()
+    private var modelStream: AnyPublisher<[NotificationInfoViewModel], Never> {
+        return pendingRequestStream
+            .map{ requests in
+                requests
+                    .compactMap{ $0.asInfoViewModel }
+                    .sorted{ $0.deleteTitleName < $1.deleteTitleName }
+            }
+            .handleEvents(
+                receiveSubscription: { _ in logd{ Event("ModelStream subscription started") } },
+                receiveOutput: { model in logd{ Event("Model produced: \(model.count)") } },
+                receiveCancel: { logd{ Event("ModelStream subscription cancelled") } }
+            )
+            .eraseToAnyPublisher()
     }
 
     var permissionStateStream: AnyPublisher<Bool, Never> {
