@@ -42,6 +42,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             .environmentObject(dataManager)
             .environmentObject(rootState)
             .environmentObject(notificationState)
+            .onAppear {
+                notificationState.requestPermissions()
+            }
 
         self.window?.rootViewController = UIHostingController(rootView: contentView)
         self.window?.makeKeyAndVisible()

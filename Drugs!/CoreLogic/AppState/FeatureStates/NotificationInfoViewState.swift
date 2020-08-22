@@ -11,7 +11,6 @@ public final class NotificationInfoViewState: ObservableObject {
     // View state
     @Published var notificationModels = [NotificationInfoViewModel]()
     @Published var permissionsGranted = false
-    @Published var fetchActive = false
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
