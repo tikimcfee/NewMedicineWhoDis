@@ -24,8 +24,11 @@ public struct NotificationInfoView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }.boringBorder
 
+
+            #if DEBUG
             // TODO: Remove test buttons or abstract cleanly
             testButtons
+            #endif
 
         }
         .padding(8)

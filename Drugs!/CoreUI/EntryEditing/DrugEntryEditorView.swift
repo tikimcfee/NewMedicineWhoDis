@@ -112,7 +112,7 @@ struct DrugEntryEditorView: View {
 				label: { EmptyView() }
 			).labelsHidden()
 			.frame(height: 64)
-//			.clipped()
+			.clipped()
 		}
 	}
 	
