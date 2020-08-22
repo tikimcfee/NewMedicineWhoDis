@@ -103,6 +103,13 @@ public class MedicineLogDataManager: ObservableObject {
 
 // Combine API... oh lawd here we go
 extension MedicineLogDataManager {
+    func liveChanges(for targetId: String) -> AnyPublisher<MedicineEntry?, Never> {
+        // TODO: This is sssssllllooooowww... consider backing the store with a dict
+        return mainEntryListStream.map{ list in
+            list.first(where: { $0.id == targetId })
+        }.eraseToAnyPublisher()
+    }
+
     func liveChanges(for publisher: Published<String?>.Publisher) -> AnyPublisher<MedicineEntry?, Never> {
         // TODO: This is sssssllllooooowww... consider backing the store with a dict
         return Publishers.CombineLatest(
@@ -139,4 +146,11 @@ private extension MedicineLogDataManager {
 // MARK: Default on-save-sorting. This might be a terrible idea.
 private func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
     return left.date > right.date
+}
+
+extension MedicineLogDataManager {
+    var TEST_getAMedicineEntry: MedicineEntry {
+        return appData.mainEntryList.first
+            ?? DefaultDrugList.shared.defaultEntry
+    }
 }

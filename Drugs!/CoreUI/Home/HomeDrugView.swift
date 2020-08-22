@@ -19,9 +19,20 @@ struct HomeDrugView: View {
     }
 
     private func makeNewDetailsView() -> some View {
-        return MedicineEntryDetailsView()
-            .environmentObject(rootScreenState.detailsState)
-            .onDisappear(perform: { self.rootScreenState.detailsState.removeSelection() })
+        if rootScreenState.isMedicineEntrySelected,
+           let newState = rootScreenState.makeNewDetailsState() {
+            return AnyView(
+                MedicineEntryDetailsView()
+                    .environmentObject(newState)
+                    .onDisappear(perform: {
+                        self.rootScreenState.deselectDetails()
+                    })
+            )
+        } else {
+            return AnyView(
+                EmptyView()
+            )
+        }
     }
 
     private func makeAlert(_ error: Error) -> Alert {

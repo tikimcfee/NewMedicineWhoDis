@@ -112,14 +112,9 @@ public struct DetailEntryModel: Identifiable, EquatableFileStorable {
 #if DEBUG
 struct DrugDetailView_Previews: PreviewProvider {
     @State var selected: MedicineEntry = DefaultDrugList.shared.defaultEntry
-    static var cancellable: AnyCancellable?
     static var previews: some View {
         let data = makeTestMedicineOperator()
-        let state = MedicineEntryDetailsViewState(data)
-        cancellable = data.mainEntryListStream.sink(receiveValue: {
-            guard let first = $0.first else { return }
-            state.setSelected(first)
-        })
+        let state = MedicineEntryDetailsViewState(data, data.TEST_getAMedicineEntry.id)
         return MedicineEntryDetailsView().environmentObject(state)
     }
 }
