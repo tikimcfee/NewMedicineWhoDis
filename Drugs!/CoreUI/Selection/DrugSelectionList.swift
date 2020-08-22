@@ -70,10 +70,10 @@ struct DrugSelectionListView: View {
     private var drugCells: some View {
         return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
             DrugEntryViewCell(
-                inProgressEntry: $viewState.inProgressEntry,
-                currentSelectedDrug: $viewState.currentSelectedDrug,
+                inProgressEntry: self.$viewState.inProgressEntry,
+                currentSelectedDrug: self.self.$viewState.currentSelectedDrug,
                 trackedDrug: drug,
-                canTake: viewState.currentInfo.canTake(drug)
+                canTake: self.viewState.currentInfo.canTake(drug)
             )
         }.padding(4.0)
     }

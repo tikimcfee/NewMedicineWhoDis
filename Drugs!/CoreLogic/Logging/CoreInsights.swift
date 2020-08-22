@@ -56,7 +56,6 @@ public func loge(_ event: () -> Event) {
 	out(event)
 }
 
-import OSLog
 fileprivate func out(_ event: () -> Event) {
 	let theEvent = event()
 	AppEvents.add(theEvent)

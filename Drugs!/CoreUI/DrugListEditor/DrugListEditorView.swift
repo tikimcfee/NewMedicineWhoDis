@@ -52,13 +52,13 @@ struct DrugListEditorView: View {
             VStack{
                 ForEach(drugList, id: \.self) { drug in
                     HStack {
-                        textGroup(drug)
+                        self.textGroup(drug)
                         Spacer()
                         Image.init(systemName: "pencil")
                             .padding(8)
                             .boringBorder
                             .asButton {
-                                drugListEditorState.inProgressEdit.targetDrug = drug
+                                self.drugListEditorState.inProgressEdit.targetDrug = drug
                             }
 
                     }

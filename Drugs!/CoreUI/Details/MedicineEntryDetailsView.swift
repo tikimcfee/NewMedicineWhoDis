@@ -20,15 +20,15 @@ struct MedicineEntryDetailsView: View {
             }
             Spacer()
             Components.fullWidthButton("Edit this entry") {
-                detailsState.startEditing()
+                self.detailsState.startEditing()
             }
 		}
 		.padding(8.0)
-        .navigationBarTitle(Text(detailsState.viewModel.title))
-        .sheet(isPresented: $detailsState.editorIsVisible) {
+        .navigationBarTitle(Text(self.detailsState.viewModel.title))
+        .sheet(isPresented: self.$detailsState.editorIsVisible) {
             DrugEntryEditorView()
-                .environmentObject(detailsState.editorState!)
-                .environmentObject(detailsState.dataManager)
+                .environmentObject(self.detailsState.editorState!)
+                .environmentObject(self.detailsState.dataManager)
         }
     }
 }
