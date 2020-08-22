@@ -60,8 +60,8 @@ extension Date {
 }
 
 extension String {
-    func simplePlural(_ count: Int) -> String {
-        return count == 0 ? ""
+    func simplePlural(_ count: Int, _ defaultIfEmpty: String = "") -> String {
+        return count == 0 ? defaultIfEmpty
             : count != 1 ? "\(count) \(self)s"
             : "\(count) \(self)"
     }

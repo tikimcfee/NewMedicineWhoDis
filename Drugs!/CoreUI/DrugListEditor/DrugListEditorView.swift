@@ -32,21 +32,6 @@ struct DrugListEditorView: View {
         }
     }
 
-    private func textGroup(_ drug: Drug) -> some View {
-        return HStack(alignment: .center) {
-            VStack(alignment: .leading) {
-                Text(drug.drugName)
-                if drug.ingredientList != "" {
-                    Text(drug.ingredientList)
-                        .font(.footnote)
-                }
-            }
-            Spacer()
-            Text(String.init(format: "%.0f hours", drug.hourlyDoseTime))
-                .font(.footnote)
-        }
-    }
-
     private var subviewDrugList: some View {
         return ScrollView {
             VStack{
@@ -70,16 +55,40 @@ struct DrugListEditorView: View {
         }
     }
 
+    private func textGroup(_ drug: Drug) -> some View {
+        return HStack(alignment: .center) {
+            VStack(alignment: .leading) {
+                Text(drug.drugName)
+                if drug.ingredientList != "" {
+                    Text(drug.ingredientList)
+                        .font(.footnote)
+                }
+            }
+            Spacer()
+            Text(String.init(format: "%.0f hours", drug.hourlyDoseTime))
+                .font(.footnote)
+        }
+    }
+
     private var subviewEditor: some View {
         return VStack {
             HStack {
-                Text("Name:")
-                TextField.init(currentDrugName, text: inProgressEdit.updatedName)
+                TextField
+                    .init(currentDrugName, text: inProgressEdit.updatedName)
+                    .padding()
+                    .frame(minHeight: 64, maxHeight: 64, alignment: .center)
+                    .boringBorder
                 Picker(selection: $drugListEditorState.inProgressEdit.updatedDoseTime, label: EmptyView()) {
-                    ForEach((1..<25)) { hour in
-                        Text("\("hour".simplePlural(hour))").tag(hour)
+                    ForEach((0..<25)) { hour in
+                        Text("\("hour".simplePlural(hour, "Any time"))").tag(hour)
                     }
                 }.frame(maxWidth: 128, maxHeight: 64).clipped().boringBorder
+            }
+            HStack {
+                Components.fullWidthButton("Save Changes") {
+                    
+                }
+                .disabled(!drugListEditorState.canSave)
             }
         }
         .padding()

@@ -1,22 +1,41 @@
-import Foundation
 import SwiftUI
+
+struct ComponentFullWidthButtonStyle: ButtonStyle {
+    func makeBody(configuration: ButtonStyle.Configuration) -> some View {
+        ComponentFullWidthButton(configuration: configuration)
+    }
+
+    struct ComponentFullWidthButton: View {
+        let configuration: ButtonStyle.Configuration
+        @Environment(\.isEnabled) private var isEnabled: Bool
+        var body: some View {
+            configuration
+                .label
+                .background(
+                    Rectangle()
+                        .cornerRadius(4.0)
+                        .foregroundColor(
+                            isEnabled
+                                ? Color.buttonBackground
+                                : Color.disabledButtonBackground
+                    )
+                )
+        }
+    }
+}
 
 public class Components {
     public static func fullWidthButton(
         _ label: String,
         _ action: @escaping () -> Void
     ) -> some View {
+
         return Button(action: action) {
             Text(label)
                 .padding(8)
                 .foregroundColor(Color.buttonText)
                 .frame(maxWidth: UIScreen.main.bounds.width)
-                .background(
-                    Rectangle()
-                        .cornerRadius(4.0)
-                        .foregroundColor(Color.buttonBackground)
-                )
-        }
+        }.buttonStyle(ComponentFullWidthButtonStyle())
     }
 
 }

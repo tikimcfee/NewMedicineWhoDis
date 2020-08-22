@@ -138,6 +138,7 @@
 		F01BBBB3246F939600BBC3A3 /* MedicineLogFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineLogFileStore.swift; sourceTree = "<group>"; };
 		F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
 		F021ED1D24EE14E5007147B6 /* NotificationInfoViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationInfoViewState.swift; sourceTree = "<group>"; };
+		F022114024F1A38E000EC089 /* Meds!.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Meds!.entitlements"; sourceTree = "<group>"; };
 		F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryEditorView.swift; sourceTree = "<group>"; };
 		F02262522471AA8C00F31141 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		F02892EF24EB87B7005A40D9 /* RootAppStartupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootAppStartupView.swift; sourceTree = "<group>"; };
@@ -202,6 +203,7 @@
 		4593B4B0231AFBD000787D91 /* Drugs! */ = {
 			isa = PBXGroup;
 			children = (
+				F022114024F1A38E000EC089 /* Meds!.entitlements */,
 				F051DACC24EBC20200D095C9 /* slow-spring-board.caf */,
 				4593B4BF231AFBD100787D91 /* Info.plist */,
 				4593B4B7231AFBD100787D91 /* Assets.xcassets */,
@@ -782,6 +784,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
@@ -798,6 +801,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -807,6 +811,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
@@ -823,6 +828,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

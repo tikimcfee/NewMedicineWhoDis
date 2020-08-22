@@ -17,6 +17,7 @@ extension Color {
 		
 	public static let buttonText = Color.white
 	public static let buttonBackground = Color.init(red: 0.4, green: 0.8, blue: 0.9)
+    public static let disabledButtonBackground = Color.init(red: 0.4, green: 0.8, blue: 0.9, opacity: 0.2)
 
 	public static let timeForNextDose = Color.init(red: 0.2, green: 0.777, blue: 0.888, opacity: 0.3)
     public static let timeForNextDoseReady = Color.init(red: 0.2, green: 0.777, blue: 0.888, opacity: 0.5)
