@@ -19,9 +19,20 @@ struct HomeDrugView: View {
     }
 
     private func makeNewDetailsView() -> some View {
-        return MedicineEntryDetailsView()
-            .environmentObject(rootScreenState.detailsState)
-            .onDisappear(perform: { rootScreenState.detailsState.removeSelection() })
+        if rootScreenState.isMedicineEntrySelected,
+           let newState = rootScreenState.makeNewDetailsState() {
+            return AnyView(
+                MedicineEntryDetailsView()
+                    .environmentObject(newState)
+                    .onDisappear(perform: {
+                        self.rootScreenState.deselectDetails()
+                    })
+            )
+        } else {
+            return AnyView(
+                EmptyView()
+            )
+        }
     }
 
     private func makeAlert(_ error: Error) -> Alert {
@@ -89,12 +100,12 @@ struct HomeMedicineInfoCell: View {
 struct ContentView_Previews: PreviewProvider {
     private static let data = makeTestMedicineOperator()
     static var previews: some View {
-        Group {
-            let dataManager = makeTestMedicineOperator()
-            let notificationState = NotificationInfoViewState(dataManager)
-            let scheduler = NotificationScheduler(notificationState: notificationState)
-            let rootState = RootScreenState(dataManager, scheduler)
-            RootAppStartupView()
+        let dataManager = makeTestMedicineOperator()
+        let notificationState = NotificationInfoViewState(dataManager)
+        let scheduler = NotificationScheduler(notificationState: notificationState)
+        let rootState = RootScreenState(dataManager, scheduler)
+        return Group {
+            return RootAppStartupView()
                 .environmentObject(data)
                 .environmentObject(rootState)
         }

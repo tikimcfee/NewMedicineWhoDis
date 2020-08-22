@@ -73,8 +73,8 @@ struct DrugEntryEditorView: View {
             Components.fullWidthButton("Save changes", editorState.saveEdits).padding(8)
 		}
         .background(Color(red: 0.8, green: 0.9, blue: 0.9))
-        .onDisappear(perform: { editorState.editorIsVisible = false })
-		.alert(item: $editorState.editorError) { error in
+        .onDisappear(perform: { self.editorState.editorIsVisible = false })
+        .alert(item: self.$editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
                 message: Text(error.localizedDescription),

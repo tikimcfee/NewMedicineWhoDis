@@ -35,57 +35,67 @@ public struct NotificationInfoView: View {
                 message: nil,
                 primaryButton: .default(Text("Keep it")),
                 secondaryButton: .destructive(Text("Delete it")) {
-                    viewState.removeExistingNotification(model.notificationId)
+                    self.viewState.removeExistingNotification(model.notificationId)
                 }
             )
         }
-        .onAppear(perform: { viewState.startPublishing() })
-        .onDisappear(perform: { viewState.stopPublishing() })
+        .onAppear(perform: { self.viewState.startPublishing() })
+        .onDisappear(perform: { self.viewState.stopPublishing() })
     }
 
     private var notificationListView: some View {
-        ForEach(viewState.notificationModels, id: \.notificationId) { model in
-            VStack(alignment: .leading, spacing: 2) {
-                // Preview box
-                ZStack(alignment: .trailing) {
-                    VStack(alignment: .leading) {
-                        Text(model.titleText).font(.headline).fontWeight(.light)
-                        Text(model.messageText).font(.subheadline).fontWeight(.thin)
-                    }.padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .boringBorder
-
-                    // Remove
-                    Image(systemName: "minus.circle.fill")
-                        .imageScale(.large)
-                        .foregroundColor(Color.init(.displayP3, red: 1, green: 0, blue: 0))
-                        .padding(8)
-                        .asButton { deleteRequestModel = model }
-                }.background(Color(.displayP3, red: 0, green: 0, blue: 0, opacity: 0.1))
-
-                // Schedule info
-                Text(model.triggerDateText)
-                    .font(.caption)
-                    .fontWeight(.thin)
-                    .italic()
+        return ForEach(self.viewState.notificationModels, id: \.notificationId) { model in
+            Group {
+                VStack(alignment: .leading, spacing: 2) {
+                    self.stackForModel(model)
+                }
+                Divider()
             }
-            Divider()
         }.animation(.default)
+    }
+
+    private func stackForModel(_ model: NotificationInfoViewModel) -> some View {
+        return Group {
+
+            ZStack(alignment: .trailing) {
+                // Preview box
+                VStack(alignment: .leading) {
+                    Text(model.titleText).font(.headline).fontWeight(.light)
+                    Text(model.messageText).font(.subheadline).fontWeight(.thin)
+                }.padding(8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .boringBorder
+
+                // Remove
+                Image(systemName: "minus.circle.fill")
+                    .imageScale(.large)
+                    .foregroundColor(Color.init(.displayP3, red: 1, green: 0, blue: 0))
+                    .padding(8)
+                    .asButton { self.deleteRequestModel = model }
+            }.background(Color(.displayP3, red: 0, green: 0, blue: 0, opacity: 0.1))
+
+            // Schedule info
+            Text(model.triggerDateText)
+                .font(.caption)
+                .fontWeight(.thin)
+                .italic()
+        }
+
     }
 
     private var testButtons: some View {
         VStack(spacing: 2) {
-            if viewState.permissionsGranted {
+            if self.viewState.permissionsGranted {
                 Components.fullWidthButton("Schedule default notification test") {
-                    viewState.scheduleForDrug()
+                    self.viewState.scheduleForDrug()
                 }
 
                 Components.fullWidthButton("Clear pending notifications") {
-                    viewState.removeCurrentNotifications()
+                    self.viewState.removeCurrentNotifications()
                 }
             } else {
                 Components.fullWidthButton("Request notification permissions") {
-                    viewState.requestPermissions()
+                    self.viewState.requestPermissions()
                 }
             }
         }

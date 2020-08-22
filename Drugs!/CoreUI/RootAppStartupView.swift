@@ -21,16 +21,24 @@ struct RootAppStartupView: View {
          * the hierarchy entirely with a new view, seemingly defeating whatever optimization or
          * retention is occuring. How long this will work is completely unknown.
          */
+        return makeView()
+    }
+
+    private func makeView() -> some View {
         if #available(iOS 14.0, *) {
-            TabView(selection: $selectionTag) {
-                homeViewOrEmpty
-                infoViewOrEmpty
-            }
+            return AnyView(
+                TabView(selection: $selectionTag) {
+                    homeViewOrEmpty
+                    infoViewOrEmpty
+                }
+            )
         } else {
-            TabView(selection: $selectionTag) {
-                homeView.asHomeTab
-                notificationsView.asNotificationsTab
-            }
+            return AnyView(
+                TabView(selection: $selectionTag) {
+                    homeView.asHomeTab
+                    notificationsView.asNotificationsTab
+                }
+            )
         }
     }
 

@@ -20,15 +20,15 @@ struct MedicineEntryDetailsView: View {
             }
             Spacer()
             Components.fullWidthButton("Edit this entry") {
-                detailsState.startEditing()
+                self.detailsState.startEditing()
             }
 		}
 		.padding(8.0)
-        .navigationBarTitle(Text(detailsState.viewModel.title))
-        .sheet(isPresented: $detailsState.editorIsVisible) {
+        .navigationBarTitle(Text(self.detailsState.viewModel.title))
+        .sheet(isPresented: self.$detailsState.editorIsVisible) {
             DrugEntryEditorView()
-                .environmentObject(detailsState.editorState!)
-                .environmentObject(detailsState.dataManager)
+                .environmentObject(self.detailsState.editorState!)
+                .environmentObject(self.detailsState.dataManager)
         }
     }
 }
@@ -112,14 +112,9 @@ public struct DetailEntryModel: Identifiable, EquatableFileStorable {
 #if DEBUG
 struct DrugDetailView_Previews: PreviewProvider {
     @State var selected: MedicineEntry = DefaultDrugList.shared.defaultEntry
-    static var cancellable: AnyCancellable?
     static var previews: some View {
         let data = makeTestMedicineOperator()
-        let state = MedicineEntryDetailsViewState(data)
-        cancellable = data.mainEntryListStream.sink(receiveValue: {
-            guard let first = $0.first else { return }
-            state.setSelected(first)
-        })
+        let state = MedicineEntryDetailsViewState(data, data.TEST_getAMedicineEntry.id)
         return MedicineEntryDetailsView().environmentObject(state)
     }
 }

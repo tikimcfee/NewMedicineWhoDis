@@ -14,10 +14,10 @@ public final class RootScreenState: ObservableObject {
 
     // Output
     @Published var currentEntries = [MedicineEntry]()
-    @Published var detailsState: MedicineEntryDetailsViewState
     @Published var createEntryPadState: DrugSelectionContainerViewState
 
     // Root 'new entry' state
+    @Published var selectedMedicineId: String? = nil
     @Published var isMedicineEntrySelected = false
     @Published var inProgressEntry = InProgressEntry()
     @Published var saveError: AppStateError? = nil
@@ -25,7 +25,6 @@ public final class RootScreenState: ObservableObject {
     init(_ dataManager: MedicineLogDataManager,
          _ notificationScheduler: NotificationScheduler) {
         self.dataManager = dataManager
-        self.detailsState = MedicineEntryDetailsViewState(dataManager)
         self.createEntryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
         self.notificationScheduler = notificationScheduler
 
@@ -34,7 +33,9 @@ public final class RootScreenState: ObservableObject {
             .assign(to: \.currentEntries, on: self)
             .store(in: &cancellables)
 
-        detailsState.$isMedicineEntrySelected
+        $selectedMedicineId
+            .receive(on: RunLoop.main)
+            .map{ $0 != nil }
             .assign(to: \.isMedicineEntrySelected, on: self)
             .store(in: &cancellables)
         
@@ -44,7 +45,19 @@ public final class RootScreenState: ObservableObject {
     }
 
     func selectForDetails(_ entry: MedicineEntry) {
-        detailsState.setSelected(entry)
+        selectedMedicineId = entry.id
+    }
+    
+    func deselectDetails() {
+        selectedMedicineId = nil
+    }
+
+    func makeNewDetailsState() -> MedicineEntryDetailsViewState? {
+        if let selectedId = selectedMedicineId {
+            return MedicineEntryDetailsViewState(dataManager, selectedId)
+        } else {
+            return nil
+        }
     }
 
     func deleteEntry(at index: Int) {
