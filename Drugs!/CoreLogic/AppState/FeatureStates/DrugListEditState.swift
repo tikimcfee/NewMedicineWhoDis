@@ -26,7 +26,6 @@ public struct InProgressDrugEdit {
     }
 }
 
-
 public final class DrugListEditorViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
@@ -41,7 +40,9 @@ public final class DrugListEditorViewState: ObservableObject {
 
         dataManager
             .drugListStream
-            .assign(to: \.currentDrugList, on: self)
+            .sink(receiveValue: { [weak self] drugList in
+                self?.currentDrugList = drugList
+            })
             .store(in: &cancellables)
 
         $inProgressEdit

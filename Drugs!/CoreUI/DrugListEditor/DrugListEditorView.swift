@@ -30,9 +30,10 @@ struct DrugListEditorView: View {
                             .padding(8)
                             .boringBorder
                             .asButton {
-                                self.drugListEditorState.inProgressEdit.targetDrug = drug
+                                withAnimation(.easeInOut) {
+                                    self.drugListEditorState.inProgressEdit.targetDrug = drug
+                                }
                             }
-
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(4)
@@ -73,7 +74,9 @@ struct DrugListEditorView: View {
             }
             HStack {
                 Components.fullWidthButton("Save Changes") {
-                    self.drugListEditorState.saveCurrentChanges()
+                    withAnimation {
+                        self.drugListEditorState.saveCurrentChanges()
+                    }
                 }
                 .disabled(!drugListEditorState.canSave)
             }
