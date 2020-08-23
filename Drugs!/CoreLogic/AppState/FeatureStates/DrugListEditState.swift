@@ -83,12 +83,14 @@ public final class DrugListEditorViewState: ObservableObject {
     }
 
     func saveAsEdit() {
-        guard inProgressEdit.isEditSaveEnabled else { return }
-        let updatedDrug = inProgressEdit.updateAsDrug
-        dataManager.updateDrug(updatedDrug: updatedDrug) { [weak self] result in
+        guard inProgressEdit.isEditSaveEnabled,
+            let original = inProgressEdit.targetDrug
+            else { return }
+        let update = inProgressEdit.updateAsDrug
+        dataManager.updateDrug(originalDrug: original, updatedDrug: update) { [weak self] result in
             switch result {
             case .success:
-                self?.inProgressEdit.targetDrug = updatedDrug
+                self?.inProgressEdit.targetDrug = update
                 self?.saveError = nil
             case .failure(let error):
                 self?.saveError = error
@@ -102,7 +104,7 @@ public final class DrugListEditorViewState: ObservableObject {
         dataManager.addDrug(newDrug: newDrug) { [weak self] result in
             switch result {
             case .success:
-                self?.inProgressEdit.targetDrug = nil
+                self?.inProgressEdit.startEditingNewDrug()
                 self?.saveError = nil
             case .failure(let error):
                 self?.saveError = error

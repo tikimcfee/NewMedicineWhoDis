@@ -59,11 +59,12 @@ public class MedicineLogDataManager: ObservableObject {
     }
 
     func updateDrug(
+        originalDrug: Drug,
         updatedDrug: Drug,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         do {
-            guard let updateIndex = appData.drugListIndexFor(updatedDrug)
+            guard let updateIndex = appData.drugListIndexFor(originalDrug)
                 else { throw AppStateError.updateError }
             appData.updateDrugList { list in
                 list.drugs[updateIndex] = updatedDrug

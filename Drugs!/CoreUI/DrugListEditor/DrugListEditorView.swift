@@ -41,9 +41,12 @@ struct DrugListEditorView: View {
     @EnvironmentObject var drugListEditorState: DrugListEditorViewState
     @State private var currentMode: EditMode = .edit {
         didSet {
-            if currentMode == .add {
+            switch currentMode {
+            case .add:
                 drugListEditorState.inProgressEdit.startEditingNewDrug()
-            } else {
+            case .delete:
+                drugListEditorState.inProgressEdit.targetDrug = nil
+            case .edit:
                 drugListEditorState.inProgressEdit.targetDrug = nil
             }
         }
@@ -52,7 +55,7 @@ struct DrugListEditorView: View {
 
     var body: some View {
         return VStack(spacing: 0) {
-            subviewDrugList.boringBorder.padding(8)
+            subviewDrugList.boringBorder.padding(8).zIndex(99)
             subviewEditor
         }
         .navigationBarItems(trailing: modeSwitchControls)

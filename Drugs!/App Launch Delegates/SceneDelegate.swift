@@ -19,6 +19,29 @@ public extension Result where Success == ApplicationData, Failure == Error {
     }
 }
 
+public class MasterEnvironmentContainer: ObservableObject {
+    let fileStore: MedicineLogFileStore
+    let dataManager: MedicineLogDataManager
+
+    let notificationState: NotificationInfoViewState
+    let notificationScheduler: NotificationScheduler
+
+    let rootScreenState: RootScreenState
+
+    init() {
+        self.fileStore = MedicineLogFileStore()
+        let appData = fileStore.load().applicationData
+        self.dataManager = MedicineLogDataManager(medicineStore: fileStore, appData: appData)
+        self.notificationState = NotificationInfoViewState(dataManager)
+        self.notificationScheduler = NotificationScheduler(notificationState: notificationState)
+        self.rootScreenState = RootScreenState(dataManager, notificationScheduler)
+    }
+
+    public func makeNewDrugEditorState() -> DrugListEditorViewState {
+        return DrugListEditorViewState(dataManager)
+    }
+}
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
@@ -32,18 +55,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window!.overrideUserInterfaceStyle = .light
         }
 
-		let log = MedicineLogFileStore()
-        let appDataResult = log.load().applicationData
-        let dataManager = MedicineLogDataManager(medicineStore: log, appData: appDataResult)
-        let notificationState = NotificationInfoViewState(dataManager)
-        let notificationScheduler = NotificationScheduler(notificationState: notificationState)
-        let rootState = RootScreenState(dataManager, notificationScheduler)
+        // Loads app data on init. Bad idea?
+		let environmentContainer = MasterEnvironmentContainer()
+
         let contentView = RootAppStartupView()
-            .environmentObject(dataManager)
-            .environmentObject(rootState)
-            .environmentObject(notificationState)
+            .environmentObject(environmentContainer)
+            .environmentObject(environmentContainer.dataManager)
+            .environmentObject(environmentContainer.rootScreenState)
+            .environmentObject(environmentContainer.notificationState)
             .onAppear {
-                notificationState.requestPermissions()
+                environmentContainer.notificationState.requestPermissions()
             }
 
         self.window?.rootViewController = UIHostingController(rootView: contentView)

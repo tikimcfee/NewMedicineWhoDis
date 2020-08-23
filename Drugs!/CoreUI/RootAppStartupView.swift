@@ -7,7 +7,7 @@ enum RootScreenTabTag {
 
 struct RootAppStartupView: View {
 
-    @EnvironmentObject var dataManager: MedicineLogDataManager
+    @EnvironmentObject var container: MasterEnvironmentContainer
     @State var selectionTag: RootScreenTabTag = .home
 
     var body: some View {
@@ -64,7 +64,7 @@ struct RootAppStartupView: View {
             } else {
                 loadingStack("Loading reminders...")
             }
-        }.asNotificationsTab
+            }.asNotificationsTab
     }
 
     private var drugListViewOrEmpty: some View {
@@ -94,7 +94,7 @@ struct RootAppStartupView: View {
     private var drugListEditorView: some View {
         NavigationView {
             DrugListEditorView()
-                .environmentObject(DrugListEditorViewState(dataManager))
+                .environmentObject(container.makeNewDrugEditorState())
                 .navigationBarTitle(
                     Text(""),
                     displayMode: .inline
