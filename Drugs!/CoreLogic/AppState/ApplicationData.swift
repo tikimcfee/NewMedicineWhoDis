@@ -46,8 +46,8 @@ extension ApplicationData {
         return mainEntryList.firstIndex(where: { $0.id == id })
     }
 
-    public func drugListIndexFor(_ drugName: String) -> Int? {
-        return availableDrugList.drugs.firstIndex(where: { $0.drugName == drugName })
+    public func drugListIndexFor(_ drug: Drug) -> Int? {
+        return availableDrugList.drugs.firstIndex(where: { $0.id == drug.id })
     }
 }
 

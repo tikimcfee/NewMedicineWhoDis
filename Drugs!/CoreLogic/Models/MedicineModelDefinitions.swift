@@ -16,10 +16,11 @@ public struct AvailableDrugList: EquatableFileStorable {
     }
 }
 
-public struct Drug: EquatableFileStorable, Comparable {
+public struct Drug: EquatableFileStorable, Comparable, Identifiable {
     private(set) var drugName: String
     private(set) var ingredients: [Ingredient]
     private(set) var hourlyDoseTime: Double
+    public var id: String { return drugName } // Here there be dragons
 
     public init(_ drugName: String,
                 _ ingredients: [Ingredient],

@@ -19,7 +19,7 @@ struct ComponentFullWidthButtonStyle: ButtonStyle {
                                 ? configuration.isPressed
                                     ? Color.buttonBackgroundPressed
                                     : Color.buttonBackground
-                                : Color.disabledButtonBackground
+                                : Color.buttonBackgroundDisabled
                     )
                 )
         }

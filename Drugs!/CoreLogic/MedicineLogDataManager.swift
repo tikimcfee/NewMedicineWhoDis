@@ -63,11 +63,37 @@ public class MedicineLogDataManager: ObservableObject {
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
         do {
-            guard let updateIndex = appData.drugListIndexFor(updatedDrug.drugName)
+            guard let updateIndex = appData.drugListIndexFor(updatedDrug)
                 else { throw AppStateError.updateError }
             appData.updateDrugList { list in
                 list.drugs[updateIndex] = updatedDrug
                 list.drugs.sort()
+            }
+            saveAndNotify(handler)
+        } catch {
+            handler(.failure(error))
+        }
+    }
+
+    func addDrug(
+        newDrug: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        appData.updateDrugList { list in
+            list.drugs.append(newDrug)
+        }
+        saveAndNotify(handler)
+    }
+
+    func removeDrug(
+        drugToRemove: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        do {
+            guard let updateIndex = appData.drugListIndexFor(drugToRemove)
+                else { throw AppStateError.updateError }
+            appData.updateDrugList { list in
+                list.drugs.remove(at: updateIndex)
             }
             saveAndNotify(handler)
         } catch {

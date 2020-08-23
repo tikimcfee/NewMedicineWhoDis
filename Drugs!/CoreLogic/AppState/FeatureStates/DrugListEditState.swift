@@ -1,20 +1,21 @@
 import Combine
 
 public struct InProgressDrugEdit {
-    private static let defaultDrug = Drug("Select a drug to edit", [], 6)
+    private static let defaultNewDrug = Drug("", [], 6)
+
     private var didMakeDrugSelection = false
     var targetDrug: Drug? = nil {
         didSet {
             didMakeDrugSelection = targetDrug != nil
-            guard let updatedDrug = self.targetDrug else { return }
+            let updatedDrug = self.targetDrug ?? Self.defaultNewDrug
             updatedName = updatedDrug.drugName
             updatedDoseTime = Int(updatedDrug.hourlyDoseTime)
             updatedIngredients = updatedDrug.ingredients
         }
     }
     var updatedName: String = ""
-    var updatedDoseTime: Int = Int(defaultDrug.hourlyDoseTime)
-    var updatedIngredients: [Ingredient] = defaultDrug.ingredients
+    var updatedDoseTime: Int = Int(defaultNewDrug.hourlyDoseTime)
+    var updatedIngredients: [Ingredient] = defaultNewDrug.ingredients
 
     var updateAsDrug: Drug {
         return Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
@@ -23,6 +24,10 @@ public struct InProgressDrugEdit {
     var hasChanged: Bool {
         return didMakeDrugSelection
             && targetDrug != updateAsDrug
+    }
+
+    mutating func startEditingNewDrug() {
+        targetDrug = Self.defaultNewDrug
     }
 }
 
@@ -53,13 +58,31 @@ public final class DrugListEditorViewState: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func saveCurrentChanges() {
+    func deleteDrug(_ drug: Drug) {
+        
+    }
+
+    func saveAsEdit() {
         guard inProgressEdit.hasChanged else { return }
         let updatedDrug = inProgressEdit.updateAsDrug
         dataManager.updateDrug(updatedDrug: updatedDrug) { [weak self] result in
             switch result {
             case .success:
                 self?.inProgressEdit.targetDrug = updatedDrug
+                self?.saveError = nil
+            case .failure(let error):
+                self?.saveError = error
+            }
+        }
+    }
+
+    func saveAsNew() {
+        guard inProgressEdit.hasChanged else { return }
+        let newDrug = inProgressEdit.updateAsDrug
+        dataManager.addDrug(newDrug: newDrug) { [weak self] result in
+            switch result {
+            case .success:
+                self?.inProgressEdit.targetDrug = nil
                 self?.saveError = nil
             case .failure(let error):
                 self?.saveError = error

@@ -137,13 +137,17 @@ struct ScreenWide: ViewModifier {
 }
 
 struct BoringBorder: ViewModifier {
-    public let color: Color
-    public init(_ color: Color = Color.gray) {
-        self.color = color
+    public let stroke: Color
+    public let background: Color
+    public init(_ stroke: Color = Color.gray,
+                _ background: Color = Color.clear) {
+        self.stroke = stroke
+        self.background = background
     }
     func body(content: Content) -> some View {
         return content.overlay(
-            RoundedRectangle(cornerRadius: 4).stroke(color)
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(stroke)
         )
     }
 }
@@ -159,6 +163,10 @@ extension View {
 
     var screenWide: some View {
         return modifier(ScreenWide())
+    }
+
+    func boringBorder(_ background: Color = .clear) -> some View {
+        return modifier(BoringBorder(.gray, background))
     }
 }
 

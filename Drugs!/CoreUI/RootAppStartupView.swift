@@ -21,6 +21,8 @@ struct RootAppStartupView: View {
          * Use selection state to simply not show the view, forcing SwiftUI to recreate
          * the hierarchy entirely with a new view, seemingly defeating whatever optimization or
          * retention is occuring. How long this will work is completely unknown.
+         *
+         * Note: This breaks quite hard in MacOS
          */
         return makeView()
     }
@@ -90,8 +92,15 @@ struct RootAppStartupView: View {
     }
 
     private var drugListEditorView: some View {
-        DrugListEditorView()
-            .environmentObject(DrugListEditorViewState(dataManager))
+        NavigationView {
+            DrugListEditorView()
+                .environmentObject(DrugListEditorViewState(dataManager))
+                .navigationBarTitle(
+                    Text(""),
+                    displayMode: .inline
+                )
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private func loadingStack(_ text: String) -> some View {
