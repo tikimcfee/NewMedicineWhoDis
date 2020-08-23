@@ -16,7 +16,9 @@ struct ComponentFullWidthButtonStyle: ButtonStyle {
                         .cornerRadius(4.0)
                         .foregroundColor(
                             isEnabled
-                                ? Color.buttonBackground
+                                ? configuration.isPressed
+                                    ? Color.buttonBackgroundPressed
+                                    : Color.buttonBackground
                                 : Color.disabledButtonBackground
                     )
                 )

@@ -36,18 +36,6 @@ public struct Drug: EquatableFileStorable, Comparable {
     public static func < (lhs: Drug, rhs: Drug) -> Bool {
         return lhs.drugName < rhs.drugName
     }
-
-    mutating func update(name: String) {
-        self.drugName = name
-    }
-
-    mutating func update(ingredients: [Ingredient]) {
-        self.ingredients = ingredients
-    }
-
-    mutating func update(doseTime: Double) {
-        self.hourlyDoseTime = doseTime
-    }
 }
 
 public struct Ingredient: EquatableFileStorable {

@@ -73,7 +73,7 @@ struct DrugListEditorView: View {
             }
             HStack {
                 Components.fullWidthButton("Save Changes") {
-                    
+                    self.drugListEditorState.saveCurrentChanges()
                 }
                 .disabled(!drugListEditorState.canSave)
             }
@@ -85,7 +85,8 @@ struct DrugListEditorView: View {
 
 private extension DrugListEditorView {
     var currentDrugName: String {
-        return drugListEditorState.inProgressEdit.targetDrug.drugName
+        return drugListEditorState.inProgressEdit.targetDrug?.drugName
+            ?? "Select a drug to edit"
     }
 
     var inProgressEdit: Binding<InProgressDrugEdit> {

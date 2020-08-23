@@ -57,6 +57,23 @@ public class MedicineLogDataManager: ObservableObject {
             handler(.failure(error))
         }
     }
+
+    func updateDrug(
+        updatedDrug: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        do {
+            guard let updateIndex = appData.drugListIndexFor(updatedDrug.drugName)
+                else { throw AppStateError.updateError }
+            appData.updateDrugList { list in
+                list.drugs[updateIndex] = updatedDrug
+                list.drugs.sort()
+            }
+            saveAndNotify(handler)
+        } catch {
+            handler(.failure(error))
+        }
+    }
 }
 
 //MARK: - Live Changes

@@ -45,16 +45,28 @@ extension ApplicationData {
     public func medicineListIndexFor(_ id: String) -> Int? {
         return mainEntryList.firstIndex(where: { $0.id == id })
     }
+
+    public func drugListIndexFor(_ drugName: String) -> Int? {
+        return availableDrugList.drugs.firstIndex(where: { $0.drugName == drugName })
+    }
 }
 
 // MARK: - Helper for simpler handling of decoding keys
 extension KeyedDecodingContainer where Key == ApplicationData.CodingKeys {
     var decodedEntryList: [MedicineEntry] {
-        return (try? decode(Array<MedicineEntry>.self, forKey: .listState))
-            ?? []
+        do {
+            return try decode(Array<MedicineEntry>.self, forKey: .listState)
+        } catch {
+            loge{ Event("Failed to decode MedicineList, returning empty") }
+            return []
+        }
     }
     var decodedDrugList: AvailableDrugList {
-        return (try? decode(AvailableDrugList.self, forKey: .availableDrugList))
-            ?? AvailableDrugList.defaultList
+        do {
+            return try decode(AvailableDrugList.self, forKey: .availableDrugList)
+        } catch {
+            loge{ Event("Failed to decode AvailableDrugList, returning defaultList") }
+            return AvailableDrugList.defaultList
+        }
     }
 }
