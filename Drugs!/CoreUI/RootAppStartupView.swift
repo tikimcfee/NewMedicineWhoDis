@@ -2,11 +2,12 @@ import SwiftUI
 import Combine
 
 enum RootScreenTabTag {
-    case home, notifications
+    case home, notifications, drugList
 }
 
 struct RootAppStartupView: View {
 
+    @EnvironmentObject var dataManager: MedicineLogDataManager
     @State var selectionTag: RootScreenTabTag = .home
 
     var body: some View {
@@ -30,6 +31,7 @@ struct RootAppStartupView: View {
                 TabView(selection: $selectionTag) {
                     homeViewOrEmpty
                     infoViewOrEmpty
+                    drugListViewOrEmpty
                 }
             )
         } else {
@@ -37,6 +39,7 @@ struct RootAppStartupView: View {
                 TabView(selection: $selectionTag) {
                     homeView.asHomeTab
                     notificationsView.asNotificationsTab
+                    drugListEditorView.asMedicinesTab
                 }
             )
         }
@@ -62,6 +65,16 @@ struct RootAppStartupView: View {
         }.asNotificationsTab
     }
 
+    private var drugListViewOrEmpty: some View {
+        Group {
+            if selectionTag == .drugList {
+                drugListEditorView
+            } else {
+                loadingStack("Loading drug list...")
+            }
+        }.asMedicinesTab
+    }
+
     private var homeView: some View {
         NavigationView {
             HomeDrugView().navigationBarTitle(
@@ -74,6 +87,11 @@ struct RootAppStartupView: View {
 
     private var notificationsView: some View {
         NotificationInfoView()
+    }
+
+    private var drugListEditorView: some View {
+        DrugListEditorView()
+            .environmentObject(DrugListEditorViewState(dataManager))
     }
 
     private func loadingStack(_ text: String) -> some View {
@@ -92,6 +110,10 @@ extension View {
     var asNotificationsTab: some View {
         return modifier(TagModifier(tag: .notifications))
     }
+
+    var asMedicinesTab: some View {
+        return modifier(TagModifier(tag: .drugList))
+    }
 }
 
 struct TagModifier: ViewModifier {
@@ -108,6 +130,11 @@ struct TagModifier: ViewModifier {
                 Image(systemName: "calendar.circle.fill")
                 Text("Reminders")
             }.tag(RootScreenTabTag.notifications)
+        case .drugList:
+            return content.tabItem {
+                Image(systemName: "heart.circle.fill")
+                Text("Medicines")
+            }.tag(RootScreenTabTag.drugList)
         }
     }
 }
