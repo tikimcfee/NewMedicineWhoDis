@@ -157,18 +157,20 @@ struct DrugListEditorView: View {
     }
 
     private var editModeView: some View {
-        return bottomViewForMode(currentDrugName, "Save Changes", true) {
+        return editingBottomView(currentDrugName, "Save Changes",
+                                 drugListEditorState.canSaveAsEdit) {
             self.drugListEditorState.saveAsEdit()
         }
     }
 
     private var addModeView: some View {
-        return bottomViewForMode("Enter new drug name", "Save", true) {
+        return editingBottomView("Enter new drug name", "Save",
+                                 drugListEditorState.canSaveAsNew) {
             self.drugListEditorState.saveAsNew()
         }
     }
 
-    private func bottomViewForMode(_ initialText: String,
+    private func editingBottomView(_ initialText: String,
                                    _ buttonTitle: String,
                                    _ isEnabled: Bool,
                                    _ action: @escaping () -> Void) -> some View {
@@ -185,9 +187,12 @@ struct DrugListEditorView: View {
                     }
                 }.frame(maxWidth: 128, maxHeight: 64).clipped().boringBorder
             }
+
             Components.fullWidthButton(buttonTitle) {
                 withAnimation { action() }
-            }.disabled(isEnabled).boringBorder
+            }
+            .disabled(!isEnabled)
+            .boringBorder
         }
     }
 }

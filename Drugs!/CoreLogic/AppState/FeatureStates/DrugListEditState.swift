@@ -21,9 +21,14 @@ public struct InProgressDrugEdit {
         return Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
     }
 
-    var hasChanged: Bool {
+    var isEditSaveEnabled: Bool {
         return didMakeDrugSelection
             && targetDrug != updateAsDrug
+    }
+
+    var isNewSaveEnabled: Bool {
+        return didMakeDrugSelection
+            && !updatedName.isEmpty
     }
 
     mutating func startEditingNewDrug() {
@@ -37,7 +42,8 @@ public final class DrugListEditorViewState: ObservableObject {
 
     @Published var inProgressEdit = InProgressDrugEdit()
     @Published var currentDrugList = AvailableDrugList.defaultList
-    @Published var canSave: Bool = false
+    @Published var canSaveAsEdit: Bool = false
+    @Published var canSaveAsNew: Bool = false
     @Published var saveError: Error? = nil
 
     init(_ dataManager: MedicineLogDataManager) {
@@ -45,25 +51,39 @@ public final class DrugListEditorViewState: ObservableObject {
 
         dataManager
             .drugListStream
-            .sink(receiveValue: { [weak self] drugList in
-                self?.currentDrugList = drugList
+            .sink(receiveValue: { [weak self] in
+                self?.currentDrugList = $0
             })
             .store(in: &cancellables)
 
         $inProgressEdit
-            .map{ $0.hasChanged }
-            .sink(receiveValue: { [weak self] editHasChanged in
-                self?.canSave = editHasChanged
+            .map{ $0.isEditSaveEnabled }
+            .sink(receiveValue: { [weak self] in
+                self?.canSaveAsEdit = $0
+            })
+            .store(in: &cancellables)
+
+        $inProgressEdit
+            .map{ $0.isNewSaveEnabled }
+            .sink(receiveValue: { [weak self] in
+                self?.canSaveAsNew = $0
             })
             .store(in: &cancellables)
     }
 
     func deleteDrug(_ drug: Drug) {
-        
+        dataManager.removeDrug(drugToRemove: drug) { [weak self] result in
+            switch result {
+            case .success:
+                self?.saveError = nil
+            case .failure(let error):
+                self?.saveError = error
+            }
+        }
     }
 
     func saveAsEdit() {
-        guard inProgressEdit.hasChanged else { return }
+        guard inProgressEdit.isEditSaveEnabled else { return }
         let updatedDrug = inProgressEdit.updateAsDrug
         dataManager.updateDrug(updatedDrug: updatedDrug) { [weak self] result in
             switch result {
@@ -77,7 +97,7 @@ public final class DrugListEditorViewState: ObservableObject {
     }
 
     func saveAsNew() {
-        guard inProgressEdit.hasChanged else { return }
+        guard inProgressEdit.isEditSaveEnabled else { return }
         let newDrug = inProgressEdit.updateAsDrug
         dataManager.addDrug(newDrug: newDrug) { [weak self] result in
             switch result {

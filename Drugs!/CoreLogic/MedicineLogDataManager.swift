@@ -81,6 +81,7 @@ public class MedicineLogDataManager: ObservableObject {
     ) {
         appData.updateDrugList { list in
             list.drugs.append(newDrug)
+            list.drugs.sort()
         }
         saveAndNotify(handler)
     }
