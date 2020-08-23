@@ -2,10 +2,10 @@ import Combine
 
 public struct InProgressDrugEdit {
     private static let defaultDrug = Drug("Select a drug to edit", [], 6)
-    private var didSet = false
+    private var didMakeDrugSelection = false
     var targetDrug: Drug = defaultDrug {
         didSet {
-            didSet = true
+            didMakeDrugSelection = true
             updatedName = targetDrug.drugName
             updatedDoseTime = Int(targetDrug.hourlyDoseTime)
             updatedIngredients = targetDrug.ingredients
@@ -16,7 +16,8 @@ public struct InProgressDrugEdit {
     var updatedIngredients: [Ingredient] = defaultDrug.ingredients
 
     var hasChanged: Bool {
-        return didSet && targetDrug != Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
+        return didMakeDrugSelection
+            && targetDrug != Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
     }
 }
 
@@ -44,4 +45,11 @@ public final class DrugListEditorViewState: ObservableObject {
             })
             .store(in: &cancellables)
     }
+
+    func saveCurrentChanges() {
+        guard inProgressEdit.hasChanged else { return }
+
+        
+    }
+
 }

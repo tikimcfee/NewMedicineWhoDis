@@ -102,7 +102,7 @@ public final class NotificationInfoViewState: ObservableObject {
             if let error = error {
                 loge{ Event("Failed to acquire notificaiton permissions: \(error)", .error)}
             }
-            logd{ Event("Notifcation grant state: \(granted)", .debug)}
+            logd{ Event("Notifcation grant state: \(granted)")}
             asyncMain {
                 self?.permissionsGranted = granted
             }
@@ -116,7 +116,7 @@ public final class NotificationInfoViewState: ObservableObject {
             if let error = error {
                 loge{ Event("Failed to schedule notification: \(error)", .error) }
             }
-            logd{ Event("Notification scheduling resolved", .debug) }
+            logd{ Event("Notification scheduling resolved") }
             self?.manualUpdateSubject.send(Date())
         }
     }

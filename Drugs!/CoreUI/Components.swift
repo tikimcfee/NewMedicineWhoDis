@@ -53,3 +53,19 @@ struct ActivityIndicator: UIViewRepresentable {
         isAnimating ? uiView.startAnimating() : uiView.stopAnimating()
     }
 }
+
+
+//MARK: - View modifiers
+
+extension View {
+    func asButton(_ action: @escaping () -> Void) -> some View{
+        return modifier(AsButtonMod(action: action))
+    }
+}
+
+struct AsButtonMod: ViewModifier {
+    let action: () -> Void
+    func body(content: Content) -> some View {
+        return Button(action: action) { content }
+    }
+}

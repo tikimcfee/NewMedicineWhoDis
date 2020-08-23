@@ -63,7 +63,7 @@ public final class RootScreenState: ObservableObject {
     func deleteEntry(at index: Int) {
         guard index < currentEntries.count else { return }
         dataManager.removeEntry(id: currentEntries[index].id) { result in
-            logd { Event("Deleted entry at \(index)", .debug) }
+            logd { Event("Deleted entry at \(index)") }
         }
     }
 

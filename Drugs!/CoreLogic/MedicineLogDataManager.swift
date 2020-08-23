@@ -57,8 +57,19 @@ public class MedicineLogDataManager: ObservableObject {
             handler(.failure(error))
         }
     }
+}
 
-    var refreshTimer: AnyPublisher<Date, Never> {
+//MARK: - Live Changes
+extension MedicineLogDataManager {
+    // Cheat code to track memory leaks on streams. Dolls out a unique value every time we create a new stream
+    // Reason: CurrentValueSubject (and others?) seems to leak when using .assign(to: \.keypath, on: self)
+    private static var _streamId = 0
+    private var streamId: Int {
+        get { Self._streamId = Self._streamId + 1; return Self._streamId }
+        set { Self._streamId = newValue }
+    }
+
+    private var refreshTimer: AnyPublisher<Date, Never> {
         return Timer
             .publish(every: 5, on: .main, in: .common)
             .autoconnect()
@@ -80,29 +91,19 @@ public class MedicineLogDataManager: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    // Cheat code to track memory leaks on streams. Dolls out a unique value every time we create a new stream
-    // Reason: CurrentValueSubject (and others?) seems to leak when using .assign(to: \.keypath, on: self)
-    private static var _streamId = 0
-    private var streamId: Int {
-        get { Self._streamId = Self._streamId + 1; return Self._streamId }
-        set { Self._streamId = newValue }
-    }
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
         let streamNumber = streamId
         var refreshCount = 0
         return Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)
             .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
-                logd { Event("Publishing refresh to [\(streamNumber)] (\(refreshCount) times) ", .debug) }
+                logd { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
                 refreshCount = refreshCount + 1
                 return list.availabilityInfo(updateInterval, drugs)
             }
             .eraseToAnyPublisher()
     }
-}
 
-// Combine API... oh lawd here we go
-extension MedicineLogDataManager {
     func liveChanges(for targetId: String) -> AnyPublisher<MedicineEntry?, Never> {
         // TODO: This is sssssllllooooowww... consider backing the store with a dict
         return mainEntryListStream.map{ list in

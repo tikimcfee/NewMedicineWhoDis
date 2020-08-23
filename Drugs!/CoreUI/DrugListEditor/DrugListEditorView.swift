@@ -8,19 +8,6 @@
 
 import SwiftUI
 
-extension View {
-    func asButton(_ action: @escaping () -> Void) -> some View{
-        return modifier(AsButtonMod(action: action))
-    }
-}
-
-struct AsButtonMod: ViewModifier {
-    let action: () -> Void
-    func body(content: Content) -> some View {
-        return Button(action: action) { content }
-    }
-}
-
 struct DrugListEditorView: View {
 
     @EnvironmentObject var drugListEditorState: DrugListEditorViewState
