@@ -19,6 +19,13 @@ public extension Result where Success == ApplicationData, Failure == Error {
     }
 }
 
+public enum AppTestArguments: String {
+    case enableTestConfiguration
+    case clearEntriesOnLaunch
+
+    var isSet: Bool { CommandLine.arguments.contains(rawValue) }
+}
+
 public class MasterEnvironmentContainer: ObservableObject {
     let fileStore: MedicineLogFileStore
     let dataManager: MedicineLogDataManager
@@ -57,6 +64,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Loads app data on init. Bad idea?
 		let environmentContainer = MasterEnvironmentContainer()
+        configureForTests(environmentContainer)
 
         let contentView = RootAppStartupView()
             .environmentObject(environmentContainer)
@@ -71,6 +79,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window?.makeKeyAndVisible()
     }
 
+    private func configureForTests(_ container: MasterEnvironmentContainer) {
+        guard AppTestArguments.enableTestConfiguration.isSet else { return }
+        log { Event("Enabling test configuration. Ye have been warned.", .warning) }
+
+        if AppTestArguments.clearEntriesOnLaunch.isSet {
+            container.dataManager.TEST_clearAllEntries()
+        }
+    }
+}
+
+extension SceneDelegate {
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
@@ -98,7 +117,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
-

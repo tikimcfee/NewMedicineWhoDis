@@ -153,7 +153,7 @@ extension UNNotificationRequest {
               let triggerDate = trigger.nextTriggerDate(),
               let drugName = content.userInfo["drugName"] as? String
         else {
-            loge{ Event("Notification missing data: \(logInfo)", .error) }
+            log { Event("Notification missing data: \(logInfo)", .error) }
             return nil
         }
         

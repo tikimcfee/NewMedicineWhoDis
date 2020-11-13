@@ -35,7 +35,7 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
             dataManager.liveChanges(for: selectedEntryId)
                 .handleEvents(
                     receiveOutput: { [weak self] in self?.currentEntry = $0},
-                    receiveCancel: { logd{ Event("DetailViewState model stream cancelled") }}
+                    receiveCancel: { log { Event("DetailViewState model stream cancelled") }}
                 )
                 .compactMap{ $0 },
             dataManager.availabilityInfoStream

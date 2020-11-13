@@ -17,7 +17,7 @@ struct DrugEntryViewCell: View {
                     : Color.computedCannotTake
                 )
                 .cornerRadius(4)
-        }
+        }.accessibility(identifier: trackedDrug.drugName)
     }
 
     private func onTap() {

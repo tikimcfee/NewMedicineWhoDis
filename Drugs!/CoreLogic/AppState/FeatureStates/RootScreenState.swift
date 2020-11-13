@@ -30,17 +30,24 @@ public final class RootScreenState: ObservableObject {
 
         dataManager.mainEntryListStream
             .receive(on: RunLoop.main)
-            .assign(to: \.currentEntries, on: self)
+            .sink { [weak self] in
+                self?.currentEntries = $0
+            }
             .store(in: &cancellables)
 
         $selectedMedicineId
             .receive(on: RunLoop.main)
             .map{ $0 != nil }
-            .assign(to: \.isMedicineEntrySelected, on: self)
+            .sink { [weak self] in
+                self?.isMedicineEntrySelected = $0
+            }
             .store(in: &cancellables)
         
         createEntryPadState.inProgressEntryStream
-            .assign(to: \.inProgressEntry, on: self)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in
+                self?.inProgressEntry = $0
+            }
             .store(in: &cancellables)
     }
 
@@ -63,7 +70,7 @@ public final class RootScreenState: ObservableObject {
     func deleteEntry(at index: Int) {
         guard index < currentEntries.count else { return }
         dataManager.removeEntry(id: currentEntries[index].id) { result in
-            logd { Event("Deleted entry at \(index)") }
+            log { Event("Deleted entry at \(index)") }
         }
     }
 
@@ -72,7 +79,7 @@ public final class RootScreenState: ObservableObject {
         let hasEntries = drugMap.count > 0
         let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
         guard hasEntries && hasNonZeroEntries else {
-            logd { Event("Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
+            log { Event("Skipping entry save: hasEntries=\(hasEntries), hasNonZeroEntries=\(hasNonZeroEntries)", .warning) }
             return
         }
 

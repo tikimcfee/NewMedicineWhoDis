@@ -44,7 +44,7 @@ public final class NotificationInfoViewState: ObservableObject {
     private var pendingRequestStream: AnyPublisher<[UNNotificationRequest], Never> {
         return timerStream()
             .handleEvents(receiveOutput: { date in
-                logd{ Event("\(date): Fetching pending notifications") }
+                log { Event("\(date): Fetching pending notifications") }
             })
             .map{ _ in
                 print(Thread.isMainThread)
@@ -58,7 +58,7 @@ public final class NotificationInfoViewState: ObservableObject {
                 return fetchedRequests
             }
             .handleEvents(receiveOutput: { models in
-                logd{ Event("Got pending notifications: \(models.count)") }
+                log { Event("Got pending notifications: \(models.count)") }
             })
             .eraseToAnyPublisher()
     }
@@ -71,9 +71,9 @@ public final class NotificationInfoViewState: ObservableObject {
                     .sorted{ $0.deleteTitleName < $1.deleteTitleName }
             }
             .handleEvents(
-                receiveSubscription: { _ in logd{ Event("ModelStream subscription started") } },
-                receiveOutput: { model in logd{ Event("Model produced: \(model.count)") } },
-                receiveCancel: { logd{ Event("ModelStream subscription cancelled") } }
+                receiveSubscription: { _ in log{ Event("ModelStream subscription started") } },
+                receiveOutput: { model in log{ Event("Model produced: \(model.count)") } },
+                receiveCancel: { log{ Event("ModelStream subscription cancelled") } }
             )
             .eraseToAnyPublisher()
     }
@@ -100,9 +100,9 @@ public final class NotificationInfoViewState: ObservableObject {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { [weak self] granted, error in
             if let error = error {
-                loge{ Event("Failed to acquire notificaiton permissions: \(error)", .error)}
+                log { Event("Failed to acquire notificaiton permissions: \(error)", .error)}
             }
-            logd{ Event("Notifcation grant state: \(granted)")}
+            log { Event("Notifcation grant state: \(granted)")}
             asyncMain {
                 self?.permissionsGranted = granted
             }
@@ -114,9 +114,9 @@ public final class NotificationInfoViewState: ObservableObject {
         let request = drug.asNotificationRequest
         notificationCenter.add(request) { [weak self] error in
             if let error = error {
-                loge{ Event("Failed to schedule notification: \(error)", .error) }
+                log{ Event("Failed to schedule notification: \(error)", .error) }
             }
-            logd{ Event("Notification scheduling resolved") }
+            log{ Event("Notification scheduling resolved") }
             self?.manualUpdateSubject.send(Date())
         }
     }

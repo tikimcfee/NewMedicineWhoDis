@@ -1,12 +1,5 @@
-//
-//  CoreInsights.swift
-//  Drugs!
-//
-//  Created by Ivan Lugo on 10/20/19.
-//  Copyright © 2019 Ivan Lugo. All rights reserved.
-//
-
 import Foundation
+import Combine
 
 public func eTag(_ object: Any?) -> String {
     guard case let .some(thing) = object
@@ -15,7 +8,7 @@ public func eTag(_ object: Any?) -> String {
 }
 
 public enum Criticality: String {
-	case debug, warning, error
+	case info, warning, error
 }
 
 public struct Event: CustomStringConvertible {
@@ -25,40 +18,47 @@ public struct Event: CustomStringConvertible {
 	
 	init (
 		_ message: String = "",
-        _ criticality: Criticality = .debug,
+        _ criticality: Criticality = .info,
         _ tag: String = #file
 	) {
-		self.tag = URL(fileURLWithPath: tag).lastPathComponent
 		self.message = message
 		self.criticality = criticality
+        self.tag = URL(fileURLWithPath: tag).lastPathComponent
 	}
 	
 	public var description: String {
 		return "(\(criticality.rawValue))"
 			+ " \(tag)"
-			+ " --| \(message)"
+			+ " ::: \(message)"
 	}
 }
 
-public struct AppEvents {
-	public private(set) static var appEvents: [Event] = []
+public class AppEvents: ObservableObject {
+    private static var shared: AppEvents = AppEvents()
+    public static var appEventsStream = shared.$appEvents.share().eraseToAnyPublisher()
+
+    @Published private var appEvents: [Event] = []
+
+    private init() {
+        // no params
+    }
+
+	static func add(_ event: Event) {
+        shared.appEvents.append(event)
+    }
 	
-	static func add(_ event: Event) { appEvents.append(event) }
-	
-	static func dump() { appEvents.forEach { print($0) } }
+	static func dump() {
+        shared.appEvents.forEach { print($0) }
+    }
 }
 
-public func logd(_ event: () -> Event) {
-	out(event)
-}
-
-public func loge(_ event: () -> Event) {
+public func log(_ event: () -> Event) {
 	out(event)
 }
 
 fileprivate func out(_ event: () -> Event) {
-	let theEvent = event()
-	AppEvents.add(theEvent)
-	print(theEvent)
+	let appEvent = event()
+	AppEvents.add(appEvent)
+	print(appEvent)
 
 }

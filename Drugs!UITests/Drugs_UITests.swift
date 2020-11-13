@@ -11,33 +11,79 @@ import XCTest
 class Drugs_UITests: XCTestCase {
 
     override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
         // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+
     }
 
-    func testExample() {
-        // UI tests must launch the application that they test.
+//    func testRootScreen() {
+//        let app = XCUIApplication()
+//        app.launch()
+//
+//        NumberPad.allCases.forEach { number in
+//            XCTAssert(app.buttons[number.rawValue].exists, "Number pad is broken: \(number)")
+//        }
+//    }
+
+    func testCreateAndSave() {
         let app = XCUIApplication()
+
+        func assertTableData() {
+            let mainTable = app.tables[HomeButtons.entryCellList.rawValue]
+            XCTAssert(mainTable.exists, "Main list wasn't found")
+
+            // TODO: Ask someone why child labels get 'swallowed up' and they can't be found.
+            // This is happening with a Button that has a 'View' with two 'Text' children
+            let entryButtons = app.buttons[HomeButtons.entryCellButton.rawValue]
+            let firstButton = entryButtons.firstMatch.label.lowercased()
+            let containsDrugs =
+                firstButton.contains(DrugList.Dramamine.rawValue.lowercased())
+                && firstButton.contains(DrugList.Excedrin.rawValue.lowercased())
+                && firstButton.contains(DrugList.Ibuprofen.rawValue.lowercased())
+            XCTAssert(containsDrugs, "Drugs are missing from the entry.")
+        }
+
+        // Set first app launch options
+        app.launchArguments = [
+            AppTestArguments.enableTestConfiguration.rawValue,
+            AppTestArguments.clearEntriesOnLaunch.rawValue,
+        ]
         app.launch()
 
-        // Use recording to get started writing UI tests.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
+        // Tap some medicine, then save
+        app.tap(.Dramamine)
+        app.tap(.two)
+        app.tap(.Excedrin)
+        app.tap(.four)
+        app.tap(.Ibuprofen)
+        app.tap(.six)
+        app.tap(.saveEntry)
+        sleep(1)
+        assertTableData()
 
-    func testLaunchPerformance() {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTOSSignpostMetric.applicationLaunch]) {
-                XCUIApplication().launch()
-            }
-        }
+        // Clear launch args, terminate, and restart
+        app.launchArguments = []
+        app.terminate()
+        app.launch()
+        assertTableData()
     }
 }
+
+extension XCUIApplication {
+    func tap(_ number: NumberPad) {
+        buttons[number.rawValue].tap()
+    }
+
+    func tap(_ drug: DrugList) {
+        buttons[drug.rawValue].tap()
+    }
+
+    func tap(_ button: HomeButtons) {
+        buttons[button.rawValue].tap()
+    }
+}
+
+

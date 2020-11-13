@@ -56,14 +56,16 @@ struct HomeDrugView: View {
                     HomeMedicineInfoCell(
                         drugList: entry.drugList,
                         dateString: dateFormatterLong.string(from: entry.date)
-                    )
+                    ).accessibility(identifier: HomeButtons.entryCellBody.rawValue)
                 }
                 .foregroundColor(.primary)
+                .accessibility(identifier: HomeButtons.entryCellButton.rawValue)
             }.onDelete(perform: { indexSet in
                 guard let removedIndex = indexSet.first else { return }
                 self.rootScreenState.deleteEntry(at: removedIndex)
             }).animation(.default)
         }.listStyle(PlainListStyle())
+        .accessibility(identifier: HomeButtons.entryCellList.rawValue)
 	}
 	
     var drugEntryView: some View {
@@ -76,7 +78,7 @@ struct HomeDrugView: View {
         return Components.fullWidthButton(
             "Take some drugs",
             rootScreenState.saveNewEntry
-        )
+        ).accessibility(identifier: HomeButtons.saveEntry.rawValue)
     }
 }
 
@@ -88,9 +90,11 @@ struct HomeMedicineInfoCell: View {
         VStack(alignment: .leading) {
             Text(drugList)
                 .fontWeight(.semibold)
+                .accessibility(identifier: HomeButtons.entryCellTitleText.rawValue)
 
             Text(dateString)
                 .fontWeight(.ultraLight)
+                .accessibility(identifier: HomeButtons.entryCellSubtitleText.rawValue)
         }
     }
 }

@@ -25,37 +25,49 @@ public class MedicineLogDataManager: ObservableObject {
         id: String,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
+        log { Event("Removing entry with id = \(id).") }
         appData.updateEntryList{ list in
-            list.removeAll{ $0.uuid == id }
+            guard let index = appData.medicineListIndexFor(id) else {
+                handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
+                return
+            }
+
+            let removed = list.remove(at: index)
+
+            log { Event("Removed medicine entry \(removed)") }
         }
         saveAndNotify(handler)
+
     }
 
     func addEntry(
         medicineEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
+        log { Event("Adding new entry: \(medicineEntry).") }
         appData.updateEntryList{ list in
             list.insert(medicineEntry, at: 0)
         }
         saveAndNotify(handler)
+        log { Event("Added entry: \(medicineEntry.id)") }
     }
 
     func updateEntry(
         updatedEntry: MedicineEntry,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        do {
-            guard let index = appData.medicineListIndexFor(updatedEntry.id)
-                else { throw AppStateError.updateError }
-            appData.updateEntryList{ list in
-                list[index] = updatedEntry
-                list.sort(by: sortEntriesNewestOnTop)
-            }
-            saveAndNotify(handler)
-        } catch {
-            handler(.failure(error))
+        log { Event("Updating entry: \(updatedEntry).") }
+        guard let index = appData.medicineListIndexFor(updatedEntry.id) else {
+            handler(.failure(AppStateError.generic(message: "Entry mismatch. Expected = \(updatedEntry.id)")))
+            return
         }
+
+        appData.updateEntryList{ list in
+            list[index] = updatedEntry
+            list.sort(by: sortEntriesNewestOnTop)
+        }
+        saveAndNotify(handler)
+        log { Event("Entry updated: \(updatedEntry.id)") }
     }
 
     func updateDrug(
@@ -63,23 +75,25 @@ public class MedicineLogDataManager: ObservableObject {
         updatedDrug: Drug,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        do {
-            guard let updateIndex = appData.drugListIndexFor(originalDrug)
-                else { throw AppStateError.updateError }
-            appData.updateDrugList { list in
-                list.drugs[updateIndex] = updatedDrug
-                list.drugs.sort()
-            }
-            saveAndNotify(handler)
-        } catch {
-            handler(.failure(error))
+        log { Event("Updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
+        guard let updateIndex = appData.drugListIndexFor(originalDrug) else {
+            handler(.failure(AppStateError.generic(message: "Drug mismatch. Expected = \(originalDrug.id)")))
+            return
         }
+
+        appData.updateDrugList { list in
+            list.drugs[updateIndex] = updatedDrug
+            list.drugs.sort()
+        }
+        saveAndNotify(handler)
+        log { Event("Drug updated: \(updatedDrug.drugName)") }
     }
 
     func addDrug(
         newDrug: Drug,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
+        log { Event("Adding drug: \(newDrug)") }
         appData.updateDrugList { list in
             list.drugs.append(newDrug)
             list.drugs.sort()
@@ -91,16 +105,17 @@ public class MedicineLogDataManager: ObservableObject {
         drugToRemove: Drug,
         _ handler: @escaping (Result<Void, Error>) -> Void
     ) {
-        do {
-            guard let updateIndex = appData.drugListIndexFor(drugToRemove)
-                else { throw AppStateError.updateError }
-            appData.updateDrugList { list in
-                list.drugs.remove(at: updateIndex)
-            }
-            saveAndNotify(handler)
-        } catch {
-            handler(.failure(error))
+        log { Event("Removing drug: \(drugToRemove)") }
+        guard let updateIndex = appData.drugListIndexFor(drugToRemove) else {
+            handler(.failure(AppStateError.generic(message: "Couldn't find drug to remove: \(drugToRemove)")))
+            return
         }
+
+        appData.updateDrugList { list in
+            list.drugs.remove(at: updateIndex)
+        }
+        saveAndNotify(handler)
+        log { Event("Removed drug: \(drugToRemove.drugName)") }
     }
 }
 
@@ -142,7 +157,7 @@ extension MedicineLogDataManager {
         return Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)
             .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
-                logd { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
+                log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
                 refreshCount = refreshCount + 1
                 return list.availabilityInfo(updateInterval, drugs)
             }
@@ -198,5 +213,14 @@ extension MedicineLogDataManager {
     var TEST_getAMedicineEntry: MedicineEntry {
         return appData.mainEntryList.first
             ?? DefaultDrugList.shared.defaultEntry
+    }
+
+    func TEST_clearAllEntries() {
+        appData.mainEntryList.removeAll()
+        let lock = DispatchSemaphore(value: 1)
+        saveAndNotify { _ in
+            lock.signal()
+        }
+        lock.wait()
     }
 }

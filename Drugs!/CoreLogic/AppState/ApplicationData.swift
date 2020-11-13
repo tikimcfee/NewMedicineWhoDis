@@ -35,19 +35,25 @@ public struct ApplicationData: EquatableFileStorable {
 
 extension ApplicationData {
     public mutating func updateEntryList(_ handler: (inout [MedicineEntry]) -> Void) {
+        log { Event("MedicineEntry list updating") }
         handler(&mainEntryList)
     }
 
     public mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
+        log { Event("AvailableDrugList updating") }
         handler(&availableDrugList)
     }
 
     public func medicineListIndexFor(_ id: String) -> Int? {
-        return mainEntryList.firstIndex(where: { $0.id == id })
+        let foundIndex = mainEntryList.firstIndex(where: { $0.id == id })
+        log { Event("MainEntryList query with id: \(id), found: \(String(describing: foundIndex))", foundIndex != nil ? .info : .error) }
+        return foundIndex
     }
 
     public func drugListIndexFor(_ drug: Drug) -> Int? {
-        return availableDrugList.drugs.firstIndex(where: { $0.id == drug.id })
+        let foundIndex = availableDrugList.drugs.firstIndex(where: { $0.id == drug.id })
+        log { Event("DrugList query: \(drug), found: \(String(describing: foundIndex))", foundIndex != nil ? .info : .error) }
+        return foundIndex
     }
 }
 
@@ -55,17 +61,19 @@ extension ApplicationData {
 extension KeyedDecodingContainer where Key == ApplicationData.CodingKeys {
     var decodedEntryList: [MedicineEntry] {
         do {
+            defer { log { Event("Decoded existing entry list") } }
             return try decode(Array<MedicineEntry>.self, forKey: .listState)
         } catch {
-            loge{ Event("Failed to decode MedicineList, returning empty") }
+            log{ Event("Failed to decode MedicineList, returning empty") }
             return []
         }
     }
     var decodedDrugList: AvailableDrugList {
         do {
+            defer { log { Event("Decoded existing drug list") } }
             return try decode(AvailableDrugList.self, forKey: .availableDrugList)
         } catch {
-            loge{ Event("Failed to decode AvailableDrugList, returning defaultList") }
+            log{ Event("Failed to decode AvailableDrugList, returning defaultList") }
             return AvailableDrugList.defaultList
         }
     }

@@ -10,8 +10,19 @@ import XCTest
 
 class Drugs_Tests: XCTestCase {
 
-    override func setUp() {
+    private let testQueue = DispatchQueue(label: "TestBackgroundQueue")
 
+    private var dataManager: MedicineLogDataManager!
+
+    private var notificationState: NotificationInfoViewState!
+    private var rootScreenState: RootScreenState!
+
+    override func setUp() {
+        dataManager = makeTestMedicineOperator()
+        dataManager.TEST_clearAllEntries()
+
+        notificationState = NotificationInfoViewState(dataManager)
+        rootScreenState = RootScreenState(dataManager, NotificationScheduler(notificationState: notificationState))
     }
 
     override func tearDown() {
@@ -19,9 +30,48 @@ class Drugs_Tests: XCTestCase {
     }
 
     func testTakableMeds() {
-        let testEntries = DefaultDrugList.shared.randomEntries
-        let info = testEntries.availabilityInfo()
-        print(info)
+        XCTAssert(rootScreenState.currentEntries.count == 0, "Must start test without any entries")
+
+        var rand: Int { Int.random(in: 0...100) }
+
+        func makeMap() -> [Drug: Int] { [
+            Drug("Drug 1", [], 6) : rand,
+            Drug("Drug 2", [], 12) : rand,
+            Drug("Drug 3", [Ingredient("AnIngredient")], 3) : rand,
+            Drug("Drug 4", [Ingredient("AnIngredient2"),
+                            Ingredient("AnIngredient3")], Double(rand)) : rand,
+        ] }
+
+        // Make test map
+        let entryMap: [Drug: Int] = makeMap()
+
+        // Set on state
+        rootScreenState.inProgressEntry.entryMap = entryMap
+
+        // Save once
+        let saveFinished = XCTestExpectation(description: "Save completes")
+        testQueue.async {
+            self.rootScreenState.saveNewEntry()
+            sleep(2)
+            saveFinished.fulfill()
+        }
+
+        wait(for: [saveFinished], timeout: 5)
+        XCTAssert(rootScreenState.currentEntries.count == 1, "Entry was not saved!")
+        XCTAssert(rootScreenState.currentEntries.first!.drugsTaken == entryMap, "Drug map was not transferred to entry correctly")
+
+        // Save multiple times
+        let allSavesFinished = XCTestExpectation(description: "All save completed")
+        allSavesFinished.expectedFulfillmentCount = 10
+        testQueue.async {
+            for _ in 0...10 {
+                let newMap = makeMap()
+                self.rootScreenState.inProgressEntry.entryMap = newMap
+                self.rootScreenState.saveNewEntry()
+                allSavesFinished.fulfill()
+            }
+        }
+        wait(for: [allSavesFinished], timeout: 5)
     }
 
 }
