@@ -31,6 +31,9 @@ public final class RootScreenState: ObservableObject {
         dataManager.mainEntryListStream
             .receive(on: RunLoop.main)
             .sink { [weak self] in
+//                // TODO: Slice to reduce displayed rows
+//                let slice = $0[0..<(min(10, $0.count))]
+//                self?.currentEntries = Array(slice)
                 self?.currentEntries = $0
             }
             .store(in: &cancellables)

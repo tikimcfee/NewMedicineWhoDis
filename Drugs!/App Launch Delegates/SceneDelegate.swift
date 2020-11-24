@@ -22,6 +22,7 @@ public extension Result where Success == ApplicationData, Failure == Error {
 public enum AppTestArguments: String {
     case enableTestConfiguration
     case clearEntriesOnLaunch
+    case disableAnimations
 
     var isSet: Bool { CommandLine.arguments.contains(rawValue) }
 }
@@ -85,6 +86,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         if AppTestArguments.clearEntriesOnLaunch.isSet {
             container.dataManager.TEST_clearAllEntries()
+        }
+
+        if AppTestArguments.disableAnimations.isSet {
+            UIView.setAnimationsEnabled(false)
         }
     }
 }

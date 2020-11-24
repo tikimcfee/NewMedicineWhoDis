@@ -7,11 +7,13 @@ public func eTag(_ object: Any?) -> String {
 	return String(describing: thing)
 }
 
-public enum Criticality: String {
-	case info, warning, error
+public enum Criticality: String, EquatableFileStorable {
+	case info
+    case warning
+    case error
 }
 
-public struct Event: CustomStringConvertible {
+public struct Event: CustomStringConvertible, EquatableFileStorable {
 	let tag: String
 	let message: String
 	let criticality: Criticality

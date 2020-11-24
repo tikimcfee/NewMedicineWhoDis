@@ -49,7 +49,7 @@ public class FileStore {
     public func saveApplicationData(_ appData: ApplicationData) -> Error? {
         do {
             let jsonData = try jsonEncoder.encode(appData)
-            try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
+            try jsonData.write(to: medicineLogsDefaultFile)
             return nil
         } catch {
             log { Event("Encoding error : \(error)", .error) }

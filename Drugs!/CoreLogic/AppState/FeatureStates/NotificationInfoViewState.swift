@@ -47,7 +47,6 @@ public final class NotificationInfoViewState: ObservableObject {
                 log { Event("\(date): Fetching pending notifications") }
             })
             .map{ _ in
-                print(Thread.isMainThread)
                 let semaphore = DispatchSemaphore(value: 0)
                 var fetchedRequests: [UNNotificationRequest] = []
                 UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
