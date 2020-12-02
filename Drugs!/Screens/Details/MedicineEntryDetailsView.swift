@@ -21,7 +21,7 @@ struct MedicineEntryDetailsView: View {
             Spacer()
             Components.fullWidthButton("Edit this entry") {
                 self.detailsState.startEditing()
-            }
+            }.accessibility(identifier: DetailScreen.editThisEntry.rawValue)
 		}
 		.padding(8.0)
         .navigationBarTitle(Text(self.detailsState.viewModel.title))
@@ -75,7 +75,8 @@ struct DetailEntryModelCell: View {
                     : Color.computedCannotTake
             )
 			.cornerRadius(4.0)
-			.slightlyRaised()
+            .shadow(color: Color.gray, radius: 0.5, x: 0.0, y: 0.5)
+            .padding(4.0)
     }
 	
 	private var subtitleView: some View {

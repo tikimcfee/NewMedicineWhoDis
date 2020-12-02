@@ -29,8 +29,19 @@ class Drugs_Tests: XCTestCase {
 
     }
 
+    func testDateFormat() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "eee MMM dd"
+        let date = formatter.date(from: "Thu Dec 10")
+        let string = formatter.string(from: date!)
+        let final = string
+    }
+
     func testTakableMeds() {
-        XCTAssert(rootScreenState.currentEntries.count == 0, "Must start test without any entries")
+        XCTAssert(
+            rootScreenState.currentEntries.count == 0,
+            "Must start test without any entries"
+        )
 
         var rand: Int { Int.random(in: 0...100) }
 
@@ -57,8 +68,14 @@ class Drugs_Tests: XCTestCase {
         }
 
         wait(for: [saveFinished], timeout: 5)
-        XCTAssert(rootScreenState.currentEntries.count == 1, "Entry was not saved!")
-        XCTAssert(rootScreenState.currentEntries.first!.drugsTaken == entryMap, "Drug map was not transferred to entry correctly")
+        XCTAssert(
+            rootScreenState.currentEntries.count == 1,
+            "Entry was not saved!"
+        )
+        XCTAssert(
+            rootScreenState.currentEntries.first!.drugsTaken == entryMap,
+            "Drug map was not transferred to entry correctly"
+        )
 
         // Save multiple times
         let allSavesFinished = XCTestExpectation(description: "All save completed")

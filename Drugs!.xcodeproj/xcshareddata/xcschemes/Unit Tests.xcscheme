@@ -50,6 +50,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "4593B4AD231AFBD000787D91"
+            BuildableName = "Meds!.app"
+            BlueprintName = "Drugs!"
+            ReferencedContainer = "container:Drugs!.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

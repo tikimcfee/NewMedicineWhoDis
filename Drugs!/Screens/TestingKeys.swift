@@ -1,11 +1,23 @@
-enum HomeButtons: String {
-    case saveEntry = "saveEntry"
+enum MedicineLogScreen: String {
+    case saveEntry
 
-    case entryCellList = "entryCellList"
-    case entryCellButton = "entryCellButton"
-    case entryCellBody = "entryCellBody"
-    case entryCellTitleText = "entryCellTitleText"
-    case entryCellSubtitleText = "entryCellSubtitleText"
+    case entryCellList
+    case entryCellButton
+    case entryCellBody
+    case entryCellTitleText
+    case entryCellSubtitleText
+}
+
+enum DetailScreen: String {
+    case editThisEntry
+}
+
+enum EditEntryScreen: String {
+    case saveEditsButton
+
+    case oldTimeLabel
+    case newTimeLabel
+    case datePickerButton
 }
 
 enum DrugList: String {

@@ -28,12 +28,62 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4593B4C3231AFBD200787D91"
+               BuildableName = "Drugs!Tests.xctest"
+               BlueprintName = "Drugs!Tests"
+               ReferencedContainer = "container:Drugs!.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4593B4CE231AFBD200787D91"
+               BuildableName = "Drugs!UITests.xctest"
+               BlueprintName = "Drugs!UITests"
+               ReferencedContainer = "container:Drugs!.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F0A38600256EF224003ADA90"
+               BuildableName = "Meds! - Core Tests.xctest"
+               BlueprintName = "Meds! - Core Tests"
+               ReferencedContainer = "container:Drugs!.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F061445E256F0D5900883FBE"
+               BuildableName = "SampleTest.xctest"
+               BlueprintName = "SampleTest"
+               ReferencedContainer = "container:Drugs!.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F0614473256F0DF700883FBE"
+               BuildableName = "Target-MainUnitTests.xctest"
+               BlueprintName = "Target-MainUnitTests"
+               ReferencedContainer = "container:Drugs!.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
-      selectedDebuggerIdentifier = ""
-      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"

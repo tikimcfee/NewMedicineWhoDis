@@ -217,7 +217,7 @@ extension MedicineLogDataManager {
 
     func TEST_clearAllEntries() {
         appData.mainEntryList.removeAll()
-        let lock = DispatchSemaphore(value: 0)
+        let lock = DispatchSemaphore(value: 1)
         saveAndNotify { _ in
             lock.signal()
         }

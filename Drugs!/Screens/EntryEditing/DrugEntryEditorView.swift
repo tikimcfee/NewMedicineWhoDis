@@ -1,51 +1,6 @@
 import Combine
 import SwiftUI
 
-public final class DrugEntryEditorState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
-    private var cancellables = Set<AnyCancellable>()
-
-    @Published public var editorIsVisible: Bool = false
-    @Published public var entryPadState: DrugSelectionContainerViewState
-    @Published var editorError: AppStateError? = nil
-    @Published var inProgressEntry: InProgressEntry = InProgressEntry()
-
-    var sourceEntry: MedicineEntry
-	
-    public init(dataManager: MedicineLogDataManager,
-                sourceEntry: MedicineEntry) {
-        self.dataManager = dataManager
-        self.sourceEntry = sourceEntry
-        self.entryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
-        entryPadState.setInProgressEntry(sourceEntry.editableEntry)
-        entryPadState.inProgressEntryStream
-            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0 })
-            .store(in: &cancellables)
-	}
-
-    func saveEdits() {
-        guard sourceEntry.date != inProgressEntry.date
-                || sourceEntry.drugsTaken != inProgressEntry.entryMap
-        else { return }
-
-        var safeCopy = sourceEntry
-        safeCopy.date = inProgressEntry.date
-        safeCopy.drugsTaken = inProgressEntry.entryMap
-
-        dataManager.updateEntry(updatedEntry: safeCopy) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .success:
-                    self.editorIsVisible = false
-                    self.editorError = nil
-
-                case .failure(let error):
-                    self.editorError = error as? AppStateError ?? .updateError
-            }
-        }
-    }
-}
-
 struct DrugEntryEditorView: View {
 	
 	@EnvironmentObject private var editorState: DrugEntryEditorState
@@ -60,8 +15,12 @@ struct DrugEntryEditorView: View {
             .environmentObject(editorState.entryPadState)
 			
 			VStack(alignment: .trailing, spacing: 8) {
-                time("Original Time:", editorState.sourceEntry.date)
-                time("New Time:", editorState.inProgressEntry.date)
+                time("Original Time:",
+                     editorState.sourceEntry.date,
+                     EditEntryScreen.oldTimeLabel.rawValue)
+                time("New Time:",
+                     editorState.inProgressEntry.date,
+                     EditEntryScreen.newTimeLabel.rawValue)
 				timePicker
 					.screenWide
 					.darkBoringBorder
@@ -70,7 +29,9 @@ struct DrugEntryEditorView: View {
             .screenWide
 			.padding(8)
 			
-            Components.fullWidthButton("Save changes", editorState.saveEdits).padding(8)
+            Components.fullWidthButton("Save changes", editorState.saveEdits)
+            .padding(8)
+            .accessibility(identifier: EditEntryScreen.saveEditsButton.rawValue)
 		}
         .background(Color(red: 0.8, green: 0.9, blue: 0.9))
         .onDisappear(perform: { self.editorState.editorIsVisible = false })
@@ -92,11 +53,14 @@ struct DrugEntryEditorView: View {
 		}
 	}
 	
-	private func time(_ title: String, _ date: Date) -> some View {
+	private func time(_ title: String,
+                      _ date: Date,
+                      _ label: String) -> some View {
 		return HStack(alignment: .firstTextBaseline) {
 			Text(title)
 				.font(.callout)
 			Text("\(date, formatter: dateTimeFormatter)")
+                .accessibility(identifier: label)
 				.font(.subheadline)
 				.padding(.horizontal, 24)
 				.frame(width: 196)
@@ -108,12 +72,15 @@ struct DrugEntryEditorView: View {
 		VStack {
 			DatePicker(
                 selection: $editorState.inProgressEntry.date,
-				displayedComponents: .init(arrayLiteral: .date,.hourAndMinute),
+				displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
 				label: { EmptyView() }
-			).labelsHidden()
+			)
+            .datePickerStyle(WheelDatePickerStyle())
+            .labelsHidden()
 			.frame(height: 64)
 			.clipped()
-		}
+            .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)
+        }
 	}
 	
 }

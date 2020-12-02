@@ -14,37 +14,6 @@ struct InProgressEntry {
     }
 }
 
-extension View {
-	func slightlyRaised() -> some View {
-		return self
-			.shadow(color: Color.gray, radius: 0.5, x: 0.0, y: 0.5)
-			.padding(4.0)
-	}
-}
-
-typealias PadState = (InProgressEntry, Drug?)
-
-public final class DrugSelectionContainerViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
-    private var cancellables = Set<AnyCancellable>()
-
-    // Inner state
-    @Published var selectionState: DrugSelectionContainerInProgressState
-
-    init(dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-        self.selectionState = DrugSelectionContainerInProgressState(dataManager)
-    }
-
-    func setInProgressEntry(_ entry: InProgressEntry) {
-        selectionState.update(entry: entry)
-    }
-
-    var inProgressEntryStream: AnyPublisher<InProgressEntry, Never> {
-        return selectionState.containerStateStream()
-    }
-}
-
 struct DrugSelectionContainerView: View {
     @EnvironmentObject var viewState: DrugSelectionContainerViewState
     
