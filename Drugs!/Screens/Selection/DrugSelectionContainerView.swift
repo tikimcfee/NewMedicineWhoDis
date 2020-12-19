@@ -2,15 +2,14 @@ import SwiftUI
 import Combine
 
 struct InProgressEntry {
-	var entryMap: [Drug:Int]
+	var entryMap: [Drug: Int]
     var date: Date
-    init(_ map: [Drug:Int] = [:], _ date: Date = Date()) {
+    init(
+        _ map: [Drug: Int] = [:],
+        _ date: Date = Date()
+    ) {
         self.entryMap = map
         self.date = date
-    }
-    mutating func reset() {
-        entryMap = [:]
-        date = Date()
     }
 }
 
@@ -46,7 +45,6 @@ struct DrugSelectionContainerView: View {
             DrugEntryNumberPad(model: numberPadModel)
                 .padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
         }
-        .background(Color(red: 0.8, green: 0.9, blue: 0.9))
     }
 
     private var listModel: DrugSelectionListModel {

@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-struct HomeDrugView: View {
+struct AddNewEntryView: View {
 
     @EnvironmentObject private var rootScreenState: RootScreenState
 
@@ -11,23 +11,6 @@ struct HomeDrugView: View {
             saveButton.padding(4.0)
         }
         .alert(item: $rootScreenState.saveError, content: makeAlert)
-    }
-
-    private func makeNewDetailsView() -> some View {
-        if rootScreenState.isMedicineEntrySelected,
-           let newState = rootScreenState.makeNewDetailsState() {
-            return AnyView(
-                MedicineEntryDetailsView()
-                    .environmentObject(newState)
-                    .onDisappear(perform: {
-                        self.rootScreenState.deselectDetails()
-                    })
-            )
-        } else {
-            return AnyView(
-                EmptyView()
-            )
-        }
     }
 
     private func makeAlert(_ error: Error) -> Alert {
@@ -62,6 +45,23 @@ struct HomeDrugView: View {
         }.listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
 	}
+
+    private func makeNewDetailsView() -> some View {
+        if rootScreenState.isMedicineEntrySelected,
+           let newState = rootScreenState.makeNewDetailsState() {
+            return AnyView(
+                MedicineEntryDetailsView()
+                    .environmentObject(newState)
+                    .onDisappear(perform: {
+                        self.rootScreenState.deselectDetails()
+                    })
+            )
+        } else {
+            return AnyView(
+                EmptyView()
+            )
+        }
+    }
 	
     var drugEntryView: some View {
         DrugSelectionContainerView(

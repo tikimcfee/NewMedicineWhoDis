@@ -2,13 +2,13 @@ import SwiftUI
 import Combine
 
 enum RootScreenTabTag {
-    case home, notifications, drugList
+    case addEntry, notifications, drugList
 }
 
 struct RootAppStartupView: View {
 
     @EnvironmentObject var container: MasterEnvironmentContainer
-    @State var selectionTag: RootScreenTabTag = .home
+    @State var selectionTag: RootScreenTabTag = .addEntry
 
     var body: some View {
         /** As of:
@@ -31,15 +31,15 @@ struct RootAppStartupView: View {
         if #available(iOS 14.0, *) {
             return AnyView(
                 TabView(selection: $selectionTag) {
-                    homeViewOrEmpty
-                    infoViewOrEmpty
-                    drugListViewOrEmpty
+                    addEntryViewLoading
+                    noficiationsViewLoading
+                    drugListViewLoading
                 }
             )
         } else {
             return AnyView(
                 TabView(selection: $selectionTag) {
-                    homeView.asHomeTab
+                    addEntryView.asAddEntryTab
                     notificationsView.asNotificationsTab
                     drugListEditorView.asMedicinesTab
                 }
@@ -47,27 +47,27 @@ struct RootAppStartupView: View {
         }
     }
 
-    private var homeViewOrEmpty: some View {
+    private var addEntryViewLoading: some View {
         Group {
-            if selectionTag == .home {
-                homeView
+            if selectionTag == .addEntry {
+                addEntryView
             } else {
                 loadingStack("Loading home...")
             }
-        }.asHomeTab
+        }.asAddEntryTab
     }
 
-    private var infoViewOrEmpty: some View {
+    private var noficiationsViewLoading: some View {
         Group {
             if selectionTag == .notifications {
                 notificationsView
             } else {
                 loadingStack("Loading reminders...")
             }
-            }.asNotificationsTab
+        }.asNotificationsTab
     }
 
-    private var drugListViewOrEmpty: some View {
+    private var drugListViewLoading: some View {
         Group {
             if selectionTag == .drugList {
                 drugListEditorView
@@ -77,14 +77,8 @@ struct RootAppStartupView: View {
         }.asMedicinesTab
     }
 
-    private var homeView: some View {
-        NavigationView {
-            HomeDrugView().navigationBarTitle(
-                Text("When did I..."),
-                displayMode: .inline
-            )
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
+    private var addEntryView: some View {
+        AddNewEntryView()
     }
 
     private var notificationsView: some View {
@@ -92,15 +86,8 @@ struct RootAppStartupView: View {
     }
 
     private var drugListEditorView: some View {
-        NavigationView {
-            DrugListEditorView()
-                .environmentObject(container.makeNewDrugEditorState())
-                .navigationBarTitle(
-                    Text(""),
-                    displayMode: .inline
-                )
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
+        DrugListEditorView()
+            .environmentObject(container.makeNewDrugEditorState())
     }
 
     private func loadingStack(_ text: String) -> some View {
@@ -112,8 +99,8 @@ struct RootAppStartupView: View {
 }
 
 extension View {
-    var asHomeTab: some View {
-        return modifier(TagModifier(tag: .home))
+    var asAddEntryTab: some View {
+        return modifier(TagModifier(tag: .addEntry))
     }
 
     var asNotificationsTab: some View {
@@ -129,11 +116,11 @@ struct TagModifier: ViewModifier {
     let tag: RootScreenTabTag
     func body(content: Content) -> some View {
         switch tag {
-        case .home:
+        case .addEntry:
             return content.tabItem {
-                Image(systemName: "list.bullet")
-                Text("Medicine Log")
-            }.tag(RootScreenTabTag.home)
+                Image(systemName: "plus.square.fill")
+                Text("Add Entry")
+            }.tag(RootScreenTabTag.addEntry)
         case .notifications:
             return content.tabItem {
                 Image(systemName: "calendar.circle.fill")

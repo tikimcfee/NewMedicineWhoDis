@@ -18,7 +18,7 @@
 		45452B8B235D308700273D79 /* CoreInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45452B8A235D308700273D79 /* CoreInsights.swift */; };
 		4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B1231AFBD000787D91 /* AppDelegate.swift */; };
 		4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B3231AFBD000787D91 /* SceneDelegate.swift */; };
-		4593B4B6231AFBD000787D91 /* HomeDrugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* HomeDrugView.swift */; };
+		4593B4B6231AFBD000787D91 /* AddNewEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* AddNewEntryView.swift */; };
 		4593B4B8231AFBD100787D91 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4B7231AFBD100787D91 /* Assets.xcassets */; };
 		4593B4BB231AFBD100787D91 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4BA231AFBD100787D91 /* Preview Assets.xcassets */; };
 		4593B4BE231AFBD100787D91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4593B4BC231AFBD100787D91 /* LaunchScreen.storyboard */; };
@@ -40,8 +40,8 @@
 		F01BBBB4246F939600BBC3A3 /* MedicineLogFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* MedicineLogFileStore.swift */; };
 		F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
 		F021ED1E24EE14E5007147B6 /* NotificationInfoViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F021ED1D24EE14E5007147B6 /* NotificationInfoViewState.swift */; };
-		F022624A2471A74700F31141 /* HomeDrugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* HomeDrugView.swift */; };
-		F022624B2471A74800F31141 /* HomeDrugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* HomeDrugView.swift */; };
+		F022624A2471A74700F31141 /* AddNewEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* AddNewEntryView.swift */; };
+		F022624B2471A74800F31141 /* AddNewEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4593B4B5231AFBD000787D91 /* AddNewEntryView.swift */; };
 		F022624F2471A8A800F31141 /* DrugEntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */; };
 		F02262502471A8A800F31141 /* DrugEntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */; };
 		F02262512471A8A800F31141 /* DrugEntryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F022624E2471A8A800F31141 /* DrugEntryEditorView.swift */; };
@@ -145,7 +145,7 @@
 		4593B4AE231AFBD000787D91 /* Meds!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Meds!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4593B4B1231AFBD000787D91 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4593B4B3231AFBD000787D91 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		4593B4B5231AFBD000787D91 /* HomeDrugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDrugView.swift; sourceTree = "<group>"; };
+		4593B4B5231AFBD000787D91 /* AddNewEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewEntryView.swift; sourceTree = "<group>"; };
 		4593B4B7231AFBD100787D91 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4593B4BA231AFBD100787D91 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4593B4BD231AFBD100787D91 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -347,7 +347,7 @@
 		45F0D6152324457B00A8313F /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				4593B4B5231AFBD000787D91 /* HomeDrugView.swift */,
+				4593B4B5231AFBD000787D91 /* AddNewEntryView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -658,7 +658,7 @@
 				F0D289C2248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
 				F07E208024E9CC2B004DFB8C /* DrugListEditState.swift in Sources */,
 				459679F723370558001DCBA1 /* AppColors.swift in Sources */,
-				4593B4B6231AFBD000787D91 /* HomeDrugView.swift in Sources */,
+				4593B4B6231AFBD000787D91 /* AddNewEntryView.swift in Sources */,
 				F01BBBB4246F939600BBC3A3 /* MedicineLogFileStore.swift in Sources */,
 				F0BE9C81258DC055008C8D6D /* NewMedicineEntryCount+CoreDataClass.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* MedicineLogDataManager.swift in Sources */,
@@ -679,7 +679,7 @@
 				F0FE7FAF255E3CD4004D6D62 /* TestingKeys.swift in Sources */,
 				F0456CD824705F020017B04E /* AppColors.swift in Sources */,
 				F0456CD624705EF70017B04E /* DefaultData.swift in Sources */,
-				F022624A2471A74700F31141 /* HomeDrugView.swift in Sources */,
+				F022624A2471A74700F31141 /* AddNewEntryView.swift in Sources */,
 				F06CE02E2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */,
 				F0FE7F91255E2853004D6D62 /* RootAppStartupView.swift in Sources */,
 				F0FE7F7C255E27FC004D6D62 /* NotificationInfoView.swift in Sources */,
@@ -719,7 +719,7 @@
 				F0FE7FB0255E3CD5004D6D62 /* TestingKeys.swift in Sources */,
 				F0456CD924705F030017B04E /* AppColors.swift in Sources */,
 				F0456CD724705EF70017B04E /* DefaultData.swift in Sources */,
-				F022624B2471A74800F31141 /* HomeDrugView.swift in Sources */,
+				F022624B2471A74800F31141 /* AddNewEntryView.swift in Sources */,
 				F0FE7F9E255E3237004D6D62 /* RootScreenState.swift in Sources */,
 				F0FE7FA6255E3256004D6D62 /* NotificationInfoViewState.swift in Sources */,
 				F06CE02F2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */,
