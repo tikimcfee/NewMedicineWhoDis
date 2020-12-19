@@ -55,7 +55,7 @@ struct HomeDrugView: View {
                 Button(action: { self.rootScreenState.selectForDetails(entry)}) {
                     HomeMedicineInfoCell(
                         drugList: entry.drugList,
-                        dateString: dateFormatterLong.string(from: entry.date)
+                        dateString: DateFormatting.LongDateShortTime.string(from: entry.date)
                     ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
                 }
                 .foregroundColor(.primary)

@@ -203,7 +203,7 @@ class Drugs_UITests: XCTestCase {
 //            let oldParsedDate = dateTimeFormatter.date(from: oldTimeLabel)!
         let newTimeLabel = app.staticTexts[EditEntryScreen.newTimeLabel.rawValue].label
         let datePicker = app.datePickers[EditEntryScreen.datePickerButton.rawValue]
-        let newParsedDate = dateTimeFormatter.date(from: newTimeLabel)!
+        let newParsedDate = DateFormatting.ShortDateShortTime.date(from: newTimeLabel)!
 
         // Thu Dec 10 9 o' clock PM
         // eee MMM dd hh 'o''clock' a

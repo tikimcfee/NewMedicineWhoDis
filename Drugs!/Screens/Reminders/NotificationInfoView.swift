@@ -113,7 +113,7 @@ extension Drug {
         // Make content
         let content = UNMutableNotificationContent()
         content.title = "You can take \(drugName)"
-        content.body = "Scheduled reminder for \(dateFormatterSmall.string(from: sourceDate))."
+        content.body = "Scheduled reminder for \(DateFormatting.DefaultDateShortTime.string(from: sourceDate))."
         content.sound = UNNotificationSound(named: .init("slow-spring-board.caf"))
         content.userInfo = ["drugName": drugName]
 

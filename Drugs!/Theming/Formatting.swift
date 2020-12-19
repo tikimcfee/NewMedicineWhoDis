@@ -1,33 +1,33 @@
 import Foundation
 
-// Statically used
-let dateTimeFormatter: DateFormatter = {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .short
-    dateFormatter.timeStyle = .short
-    return dateFormatter
-}()
+struct DateFormatting {
+    static let ShortDateShortTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
 
-let dateFormatterLong: DateFormatter = {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .long
-    dateFormatter.timeStyle = .short
-    return dateFormatter
-}()
+    static let LongDateShortTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
 
+    static let NoDateMediumTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .medium
+        return dateFormatter
+    }()
 
-let dateFormatter: DateFormatter = {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .none
-    dateFormatter.timeStyle = .medium
-    return dateFormatter
-}()
-
-let dateFormatterSmall: DateFormatter = {
-    let dateFormatter = DateFormatter()
-    dateFormatter.timeStyle = .short
-    return dateFormatter
-}()
+    static let DefaultDateShortTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
+}
 
 extension Date {
     func timeDifference(from date: Date) -> (days: Int, hours: Int, minutes: Int) {

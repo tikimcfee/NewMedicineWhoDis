@@ -59,7 +59,7 @@ struct DrugEntryEditorView: View {
 		return HStack(alignment: .firstTextBaseline) {
 			Text(title)
 				.font(.callout)
-			Text("\(date, formatter: dateTimeFormatter)")
+            Text("\(date, formatter: DateFormatting.ShortDateShortTime)")
                 .accessibility(identifier: label)
 				.font(.subheadline)
 				.padding(.horizontal, 24)
