@@ -30,10 +30,6 @@ public struct Drug: EquatableFileStorable, Comparable, Identifiable {
         self.hourlyDoseTime = hourlyDoseTime
     }
 
-    static func blank(_ name: String = "<\(UUID.init().uuidString)>") -> Drug {
-        return Drug(name, [], 4)
-    }
-
     public static func < (lhs: Drug, rhs: Drug) -> Bool {
         return lhs.drugName < rhs.drugName
     }

@@ -19,7 +19,9 @@ struct DrugSelectionListView: View {
 
     var body: some View {
         let drugs = model.availableDrugs
-        let half = drugs.count / 2 + max(0, drugs.count % 2)
+
+        let half = drugs.count / 2
+            + drugs.count % 2 // mod adds uneven counts to left
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {

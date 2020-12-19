@@ -1,40 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17707" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="NewAvailableDrug" representedClassName="NewAvailableDrug" syncable="YES" codeGenerationType="category">
-        <attribute name="drugName" attributeType="String"/>
-        <attribute name="hourlyDoseTime" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="ingredients" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="NewIngredient" inverseName="drugMix" inverseEntity="NewIngredient"/>
-        <relationship name="sourceList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NewAvailableDrugList" inverseName="drugs" inverseEntity="NewAvailableDrugList"/>
-    </entity>
-    <entity name="NewAvailableDrugList" representedClassName="NewAvailableDrugList" syncable="YES" codeGenerationType="category">
-        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="drugs" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="NewAvailableDrug" inverseName="sourceList" inverseEntity="NewAvailableDrug"/>
-    </entity>
-    <entity name="NewIngredient" representedClassName="NewIngredient" syncable="YES" codeGenerationType="category">
-        <attribute name="ingredientName" attributeType="String"/>
-        <relationship name="drugMix" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NewAvailableDrug" inverseName="ingredients" inverseEntity="NewAvailableDrug"/>
-    </entity>
-    <entity name="NewLoggedDrug" representedClassName="NewLoggedDrug" syncable="YES" codeGenerationType="category">
-        <attribute name="drugName" attributeType="String"/>
+    <entity name="CDDrug" representedClassName="CDDrug" syncable="YES" codeGenerationType="category">
+        <attribute name="drugName" attributeType="String" defaultValueString=""/>
         <attribute name="houlyDoseTime" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="sourceCount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NewMedicineEntryCount" inverseName="drug" inverseEntity="NewMedicineEntryCount"/>
+        <attribute name="removedByUser" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <relationship name="ingredients" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDIngredient" inverseName="sourceDrug" inverseEntity="CDIngredient"/>
+        <relationship name="sourceCount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDLogEntryTuple" inverseName="drug" inverseEntity="CDLogEntryTuple"/>
     </entity>
-    <entity name="NewMedicineEntry" representedClassName="NewMedicineEntry" syncable="YES" codeGenerationType="category">
+    <entity name="CDIngredient" representedClassName="CDIngredient" syncable="YES" codeGenerationType="category">
+        <attribute name="ingredientName" attributeType="String" defaultValueString=""/>
+        <relationship name="sourceDrug" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDDrug" inverseName="ingredients" inverseEntity="CDDrug"/>
+    </entity>
+    <entity name="CDLogEntry" representedClassName="CDLogEntry" syncable="YES" codeGenerationType="category">
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="drugsTaken" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="NewMedicineEntryCount" inverseName="sourceEntry" inverseEntity="NewMedicineEntryCount"/>
+        <attribute name="entryId" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="drugsTaken" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CDLogEntryTuple" inverseName="sourceEntry" inverseEntity="CDLogEntryTuple"/>
     </entity>
-    <entity name="NewMedicineEntryCount" representedClassName="NewMedicineEntryCount" syncable="YES" codeGenerationType="category">
+    <entity name="CDLogEntryTuple" representedClassName="CDLogEntryTuple" syncable="YES" codeGenerationType="category">
         <attribute name="count" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="drug" maxCount="1" deletionRule="Nullify" destinationEntity="NewLoggedDrug" inverseName="sourceCount" inverseEntity="NewLoggedDrug"/>
-        <relationship name="sourceEntry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NewMedicineEntry" inverseName="drugsTaken" inverseEntity="NewMedicineEntry"/>
+        <relationship name="drug" maxCount="1" deletionRule="Nullify" destinationEntity="CDDrug" inverseName="sourceCount" inverseEntity="CDDrug"/>
+        <relationship name="sourceEntry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDLogEntry" inverseName="drugsTaken" inverseEntity="CDLogEntry"/>
     </entity>
     <elements>
-        <element name="NewAvailableDrug" positionX="-104.08203125" positionY="-41.3515625" width="128" height="103"/>
-        <element name="NewAvailableDrugList" positionX="75.43359375" positionY="69.95703125" width="128" height="73"/>
-        <element name="NewIngredient" positionX="-107.28125" positionY="-173.8984375" width="131.88671875" height="73"/>
-        <element name="NewLoggedDrug" positionX="-108" positionY="-18" width="128" height="88"/>
-        <element name="NewMedicineEntry" positionX="-273.86328125" positionY="225.9375" width="128" height="88"/>
-        <element name="NewMedicineEntryCount" positionX="-271.71875" positionY="59.87109375" width="128" height="88"/>
+        <element name="CDIngredient" positionX="-107.28125" positionY="-173.8984375" width="131.88671875" height="73"/>
+        <element name="CDDrug" positionX="-108" positionY="-18" width="128" height="118"/>
+        <element name="CDLogEntry" positionX="-273.86328125" positionY="225.9375" width="128" height="88"/>
+        <element name="CDLogEntryTuple" positionX="-271.71875" positionY="59.87109375" width="128" height="88"/>
     </elements>
 </model>

@@ -40,7 +40,7 @@ public class BoolBinding {
 }
 
 public class DrugBinding {
-    private var current: Drug = Drug.blank()
+    private var current: Drug = Drug("", [], 4)
     lazy var binding = Binding<Drug>(
         get: { () -> Drug in self.current },
         set: { (val: Drug) in self.current = val }
@@ -62,7 +62,7 @@ public final class DefaultDrugList {
 
     static func drugBinding() -> Binding<Drug?> {
         return Binding<Drug?>(
-            get: { () -> Drug? in Drug.blank() },
+            get: { () -> Drug? in Drug("", [], 4) },
             set: { (Drug) in }
         )
     }
