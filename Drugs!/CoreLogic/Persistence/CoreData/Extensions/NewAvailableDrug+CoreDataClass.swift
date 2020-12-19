@@ -12,5 +12,5 @@ import CoreData
 
 @objc(NewAvailableDrug)
 public class NewAvailableDrug: NSManagedObject {
-
+    var displayName: String { drugName ?? "<missing name>" }
 }

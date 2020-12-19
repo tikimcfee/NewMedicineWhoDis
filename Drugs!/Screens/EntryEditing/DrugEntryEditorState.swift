@@ -17,8 +17,8 @@ public final class DrugEntryEditorState: ObservableObject {
         self.sourceEntry = sourceEntry
         self.entryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
         entryPadState.setInProgressEntry(sourceEntry.editableEntry)
-        entryPadState.inProgressEntryStream
-            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0 })
+        entryPadState.selectionState.$model
+            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0.inProgressEntry })
             .store(in: &cancellables)
     }
 

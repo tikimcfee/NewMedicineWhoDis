@@ -1,49 +1,46 @@
 import Foundation
 import SwiftUI
 
+struct DrugEntryViewCellModel {
+    let drugName: String
+    let count: Int
+    let isSelected: Bool
+    let canTake: Bool
+    let tapAction: Action
+}
+
 struct DrugEntryViewCell: View {
 
-    @Binding var inProgressEntry: InProgressEntry
-    @Binding var currentSelectedDrug: Drug?
-    let trackedDrug: Drug
-    let canTake: Bool
+    let model: DrugEntryViewCellModel
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: model.tapAction) {
             text()
-                .padding(4)
-                .background(canTake
+                .padding(8)
+                .background(model.canTake
                     ? Color.computedCanTake
                     : Color.computedCannotTake
                 )
                 .cornerRadius(4)
-        }.accessibility(identifier: trackedDrug.drugName)
-    }
-
-    private func onTap() {
-        if let selected = self.currentSelectedDrug, selected == self.trackedDrug {
-            self.currentSelectedDrug = nil
-        } else {
-            self.currentSelectedDrug = self.trackedDrug
-        }
+        }.accessibility(identifier: model.drugName)
     }
 
     private func text() -> some View {
         let title =
-            Text("\(trackedDrug.drugName)")
+            Text("\(model.drugName)")
                 .font(.headline)
                 .fontWeight(.light)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(.none)
 
         let count =
-            Text("(\(String(self.inProgressEntry.entryMap[trackedDrug] ?? 0)))")
+            Text("(\(model.count))")
                 .font(.subheadline)
                 .fontWeight(.thin)
                 .animation(.none)
 
         let titleColor, countColor: Color
-        if trackedDrug == currentSelectedDrug {
+        if model.isSelected {
             titleColor = Color.medicineCellSelected
             countColor = Color.medicineCellSelected
         } else {
@@ -66,10 +63,13 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugEntryViewCell(
-                inProgressEntry: DefaultDrugList.$inProgressEntry,
-                currentSelectedDrug: DefaultDrugList.drugBinding(),
-                trackedDrug: DefaultDrugList.shared.drugs[2],
-                canTake: true
+                model: DrugEntryViewCellModel(
+                    drugName: "<DrugEntryViewCellModel>",
+                    count: 0,
+                    isSelected: false,
+                    canTake: true,
+                    tapAction: { }
+                )
             )
         }
     }

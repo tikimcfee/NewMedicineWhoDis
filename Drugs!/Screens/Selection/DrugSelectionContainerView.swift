@@ -18,9 +18,11 @@ struct DrugSelectionContainerView: View {
     @EnvironmentObject var viewState: DrugSelectionContainerViewState
     
     var body: some View {
-        HStack(alignment: .center, spacing: 0) {
+        VStack(alignment: .center, spacing: 0) {
             DrugSelectionListView()
+                .boringBorder
                 .padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
+
             DrugEntryNumberPad()
                 .padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
         }

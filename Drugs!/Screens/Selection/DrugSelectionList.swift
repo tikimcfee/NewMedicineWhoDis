@@ -2,55 +2,44 @@ import Foundation
 import SwiftUI
 import Combine
 
+struct DrugSelectionContainerModel {
+    var currentInfo = AvailabilityInfo()
+    var availableDrugs = AvailableDrugList.defaultList
+    var inProgressEntry = InProgressEntry()
+    var currentSelectedDrug: Drug?
+}
+
 final class DrugSelectionContainerInProgressState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 
-    @Published var currentInfo = AvailabilityInfo()
-    @Published var availableDrugs = AvailableDrugList.defaultList
-    @Published var currentSelectedDrug: Drug?
-    @Published var inProgressEntry: InProgressEntry
-
-    private var inProgressEntrySubject: CurrentValueSubject<InProgressEntry, Never>
+    @Published var model = DrugSelectionContainerModel()
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
 
-        let initialEntry = InProgressEntry()
-        self.inProgressEntrySubject = .init(initialEntry)
-        self.inProgressEntry = initialEntry
-
         // Start publishing data
         dataManager.availabilityInfoStream
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in self?.currentInfo = $0 })
+            .sink(receiveValue: { [weak self] in self?.model.currentInfo = $0 })
             .store(in: &cancellables)
 
         dataManager.drugListStream
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in self?.availableDrugs = $0 })
-            .store(in: &cancellables)
-
-        inProgressEntrySubject
-            .sink(receiveValue: { [weak self] in self?.inProgressEntry = $0 })
+            .sink(receiveValue: { [weak self] in self?.model.availableDrugs = $0 })
             .store(in: &cancellables)
     }
 
     func update(entry: InProgressEntry) {
-        inProgressEntrySubject.send(entry)
+        model.inProgressEntry = entry
     }
 
     func forDrug(_ drug: Drug, set count: Int?) {
-        inProgressEntry.entryMap[drug] = count
-        inProgressEntrySubject.send(inProgressEntry)
+        model.inProgressEntry.entryMap[drug] = count
     }
 
-    func count(for drug: Drug) -> Int? {
-        return inProgressEntry.entryMap[drug]
-    }
-
-    func containerStateStream() -> AnyPublisher<InProgressEntry, Never> {
-        return inProgressEntrySubject.eraseToAnyPublisher()
+    func count(for drug: Drug) -> Int {
+        model.inProgressEntry.entryMap[drug] ?? 0
     }
 }
 
@@ -59,23 +48,45 @@ struct DrugSelectionListView: View {
     @EnvironmentObject var viewState: DrugSelectionContainerInProgressState
 
     var body: some View {
+        let drugs = viewState.model.availableDrugs.drugs
+        let half = drugs.count / 2
+        let drugsSliceLeft = drugs[0..<half]
+        let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {
-            VStack(spacing: 0) { drugCells }
-                .listStyle(PlainListStyle())
-                .listRowBackground(Color.clear)
-                .environment(\.defaultMinListRowHeight, 0)
+            HStack(alignment: .top, spacing: 0) {
+                VStack {
+                    ForEach(drugsSliceLeft, id: \.drugName) { drug in
+                        DrugEntryViewCell(model: modelFor(drug: drug))
+                    }.padding(4.0)
+                }
+                VStack {
+                    ForEach(drugsSliceRight, id: \.drugName) { drug in
+                        DrugEntryViewCell(model: modelFor(drug: drug))
+                    }.padding(4.0)
+                }
+            }
+            .listStyle(PlainListStyle())
+            .listRowBackground(Color.clear)
+            .environment(\.defaultMinListRowHeight, 0)
         }
     }
 
-    private var drugCells: some View {
-        return ForEach(viewState.availableDrugs.drugs, id: \.drugName) { drug in
-            DrugEntryViewCell(
-                inProgressEntry: self.$viewState.inProgressEntry,
-                currentSelectedDrug: self.self.$viewState.currentSelectedDrug,
-                trackedDrug: drug,
-                canTake: self.viewState.currentInfo.canTake(drug)
-            )
-        }.padding(4.0)
+    private func modelFor(drug: Drug) -> DrugEntryViewCellModel {
+        DrugEntryViewCellModel(
+            drugName: drug.drugName,
+            count: viewState.count(for: drug),
+            isSelected: viewState.model.currentSelectedDrug == drug,
+            canTake: viewState.model.currentInfo.canTake(drug),
+            tapAction: { didSelect(drug: drug) }
+        )
+    }
+
+    private func didSelect(drug: Drug) {
+        if viewState.model.currentSelectedDrug == drug {
+            viewState.model.currentSelectedDrug = nil
+        } else {
+            viewState.model.currentSelectedDrug = drug
+        }
     }
 }
 

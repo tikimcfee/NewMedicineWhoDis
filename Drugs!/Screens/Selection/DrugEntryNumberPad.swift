@@ -10,42 +10,48 @@ import Foundation
 import SwiftUI
 
 struct DrugEntryNumberPad: View {
+
+    private let sharedSpacing: CGFloat = 8.0
 	
     @EnvironmentObject var selectionListViewState: DrugSelectionContainerInProgressState
 	
 	private var currentDrugCount: Int {
-        guard let drug = selectionListViewState.currentSelectedDrug else { return 0 }
-        return selectionListViewState.count(for: drug) ?? 0
+        guard let drug = selectionListViewState.model.currentSelectedDrug else { return 0 }
+        return selectionListViewState.count(for: drug)
 	}
 	
 	var body: some View {
 		HStack {
-            VStack(spacing: 4) {
-				headerLabel.frame(minHeight: 16.0)
+            VStack(spacing: sharedSpacing) {
+                headerLabel
+                    .frame(width: 196, height: 32)
+                    .padding(.horizontal)
+                    .boringBorder
 				buttonGrid
 			}
 		}
 	}
 	
 	private var buttonGrid: some View {
-		return VStack(spacing: 4) {
-            HStack(spacing: 4) {
-				createButtonsFor(1, 2, 3)
-			}
-            HStack(spacing: 4) {
-                createButtonsFor(4, 5, 6)
+        let grid = [
+            [1, 2, 3, 4, 5, 6],
+            [7, 8, 9, 10, 11, 12]
+        ]
+		return VStack(spacing: sharedSpacing) {
+            ForEach(grid, id: \.self) { row in
+                HStack(spacing: sharedSpacing) {
+                    ForEach(row, id: \.self) {
+                        numberButton(trackedNumber: $0)
+                    }
+                }
             }
-            HStack(spacing: 4) {
-				createButtonsFor(7, 8, 9)
-			}
 		}
 	}
 	
 	private var headerLabel: some View {
 		var headerText: Text
-        if let selectedDrug = selectionListViewState.currentSelectedDrug {
+        if let selectedDrug = selectionListViewState.model.currentSelectedDrug {
 			let title = "\(selectedDrug.drugName) (\(currentDrugCount))"
-			
 			headerText = Text(title)
 				.bold()
 				.font(.subheadline)
@@ -59,7 +65,7 @@ struct DrugEntryNumberPad: View {
 	
 	private func createButtonsFor(_ numbersIn: Int...) -> some View {
 		return ForEach(numbersIn, id:\.self) {
-			self.numberButton(trackedNumber: $0)
+			numberButton(trackedNumber: $0)
 		}
 	}
 	
@@ -70,9 +76,9 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func onTap(of number: Int) {
-        if let drug = selectionListViewState.currentSelectedDrug {
+        if let drug = selectionListViewState.model.currentSelectedDrug {
 			// toggle selection
-            if let lastSelection = selectionListViewState.count(for: drug), lastSelection == number {
+            if selectionListViewState.count(for: drug) == number {
                 selectionListViewState.forDrug(drug, set: nil)
 			} else {
                 selectionListViewState.forDrug(drug, set: number)
@@ -81,18 +87,27 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func numberText(trackedNumber: Int) -> some View {
+        var isSelected = false
+        if let currentDrug = selectionListViewState.model.currentSelectedDrug,
+           selectionListViewState.count(for: currentDrug) == trackedNumber {
+            isSelected = true
+        }
+
 		let text = Text("\(trackedNumber)")
             .fontWeight(.bold)
 			.frame(width: 48, height: 48, alignment: .center)
-			.background(Color.buttonBackground)
-            .clipShape(Circle())
-		
-        if let currentDrug = selectionListViewState.currentSelectedDrug,
-           selectionListViewState.count(for: currentDrug) == trackedNumber {
-            return text.foregroundColor(Color.medicineCellSelected)
-		} else {
-			return text.foregroundColor(Color.medicineCellNotSelected)
-		}
+			.background(
+                isSelected
+                ? Color.buttonBackground
+                : Color.init(.displayP3, red: 0.3, green: 0.3, blue: 0.3, opacity: 0.1)
+            )
+//            .clipShape(Circle())
+
+        return text.foregroundColor(
+            isSelected
+                ? Color.medicineCellSelected
+                : Color.medicineCellNotSelected
+        ).boringBorder
 	}
 	
 }

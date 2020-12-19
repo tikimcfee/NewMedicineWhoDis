@@ -46,10 +46,10 @@ public final class RootScreenState: ObservableObject {
             }
             .store(in: &cancellables)
         
-        createEntryPadState.inProgressEntryStream
+        createEntryPadState.selectionState.$model
             .receive(on: RunLoop.main)
             .sink { [weak self] in
-                self?.inProgressEntry = $0
+                self?.inProgressEntry = $0.inProgressEntry
             }
             .store(in: &cancellables)
     }

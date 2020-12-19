@@ -15,8 +15,4 @@ public final class DrugSelectionContainerViewState: ObservableObject {
     func setInProgressEntry(_ entry: InProgressEntry) {
         selectionState.update(entry: entry)
     }
-
-    var inProgressEntryStream: AnyPublisher<InProgressEntry, Never> {
-        return selectionState.containerStateStream()
-    }
 }

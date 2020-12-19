@@ -6,14 +6,9 @@ struct HomeDrugView: View {
     @EnvironmentObject private var rootScreenState: RootScreenState
 
     var body: some View {
-        return VStack(spacing: 0) {
-            medicineList.padding(4.0)
+        return VStack() {
             drugEntryView
             saveButton.padding(4.0)
-            NavigationLink(
-                destination: makeNewDetailsView(),
-                isActive: $rootScreenState.isMedicineEntrySelected
-            ) { EmptyView() }
         }
         .alert(item: $rootScreenState.saveError, content: makeAlert)
     }
@@ -70,7 +65,6 @@ struct HomeDrugView: View {
 	
     var drugEntryView: some View {
         return DrugSelectionContainerView()
-            .frame(height: 228)
             .environmentObject(rootScreenState.createEntryPadState)
     }
     
