@@ -27,6 +27,11 @@ struct DrugSelectionContainerModel {
     mutating func updateCount(_ count: Int?, for drug: Drug) {
         inProgressEntry.entryMap[drug] = count
     }
+
+    mutating func resetEdits() {
+        inProgressEntry = InProgressEntry()
+        currentSelectedDrug = nil
+    }
 }
 
 struct DrugSelectionContainerView: View {

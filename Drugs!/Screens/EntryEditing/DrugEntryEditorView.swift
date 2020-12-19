@@ -20,7 +20,7 @@ struct DrugEntryEditorView: View {
                      editorState.sourceEntry.date,
                      EditEntryScreen.oldTimeLabel.rawValue)
                 time("New Time:",
-                     editorState.inProgressEntry.date,
+                     editorState.selectionModel.inProgressEntry.date,
                      EditEntryScreen.newTimeLabel.rawValue)
 				timePicker
 					.screenWide
@@ -72,7 +72,7 @@ struct DrugEntryEditorView: View {
 	private var timePicker: some View {
 		VStack {
 			DatePicker(
-                selection: $editorState.inProgressEntry.date,
+                selection: $editorState.selectionModel.inProgressEntry.date,
 				displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
 				label: { EmptyView() }
 			)
@@ -94,7 +94,7 @@ extension DrugEntryEditorView {
 
     var distance: String {
         return editorState.sourceEntry.date
-            .distanceString($editorState.inProgressEntry.date.wrappedValue)
+            .distanceString($editorState.selectionModel.inProgressEntry.date.wrappedValue)
     }
 }
 

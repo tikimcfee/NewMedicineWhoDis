@@ -17,12 +17,11 @@ public final class RootScreenState: ObservableObject {
 
     // Output
     @Published var currentEntries = [MedicineEntry]()
+    @Published var saveError: AppStateError? = nil
 
-    // Root 'new entry' state
+    // Navigation flags; refactor these soon
     @Published var selectedMedicineId: String? = nil
     @Published var isMedicineEntrySelected = false
-    @Published var inProgressEntry = InProgressEntry()
-    @Published var saveError: AppStateError? = nil
 
     init(_ dataManager: MedicineLogDataManager,
          _ notificationScheduler: NotificationScheduler) {
@@ -86,7 +85,7 @@ public final class RootScreenState: ObservableObject {
     }
 
     func saveNewEntry() {
-        let drugMap = inProgressEntry.entryMap
+        let drugMap = drugSelectionModel.inProgressEntry.entryMap
         let hasEntries = drugMap.count > 0
         let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
         guard hasEntries && hasNonZeroEntries else {
@@ -98,9 +97,10 @@ public final class RootScreenState: ObservableObject {
         dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
             switch result {
             case .success:
-                self?.inProgressEntry = InProgressEntry()
-                self?.notificationScheduler
-                    .scheduleLocalNotifications(for: Array(drugMap.keys))
+                self?.drugSelectionModel.resetEdits()
+                self?.notificationScheduler.scheduleLocalNotifications(
+                    for: Array(drugMap.keys)
+                )
             case .failure(let saveError):
                 self?.saveError = .saveError(cause: saveError)
             }
