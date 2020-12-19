@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import CoreData
 
 class Drugs_Tests: XCTestCase {
 
@@ -45,7 +46,7 @@ class Drugs_Tests: XCTestCase {
 
         var rand: Int { Int.random(in: 0...100) }
 
-        func makeMap() -> [Drug: Int] { [
+        func makeMap() -> [AvailableDrug: Int] { [
             Drug("Drug 1", [], 6) : rand,
             Drug("Drug 2", [], 12) : rand,
             Drug("Drug 3", [Ingredient("AnIngredient")], 3) : rand,
@@ -54,7 +55,7 @@ class Drugs_Tests: XCTestCase {
         ] }
 
         // Make test map
-        let entryMap: [Drug: Int] = makeMap()
+        let entryMap: [AvailableDrug: Int] = makeMap()
 
         // Set on state
         rootScreenState.inProgressEntry.entryMap = entryMap

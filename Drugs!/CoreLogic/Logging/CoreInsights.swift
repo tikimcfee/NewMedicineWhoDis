@@ -1,12 +1,6 @@
 import Foundation
 import Combine
 
-public func eTag(_ object: Any?) -> String {
-    guard case let .some(thing) = object
-        else { return "" }
-	return String(describing: thing)
-}
-
 public enum Criticality: String, EquatableFileStorable {
 	case info
     case warning
@@ -36,14 +30,12 @@ public struct Event: CustomStringConvertible, EquatableFileStorable {
 }
 
 public class AppEvents: ObservableObject {
-    private static var shared: AppEvents = AppEvents()
-    public static var appEventsStream = shared.$appEvents.share().eraseToAnyPublisher()
+    private static let shared: AppEvents = AppEvents()
+    public static let appEventsStream = shared.$appEvents.share().eraseToAnyPublisher()
 
     @Published private var appEvents: [Event] = []
 
-    private init() {
-        // no params
-    }
+    private init() { }
 
 	static func add(_ event: Event) {
         shared.appEvents.append(event)
