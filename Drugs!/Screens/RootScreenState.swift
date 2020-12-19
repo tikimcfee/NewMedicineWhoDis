@@ -12,9 +12,11 @@ public final class RootScreenState: ObservableObject {
     private let notificationScheduler: NotificationScheduler
     private var cancellables = Set<AnyCancellable>()
 
+    // View models
+    @Published var drugSelectionModel = DrugSelectionContainerModel()
+
     // Output
     @Published var currentEntries = [MedicineEntry]()
-    @Published var createEntryPadState: DrugSelectionContainerViewState
 
     // Root 'new entry' state
     @Published var selectedMedicineId: String? = nil
@@ -25,7 +27,6 @@ public final class RootScreenState: ObservableObject {
     init(_ dataManager: MedicineLogDataManager,
          _ notificationScheduler: NotificationScheduler) {
         self.dataManager = dataManager
-        self.createEntryPadState = DrugSelectionContainerViewState(dataManager: dataManager)
         self.notificationScheduler = notificationScheduler
 
         dataManager.mainEntryListStream
@@ -38,18 +39,25 @@ public final class RootScreenState: ObservableObject {
             }
             .store(in: &cancellables)
 
-        $selectedMedicineId
+        dataManager.availabilityInfoStream
             .receive(on: RunLoop.main)
-            .map{ $0 != nil }
             .sink { [weak self] in
-                self?.isMedicineEntrySelected = $0
+                self?.drugSelectionModel.info = $0
             }
             .store(in: &cancellables)
-        
-        createEntryPadState.selectionState.$model
+
+        dataManager.drugListStream
             .receive(on: RunLoop.main)
             .sink { [weak self] in
-                self?.inProgressEntry = $0.inProgressEntry
+                self?.drugSelectionModel.availableDrugs = $0
+            }
+            .store(in: &cancellables)
+
+        $selectedMedicineId
+            .receive(on: RunLoop.main)
+            .map { $0 != nil }
+            .sink { [weak self] in
+                self?.isMedicineEntrySelected = $0
             }
             .store(in: &cancellables)
     }
@@ -90,7 +98,7 @@ public final class RootScreenState: ObservableObject {
         dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
             switch result {
             case .success:
-                self?.createEntryPadState.setInProgressEntry(InProgressEntry())
+                self?.inProgressEntry = InProgressEntry()
                 self?.notificationScheduler
                     .scheduleLocalNotifications(for: Array(drugMap.keys))
             case .failure(let saveError):

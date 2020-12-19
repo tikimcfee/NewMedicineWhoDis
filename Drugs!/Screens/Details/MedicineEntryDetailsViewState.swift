@@ -53,12 +53,6 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
         .store(in: &cancellables)
     }
 
-//    func removeSelection() {
-//        currentEntry = nil
-//        editorState = nil
-//        cancellables = Set()
-//    }
-
     func startEditing() {
         // This is really unsafe. It's been cleared up by not having selection state managed by
         // internal 'setSelected' stuff.. but still not great. EditorState should also fetch

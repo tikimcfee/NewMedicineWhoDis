@@ -9,16 +9,15 @@
 import Foundation
 import SwiftUI
 
-struct DrugEntryNumberPad: View {
+struct DrugEntryNumberPadModel {
+    let currentSelection: (drugName: String, count: Int)?
+    let didSelectNumber: (Int) -> Void
+}
 
+struct DrugEntryNumberPad: View {
     private let sharedSpacing: CGFloat = 8.0
-	
-    @EnvironmentObject var selectionListViewState: DrugSelectionContainerInProgressState
-	
-	private var currentDrugCount: Int {
-        guard let drug = selectionListViewState.model.currentSelectedDrug else { return 0 }
-        return selectionListViewState.count(for: drug)
-	}
+
+    let model: DrugEntryNumberPadModel
 	
 	var body: some View {
 		HStack {
@@ -50,8 +49,8 @@ struct DrugEntryNumberPad: View {
 	
 	private var headerLabel: some View {
 		var headerText: Text
-        if let selectedDrug = selectionListViewState.model.currentSelectedDrug {
-			let title = "\(selectedDrug.drugName) (\(currentDrugCount))"
+        if let selection = model.currentSelection {
+            let title = "\(selection.drugName) (\(selection.count))"
 			headerText = Text(title)
 				.bold()
 				.font(.subheadline)
@@ -70,28 +69,15 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func numberButton(trackedNumber: Int) -> some View {
-		return Button(action: { self.onTap(of: trackedNumber) }) {
+		return Button(action: {
+            model.didSelectNumber(trackedNumber)
+        }) {
 			numberText(trackedNumber: trackedNumber)
         }
 	}
 	
-	private func onTap(of number: Int) {
-        if let drug = selectionListViewState.model.currentSelectedDrug {
-			// toggle selection
-            if selectionListViewState.count(for: drug) == number {
-                selectionListViewState.forDrug(drug, set: nil)
-			} else {
-                selectionListViewState.forDrug(drug, set: number)
-			}
-		}
-	}
-	
 	private func numberText(trackedNumber: Int) -> some View {
-        var isSelected = false
-        if let currentDrug = selectionListViewState.model.currentSelectedDrug,
-           selectionListViewState.count(for: currentDrug) == trackedNumber {
-            isSelected = true
-        }
+        let isSelected = model.currentSelection?.count == trackedNumber
 
 		let text = Text("\(trackedNumber)")
             .fontWeight(.bold)
@@ -101,7 +87,6 @@ struct DrugEntryNumberPad: View {
                 ? Color.buttonBackground
                 : Color.init(.displayP3, red: 0.3, green: 0.3, blue: 0.3, opacity: 0.1)
             )
-//            .clipShape(Circle())
 
         return text.foregroundColor(
             isSelected
@@ -117,10 +102,12 @@ struct DrugEntryNumberPad: View {
 struct DrugEntryNumberPad_Preview: PreviewProvider {
     static var previews: some View {
         Group {
-            DrugEntryNumberPad()
-                .environmentObject(DrugSelectionContainerInProgressState(
-                    makeTestMedicineOperator()
-                ))
+            DrugEntryNumberPad(
+                model: DrugEntryNumberPadModel(
+                    currentSelection: ("A Drug", 19),
+                    didSelectNumber: { _ in }
+                )
+            )
         }
     }
 }

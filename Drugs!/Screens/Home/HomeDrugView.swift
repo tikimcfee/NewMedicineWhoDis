@@ -45,7 +45,7 @@ struct HomeDrugView: View {
     }
 
 	var medicineList: some View {
-        return List {
+        List {
             ForEach(rootScreenState.currentEntries, id: \.id) { entry in
                 Button(action: { self.rootScreenState.selectForDetails(entry)}) {
                     HomeMedicineInfoCell(
@@ -64,12 +64,13 @@ struct HomeDrugView: View {
 	}
 	
     var drugEntryView: some View {
-        return DrugSelectionContainerView()
-            .environmentObject(rootScreenState.createEntryPadState)
+        DrugSelectionContainerView(
+            model: $rootScreenState.drugSelectionModel
+        )
     }
     
 	var saveButton: some View {
-        return Components.fullWidthButton(
+        Components.fullWidthButton(
             "Take some drugs",
             rootScreenState.saveNewEntry
         ).accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)

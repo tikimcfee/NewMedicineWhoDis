@@ -8,11 +8,12 @@ struct DrugEntryEditorView: View {
 	
 	var body: some View {
 		return VStack(spacing: 0) {
-			DrugSelectionContainerView()
+			DrugSelectionContainerView(
+                model: $editorState.selectionModel
+            )
             .frame(height: 300)
 			.darkBoringBorder
 			.padding(8)
-            .environmentObject(editorState.entryPadState)
 			
 			VStack(alignment: .trailing, spacing: 8) {
                 time("Original Time:",

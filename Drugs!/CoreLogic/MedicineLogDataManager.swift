@@ -144,7 +144,6 @@ extension MedicineLogDataManager {
             .eraseToAnyPublisher()
     }
 
-
     var drugListStream: AnyPublisher<AvailableDrugList, Never> {
         $appData
             .map{ $0.availableDrugList }

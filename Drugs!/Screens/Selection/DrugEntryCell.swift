@@ -29,15 +29,19 @@ struct DrugEntryViewCell: View {
         let title =
             Text("\(model.drugName)")
                 .font(.headline)
-                .fontWeight(.light)
+                .fontWeight(.regular)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(.none)
 
         let count =
-            Text("(\(model.count))")
+            Text("\(model.count)")
                 .font(.subheadline)
-                .fontWeight(.thin)
+                .fontWeight(.light)
                 .animation(.none)
+                .frame(width: 24.0)
+                .padding(4)
+                .background(Color.init(.displayP3, red: 0.5, green: 0.7, blue: 0.8, opacity: 1.0))
+                .clipShape(Circle())
 
         let titleColor, countColor: Color
         if model.isSelected {
@@ -49,8 +53,8 @@ struct DrugEntryViewCell: View {
         }
 
         return HStack {
-            title.foregroundColor(titleColor)
             count.foregroundColor(countColor)
+            title.foregroundColor(titleColor)
         }
     }
 }
@@ -65,8 +69,8 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
             DrugEntryViewCell(
                 model: DrugEntryViewCellModel(
                     drugName: "<DrugEntryViewCellModel>",
-                    count: 0,
-                    isSelected: false,
+                    count: 14,
+                    isSelected: true,
                     canTake: true,
                     tapAction: { }
                 )

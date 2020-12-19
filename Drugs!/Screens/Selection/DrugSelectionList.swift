@@ -2,67 +2,37 @@ import Foundation
 import SwiftUI
 import Combine
 
-struct DrugSelectionContainerModel {
-    var currentInfo = AvailabilityInfo()
-    var availableDrugs = AvailableDrugList.defaultList
-    var inProgressEntry = InProgressEntry()
-    var currentSelectedDrug: Drug?
-}
+typealias CanTakeTuple = (
+    drug: Drug,
+    count: Int,
+    canTake: Bool
+)
 
-final class DrugSelectionContainerInProgressState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
-    private var cancellables = Set<AnyCancellable>()
-
-    @Published var model = DrugSelectionContainerModel()
-
-    init(_ dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-
-        // Start publishing data
-        dataManager.availabilityInfoStream
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in self?.model.currentInfo = $0 })
-            .store(in: &cancellables)
-
-        dataManager.drugListStream
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in self?.model.availableDrugs = $0 })
-            .store(in: &cancellables)
-    }
-
-    func update(entry: InProgressEntry) {
-        model.inProgressEntry = entry
-    }
-
-    func forDrug(_ drug: Drug, set count: Int?) {
-        model.inProgressEntry.entryMap[drug] = count
-    }
-
-    func count(for drug: Drug) -> Int {
-        model.inProgressEntry.entryMap[drug] ?? 0
-    }
+struct DrugSelectionListModel {
+    let availableDrugs: [CanTakeTuple]
+    let didSelectDrug: (Drug) -> Void
+    var selectedDrug: Drug?
 }
 
 struct DrugSelectionListView: View {
-
-    @EnvironmentObject var viewState: DrugSelectionContainerInProgressState
+    let model: DrugSelectionListModel
 
     var body: some View {
-        let drugs = viewState.model.availableDrugs.drugs
-        let half = drugs.count / 2
+        let drugs = model.availableDrugs
+        let half = drugs.count / 2 + max(0, drugs.count % 2)
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {
-            HStack(alignment: .top, spacing: 0) {
+            HStack(alignment: .top, spacing: 2) {
                 VStack {
-                    ForEach(drugsSliceLeft, id: \.drugName) { drug in
-                        DrugEntryViewCell(model: modelFor(drug: drug))
-                    }.padding(4.0)
+                    ForEach(drugsSliceLeft, id: \.drug.drugName) { tuple in
+                        DrugEntryViewCell(model: modelFor(tuple))
+                    }
                 }
                 VStack {
-                    ForEach(drugsSliceRight, id: \.drugName) { drug in
-                        DrugEntryViewCell(model: modelFor(drug: drug))
-                    }.padding(4.0)
+                    ForEach(drugsSliceRight, id: \.drug.drugName) { tuple in
+                        DrugEntryViewCell(model: modelFor(tuple))
+                    }
                 }
             }
             .listStyle(PlainListStyle())
@@ -71,28 +41,14 @@ struct DrugSelectionListView: View {
         }
     }
 
-    private func modelFor(drug: Drug) -> DrugEntryViewCellModel {
+    private func modelFor(_ tuple: CanTakeTuple) -> DrugEntryViewCellModel {
         DrugEntryViewCellModel(
-            drugName: drug.drugName,
-            count: viewState.count(for: drug),
-            isSelected: viewState.model.currentSelectedDrug == drug,
-            canTake: viewState.model.currentInfo.canTake(drug),
-            tapAction: { didSelect(drug: drug) }
+            drugName: tuple.drug.drugName,
+            count: tuple.count,
+            isSelected: model.selectedDrug == tuple.drug,
+            canTake: tuple.canTake,
+            tapAction: { model.didSelectDrug(tuple.drug) }
         )
-    }
-
-    private func didSelect(drug: Drug) {
-        if viewState.model.currentSelectedDrug == drug {
-            viewState.model.currentSelectedDrug = nil
-        } else {
-            viewState.model.currentSelectedDrug = drug
-        }
-    }
-}
-
-private extension AvailabilityInfo {
-    func canTake(_ drug: Drug) -> Bool {
-        return self[drug]?.canTake == true
     }
 }
 
@@ -100,8 +56,12 @@ private extension AvailabilityInfo {
 struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
-            DrugSelectionListView().environmentObject(
-                DrugSelectionContainerInProgressState(makeTestMedicineOperator())
+            DrugSelectionListView(
+                model: DrugSelectionListModel(
+                    availableDrugs: [],
+                    didSelectDrug: { _ in },
+                    selectedDrug: nil
+                )
             )
         }
     }
