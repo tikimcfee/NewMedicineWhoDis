@@ -121,13 +121,7 @@ public func makeTestMedicineOperator() -> MedicineLogDataManager {
     let medicineStore = MedicineLogFileStore()
     let loaded = medicineStore.load().applicationData
     return MedicineLogDataManager(
-        medicineStore: medicineStore,
+        persistenceManager: FilePersistenceManager(store: medicineStore),
         appData: loaded
     )
-}
-
-struct DefaultData_Previews: PreviewProvider {
-	static var previews: some View {
-		/*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
-	}
 }

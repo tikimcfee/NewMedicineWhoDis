@@ -2,48 +2,63 @@ import Foundation
 import SwiftUI
 import Combine
 
-public class MedicineLogDataManager: ObservableObject {
+typealias PersistenceCallback = (Result<Void, Error>) -> Void
+
+enum PersistenceOperation {
+    case addEntry(MedicineEntry)
+    case removeEntry(String)
+    case updateEntry(MedicineEntry)
+
+    case updateDrug(originalDrug: Drug, updatedDrug: Drug)
+    case addDrug(Drug)
+    case removeDrug(Drug)
+}
+
+protocol PersistenceManager {
+    func perform(operation: PersistenceOperation,
+                 with appContext: inout ApplicationData,
+                 _ handler: @escaping PersistenceCallback)
+}
+
+public class FilePersistenceManager: PersistenceManager {
 
     private let medicineStore: MedicineLogFileStore
-    @Published private var appData: ApplicationData
+
+    // Set in perform(operation:with:), not safe otherwise
+    private var appData: ApplicationData!
 
     private let mainQueue = DispatchQueue.main
     private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
                                                qos: .userInteractive)
 
-    // todo: maybe make a 'lastSaveError'
-    
-    init(
-        medicineStore: MedicineLogFileStore,
-        appData: ApplicationData
-    ) {
-        self.medicineStore = medicineStore
-        self.appData = appData
+    init(store: MedicineLogFileStore) {
+        self.medicineStore = store
     }
 
-    func removeEntry(
-        id: String,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        log { Event("Removing entry with id = \(id).") }
-        appData.updateEntryList{ list in
-            guard let index = appData.medicineListIndexFor(id) else {
-                handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
-                return
-            }
-
-            let removed = list.remove(at: index)
-
-            log { Event("Removed medicine entry \(removed)") }
+    func perform(operation: PersistenceOperation,
+                 with appContext: inout ApplicationData,
+                 _ handler: @escaping PersistenceCallback) {
+        self.appData = appContext
+        switch operation {
+        case .addEntry(let entry):
+            addEntry(medicineEntry: entry, handler)
+        case .removeEntry(let id):
+            removeEntry(id: id, handler)
+        case .updateEntry(let entry):
+            updateEntry(updatedEntry: entry, handler)
+        case let .addDrug(drug):
+            addDrug(newDrug: drug, handler)
+        case .removeDrug(let drug):
+            removeDrug(drugToRemove: drug, handler)
+        case let .updateDrug(og, new):
+            updateDrug(originalDrug: og, updatedDrug: new, handler)
         }
-        saveAndNotify(handler)
-
+        appContext.availableDrugList = appData.availableDrugList
+        appContext.mainEntryList = appData.mainEntryList
     }
 
-    func addEntry(
-        medicineEntry: MedicineEntry,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
+    func addEntry(medicineEntry: MedicineEntry,
+                  _ handler: @escaping (Result<Void, Error>) -> Void) {
         log { Event("Adding new entry: \(medicineEntry).") }
         appData.updateEntryList{ list in
             list.insert(medicineEntry, at: 0)
@@ -52,10 +67,22 @@ public class MedicineLogDataManager: ObservableObject {
         log { Event("Added entry: \(medicineEntry.id)") }
     }
 
-    func updateEntry(
-        updatedEntry: MedicineEntry,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
+    func removeEntry(id: String,
+                     _ handler: @escaping (Result<Void, Error>) -> Void) {
+        log { Event("Removing entry with id = \(id).") }
+        guard let index = appData.medicineListIndexFor(id) else {
+            handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
+            return
+        }
+        appData.updateEntryList{ list in
+            let removed = list.remove(at: index)
+            log { Event("Removed medicine entry \(removed)") }
+        }
+        saveAndNotify(handler)
+    }
+
+    func updateEntry(updatedEntry: MedicineEntry,
+                     _ handler: @escaping (Result<Void, Error>) -> Void) {
         log { Event("Updating entry: \(updatedEntry).") }
         guard let index = appData.medicineListIndexFor(updatedEntry.id) else {
             handler(.failure(AppStateError.generic(message: "Entry mismatch. Expected = \(updatedEntry.id)")))
@@ -70,11 +97,9 @@ public class MedicineLogDataManager: ObservableObject {
         log { Event("Entry updated: \(updatedEntry.id)") }
     }
 
-    func updateDrug(
-        originalDrug: Drug,
-        updatedDrug: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
+    func updateDrug(originalDrug: Drug,
+                    updatedDrug: Drug,
+                    _ handler: @escaping (Result<Void, Error>) -> Void) {
         log { Event("Updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
         guard let updateIndex = appData.drugListIndexFor(originalDrug) else {
             handler(.failure(AppStateError.generic(message: "Drug mismatch. Expected = \(originalDrug.id)")))
@@ -89,10 +114,8 @@ public class MedicineLogDataManager: ObservableObject {
         log { Event("Drug updated: \(updatedDrug.drugName)") }
     }
 
-    func addDrug(
-        newDrug: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
+    func addDrug(newDrug: Drug,
+                 _ handler: @escaping (Result<Void, Error>) -> Void) {
         log { Event("Adding drug: \(newDrug)") }
         appData.updateDrugList { list in
             list.drugs.append(newDrug)
@@ -101,10 +124,8 @@ public class MedicineLogDataManager: ObservableObject {
         saveAndNotify(handler)
     }
 
-    func removeDrug(
-        drugToRemove: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
+    func removeDrug(drugToRemove: Drug,
+                    _ handler: @escaping (Result<Void, Error>) -> Void) {
         log { Event("Removing drug: \(drugToRemove)") }
         guard let updateIndex = appData.drugListIndexFor(drugToRemove) else {
             handler(.failure(AppStateError.generic(message: "Couldn't find drug to remove: \(drugToRemove)")))
@@ -116,6 +137,88 @@ public class MedicineLogDataManager: ObservableObject {
         }
         saveAndNotify(handler)
         log { Event("Removed drug: \(drugToRemove.drugName)") }
+    }
+
+    func saveAndNotify(
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        saveQueue.async {
+            self.medicineStore.save(applicationData: self.appData) { result in
+                self.notifyHandler(result, handler)
+            }
+        }
+    }
+
+    func notifyHandler(
+        _ result: Result<Void, Error>,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        mainQueue.async {
+            handler(result)
+        }
+    }
+}
+
+public class MedicineLogDataManager: ObservableObject {
+    private let persistenceManager: PersistenceManager
+    @Published private var appData: ApplicationData
+
+    init(
+        persistenceManager: PersistenceManager,
+        appData: ApplicationData
+    ) {
+        self.persistenceManager = persistenceManager
+        self.appData = appData
+    }
+
+    func addEntry(
+        medicineEntry: MedicineEntry,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .addEntry(medicineEntry),
+                                   with: &appData, handler)
+    }
+
+    func removeEntry(
+        id: String,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .removeEntry(id),
+                                   with: &appData, handler)
+    }
+
+    func updateEntry(
+        updatedEntry: MedicineEntry,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .updateEntry(updatedEntry),
+                                   with: &appData, handler)
+    }
+
+    func updateDrug(
+        originalDrug: Drug,
+        updatedDrug: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .updateDrug(originalDrug: originalDrug,
+                                                          updatedDrug: updatedDrug),
+                                   with: &appData, handler)
+    }
+
+    func addDrug(
+        newDrug: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .addDrug(newDrug),
+                                   with: &appData, handler)
+    }
+
+    func removeDrug(
+        drugToRemove: Drug,
+        _ handler: @escaping (Result<Void, Error>) -> Void
+    ) {
+        persistenceManager.perform(operation: .removeDrug(drugToRemove),
+                                   with: &appData, handler)
     }
 }
 
@@ -130,7 +233,7 @@ extension MedicineLogDataManager {
     }
 
     private var refreshTimer: AnyPublisher<Date, Never> {
-        return Timer
+        Timer
             .publish(every: 5, on: .main, in: .common)
             .autoconnect()
             .map{ $0 as Date }
@@ -181,45 +284,7 @@ extension MedicineLogDataManager {
     }
 }
 
-private extension MedicineLogDataManager {
-    func saveAndNotify(
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        saveQueue.async {
-            self.medicineStore.save(applicationData: self.appData) { result in
-                self.notifyHandler(result, handler)
-            }
-        }
-    }
-
-    func notifyHandler(
-        _ result: Result<Void, Error>,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        mainQueue.async {
-            handler(result)
-        }
-    }
-}
-
-
 // MARK: Default on-save-sorting. This might be a terrible idea.
 private func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
     return left.date > right.date
-}
-
-extension MedicineLogDataManager {
-    var TEST_getAMedicineEntry: MedicineEntry {
-        return appData.mainEntryList.first
-            ?? DefaultDrugList.shared.defaultEntry
-    }
-
-    func TEST_clearAllEntries() {
-        appData.mainEntryList.removeAll()
-        let lock = DispatchSemaphore(value: 1)
-        saveAndNotify { _ in
-            lock.signal()
-        }
-        lock.wait()
-    }
 }

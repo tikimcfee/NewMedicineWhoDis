@@ -115,7 +115,7 @@ struct DrugDetailView_Previews: PreviewProvider {
     @State var selected: MedicineEntry = DefaultDrugList.shared.defaultEntry
     static var previews: some View {
         let data = makeTestMedicineOperator()
-        let state = MedicineEntryDetailsViewState(data, data.TEST_getAMedicineEntry.id)
+        let state = MedicineEntryDetailsViewState(data, "")
         return MedicineEntryDetailsView().environmentObject(state)
     }
 }

@@ -36,7 +36,6 @@ public struct Drug: EquatableFileStorable, Comparable, Identifiable {
 }
 
 public struct Ingredient: EquatableFileStorable {
-
     let ingredientName: String
     public init(_ ingredientName: String) {
         self.ingredientName = ingredientName
@@ -44,7 +43,6 @@ public struct Ingredient: EquatableFileStorable {
 }
 
 public struct MedicineEntry: EquatableFileStorable, Identifiable {
-    
     let uuid: String
     var date: Date
     var drugsTaken: [Drug:Int]
