@@ -2,8 +2,40 @@ import SwiftUI
 import Combine
 
 enum RootScreenTabTag {
-    case addEntry, notifications, drugList
+    case addEntry
+    case entryList
+    case notifications
+    case drugList
 }
+
+struct TagModifier: ViewModifier {
+    let tag: RootScreenTabTag
+    func body(content: Content) -> some View {
+        switch tag {
+        case .addEntry:
+            return content.tabItem {
+                Image(systemName: "plus.square.fill")
+                Text("Add Entry")
+            }.tag(RootScreenTabTag.addEntry)
+        case .entryList:
+            return content.tabItem {
+                Image(systemName: "list.dash")
+                Text("Entries")
+            }.tag(RootScreenTabTag.entryList)
+        case .notifications:
+            return content.tabItem {
+                Image(systemName: "calendar.circle.fill")
+                Text("Reminders")
+            }.tag(RootScreenTabTag.notifications)
+        case .drugList:
+            return content.tabItem {
+                Image(systemName: "heart.circle.fill")
+                Text("Medicines")
+            }.tag(RootScreenTabTag.drugList)
+        }
+    }
+}
+
 
 struct RootAppStartupView: View {
 
@@ -28,73 +60,38 @@ struct RootAppStartupView: View {
     }
 
     private func makeView() -> some View {
-        if #available(iOS 14.0, *) {
-            return AnyView(
-                TabView(selection: $selectionTag) {
-                    addEntryViewLoading
-                    noficiationsViewLoading
-                    drugListViewLoading
-                }
-            )
-        } else {
-            return AnyView(
-                TabView(selection: $selectionTag) {
-                    addEntryView.asAddEntryTab
-                    notificationsView.asNotificationsTab
-                    drugListEditorView.asMedicinesTab
-                }
-            )
-        }
-    }
-
-    private var addEntryViewLoading: some View {
-        Group {
-            if selectionTag == .addEntry {
+        AnyView(
+            TabView(selection: $selectionTag) {
                 addEntryView
-            } else {
-                loadingStack("Loading home...")
-            }
-        }.asAddEntryTab
-    }
-
-    private var noficiationsViewLoading: some View {
-        Group {
-            if selectionTag == .notifications {
+                entryListView
                 notificationsView
-            } else {
-                loadingStack("Loading reminders...")
-            }
-        }.asNotificationsTab
-    }
-
-    private var drugListViewLoading: some View {
-        Group {
-            if selectionTag == .drugList {
                 drugListEditorView
-            } else {
-                loadingStack("Loading drug list...")
             }
-        }.asMedicinesTab
+        )
     }
+}
 
+// View helpers
+extension RootAppStartupView {
     private var addEntryView: some View {
         AddNewEntryView()
+            .asAddEntryTab
+    }
+
+    private var entryListView: some View {
+        MedicineLogView()
+            .asEntryListTab
     }
 
     private var notificationsView: some View {
         NotificationInfoView()
+            .asNotificationsTab
     }
 
     private var drugListEditorView: some View {
         DrugListEditorView()
+            .asMedicinesTab
             .environmentObject(container.makeNewDrugEditorState())
-    }
-
-    private func loadingStack(_ text: String) -> some View {
-        VStack {
-            ActivityIndicator(isAnimating: .constant(true), style: .large)
-            Text(text)
-        }
     }
 }
 
@@ -103,35 +100,16 @@ extension View {
         return modifier(TagModifier(tag: .addEntry))
     }
 
+    var asEntryListTab: some View {
+        return modifier(TagModifier(tag: .entryList))
+    }
+
     var asNotificationsTab: some View {
         return modifier(TagModifier(tag: .notifications))
     }
 
     var asMedicinesTab: some View {
         return modifier(TagModifier(tag: .drugList))
-    }
-}
-
-struct TagModifier: ViewModifier {
-    let tag: RootScreenTabTag
-    func body(content: Content) -> some View {
-        switch tag {
-        case .addEntry:
-            return content.tabItem {
-                Image(systemName: "plus.square.fill")
-                Text("Add Entry")
-            }.tag(RootScreenTabTag.addEntry)
-        case .notifications:
-            return content.tabItem {
-                Image(systemName: "calendar.circle.fill")
-                Text("Reminders")
-            }.tag(RootScreenTabTag.notifications)
-        case .drugList:
-            return content.tabItem {
-                Image(systemName: "heart.circle.fill")
-                Text("Medicines")
-            }.tag(RootScreenTabTag.drugList)
-        }
     }
 }
 
