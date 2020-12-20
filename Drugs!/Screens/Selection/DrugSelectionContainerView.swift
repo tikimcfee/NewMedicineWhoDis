@@ -1,6 +1,13 @@
 import SwiftUI
 import Combine
 
+typealias SelectableDrugId = String
+
+struct SelectableDrug {
+    let drugName: String
+    let drugId: SelectableDrugId
+}
+
 struct InProgressEntry {
 	var entryMap: [Drug: Int]
     var date: Date
@@ -48,18 +55,26 @@ struct DrugSelectionContainerView: View {
     }
 
     private var listModel: DrugSelectionListModel {
-        let tuples = model.availableDrugs.drugs.map { drug in
-            (drug, model.count(for: drug), model.info.canTake(drug))
+        func didSelect(_ drug: Drug) {
+            let wasSelected = model.currentSelectedDrug == drug
+            let newOrToggledSelection = wasSelected ? nil : drug
+            model.currentSelectedDrug = newOrToggledSelection
         }
+
+        let drugModels = model.availableDrugs.drugs.map { drug in
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: drug.drugName, drugId: drug.id),
+                count: model.count(for: drug),
+                canTake: model.info.canTake(drug),
+                isSelected: model.currentSelectedDrug == drug,
+                didSelect: { didSelect(drug) }
+            )
+        }
+
         let listModel = DrugSelectionListModel(
-            availableDrugs: tuples,
-            didSelectDrug: { drug in
-                let wasSelected = model.currentSelectedDrug == drug
-                let toSet = wasSelected ? nil : drug
-                model.currentSelectedDrug = toSet
-            },
-            selectedDrug: model.currentSelectedDrug
+            availableDrugs: drugModels
         )
+
         return listModel
     }
 

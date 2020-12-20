@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17707" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="CDDrug" representedClassName="CDDrug" syncable="YES" codeGenerationType="category">
+    <entity name="CDDrug" representedClassName="CDDrug" syncable="YES" codeGenerationType="class">
         <attribute name="drugName" attributeType="String" defaultValueString=""/>
         <attribute name="houlyDoseTime" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="removedByUser" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <relationship name="ingredients" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDIngredient" inverseName="sourceDrug" inverseEntity="CDIngredient"/>
         <relationship name="sourceCount" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDLogEntryTuple" inverseName="drug" inverseEntity="CDLogEntryTuple"/>
     </entity>
-    <entity name="CDIngredient" representedClassName="CDIngredient" syncable="YES" codeGenerationType="category">
+    <entity name="CDIngredient" representedClassName="CDIngredient" syncable="YES" codeGenerationType="class">
         <attribute name="ingredientName" attributeType="String" defaultValueString=""/>
         <relationship name="sourceDrug" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDDrug" inverseName="ingredients" inverseEntity="CDDrug"/>
     </entity>
-    <entity name="CDLogEntry" representedClassName="CDLogEntry" syncable="YES" codeGenerationType="category">
+    <entity name="CDLogEntry" representedClassName="CDLogEntry" syncable="YES" codeGenerationType="class">
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="entryId" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="drugsTaken" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CDLogEntryTuple" inverseName="sourceEntry" inverseEntity="CDLogEntryTuple"/>
     </entity>
-    <entity name="CDLogEntryTuple" representedClassName="CDLogEntryTuple" syncable="YES" codeGenerationType="category">
+    <entity name="CDLogEntryTuple" representedClassName="CDLogEntryTuple" syncable="YES" codeGenerationType="class">
         <attribute name="count" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="drug" maxCount="1" deletionRule="Nullify" destinationEntity="CDDrug" inverseName="sourceCount" inverseEntity="CDDrug"/>
         <relationship name="sourceEntry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDLogEntry" inverseName="drugsTaken" inverseEntity="CDLogEntry"/>

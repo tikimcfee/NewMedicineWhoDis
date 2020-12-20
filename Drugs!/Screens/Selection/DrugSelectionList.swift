@@ -2,16 +2,16 @@ import Foundation
 import SwiftUI
 import Combine
 
-typealias CanTakeTuple = (
-    drug: Drug,
-    count: Int,
-    canTake: Bool
-)
+struct DrugSelectionListRowModel {
+    let drug: SelectableDrug
+    let count: Int
+    let canTake: Bool
+    let isSelected: Bool
+    let didSelect: Action
+}
 
 struct DrugSelectionListModel {
-    let availableDrugs: [CanTakeTuple]
-    let didSelectDrug: (Drug) -> Void
-    var selectedDrug: Drug?
+    let availableDrugs: [DrugSelectionListRowModel]
 }
 
 struct DrugSelectionListView: View {
@@ -19,20 +19,18 @@ struct DrugSelectionListView: View {
 
     var body: some View {
         let drugs = model.availableDrugs
-
-        let half = drugs.count / 2
-            + drugs.count % 2 // mod adds uneven counts to left
+        let half = drugs.count / 2 + drugs.count % 2 // mod adds uneven counts to left
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {
             HStack(alignment: .top, spacing: 2) {
                 VStack {
-                    ForEach(drugsSliceLeft, id: \.drug.drugName) { tuple in
+                    ForEach(drugsSliceLeft, id: \.drug.drugId) { tuple in
                         DrugEntryViewCell(model: modelFor(tuple))
                     }
                 }
                 VStack {
-                    ForEach(drugsSliceRight, id: \.drug.drugName) { tuple in
+                    ForEach(drugsSliceRight, id: \.drug.drugId) { tuple in
                         DrugEntryViewCell(model: modelFor(tuple))
                     }
                 }
@@ -43,13 +41,13 @@ struct DrugSelectionListView: View {
         }
     }
 
-    private func modelFor(_ tuple: CanTakeTuple) -> DrugEntryViewCellModel {
+    private func modelFor(_ tuple: DrugSelectionListRowModel) -> DrugEntryViewCellModel {
         DrugEntryViewCellModel(
             drugName: tuple.drug.drugName,
             count: tuple.count,
-            isSelected: model.selectedDrug == tuple.drug,
+            isSelected: tuple.isSelected,
             canTake: tuple.canTake,
-            tapAction: { model.didSelectDrug(tuple.drug) }
+            tapAction: tuple.didSelect
         )
     }
 }
@@ -60,9 +58,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
         Group {
             DrugSelectionListView(
                 model: DrugSelectionListModel(
-                    availableDrugs: [],
-                    didSelectDrug: { _ in },
-                    selectedDrug: nil
+                    availableDrugs: []
                 )
             )
         }
