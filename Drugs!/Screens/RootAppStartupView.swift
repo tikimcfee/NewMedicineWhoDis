@@ -43,31 +43,12 @@ struct RootAppStartupView: View {
     @State var selectionTag: RootScreenTabTag = .addEntry
 
     var body: some View {
-        /** As of:
-         * XCode 12.0 beta 4 (12A8179i)
-         * iOS 14.0 Beta 5 (18A5351d), and iOS 14.0 'default simulator'
-         *
-         * TabView automatically recreates and keeps alive tabs that aren't selected.
-         * This means any subscriptions and lifecyle events are kept around. This is
-         * best tested with a .viewAppeared(). So, there's a great little hack:
-         * Use selection state to simply not show the view, forcing SwiftUI to recreate
-         * the hierarchy entirely with a new view, seemingly defeating whatever optimization or
-         * retention is occuring. How long this will work is completely unknown.
-         *
-         * Note: This breaks quite hard in MacOS
-         */
-        return makeView()
-    }
-
-    private func makeView() -> some View {
-        AnyView(
-            TabView(selection: $selectionTag) {
-                addEntryView
-                entryListView
-                notificationsView
-                drugListEditorView
-            }
-        )
+        TabView(selection: $selectionTag) {
+            addEntryView
+            entryListView
+            notificationsView
+            drugListEditorView
+        }
     }
 }
 
@@ -89,9 +70,15 @@ extension RootAppStartupView {
     }
 
     private var drugListEditorView: some View {
-        DrugListEditorView()
-            .asMedicinesTab
-            .environmentObject(container.makeNewDrugEditorState())
+        NavigationView {
+            DrugListEditorView()
+                .environmentObject(container.makeNewDrugEditorState())
+                .navigationBarTitle("", displayMode: .inline)
+
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .asMedicinesTab
+
     }
 }
 
