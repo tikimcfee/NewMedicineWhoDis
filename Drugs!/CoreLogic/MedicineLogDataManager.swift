@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 
 typealias PersistenceCallback = (Result<Void, Error>) -> Void
+typealias ManagerCallback = (Result<Void, Error>) -> Void
 
 enum PersistenceOperation {
     case addEntry(MedicineEntry)
@@ -15,148 +16,10 @@ enum PersistenceOperation {
 }
 
 protocol PersistenceManager {
+    // Operation results are assumed bidirectional with appContext
     func perform(operation: PersistenceOperation,
-                 with appContext: inout ApplicationData,
+                 with appContext: ApplicationData,
                  _ handler: @escaping PersistenceCallback)
-}
-
-public class FilePersistenceManager: PersistenceManager {
-
-    private let medicineStore: MedicineLogFileStore
-
-    // Set in perform(operation:with:), not safe otherwise
-    private var appData: ApplicationData!
-
-    private let mainQueue = DispatchQueue.main
-    private let saveQueue = DispatchQueue.init(label: "MedicineLogOperator-Queue",
-                                               qos: .userInteractive)
-
-    init(store: MedicineLogFileStore) {
-        self.medicineStore = store
-    }
-
-    func perform(operation: PersistenceOperation,
-                 with appContext: inout ApplicationData,
-                 _ handler: @escaping PersistenceCallback) {
-        self.appData = appContext
-        switch operation {
-        case .addEntry(let entry):
-            addEntry(medicineEntry: entry, handler)
-        case .removeEntry(let id):
-            removeEntry(id: id, handler)
-        case .updateEntry(let entry):
-            updateEntry(updatedEntry: entry, handler)
-        case let .addDrug(drug):
-            addDrug(newDrug: drug, handler)
-        case .removeDrug(let drug):
-            removeDrug(drugToRemove: drug, handler)
-        case let .updateDrug(og, new):
-            updateDrug(originalDrug: og, updatedDrug: new, handler)
-        }
-        appContext.availableDrugList = appData.availableDrugList
-        appContext.mainEntryList = appData.mainEntryList
-    }
-
-    func addEntry(medicineEntry: MedicineEntry,
-                  _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Adding new entry: \(medicineEntry).") }
-        appData.updateEntryList{ list in
-            list.insert(medicineEntry, at: 0)
-        }
-        saveAndNotify(handler)
-        log { Event("Added entry: \(medicineEntry.id)") }
-    }
-
-    func removeEntry(id: String,
-                     _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Removing entry with id = \(id).") }
-        guard let index = appData.medicineListIndexFor(id) else {
-            handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
-            return
-        }
-        appData.updateEntryList{ list in
-            let removed = list.remove(at: index)
-            log { Event("Removed medicine entry \(removed)") }
-        }
-        saveAndNotify(handler)
-    }
-
-    func updateEntry(updatedEntry: MedicineEntry,
-                     _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Updating entry: \(updatedEntry).") }
-        guard let index = appData.medicineListIndexFor(updatedEntry.id) else {
-            handler(.failure(AppStateError.generic(message: "Entry mismatch. Expected = \(updatedEntry.id)")))
-            return
-        }
-
-        appData.updateEntryList{ list in
-            list[index] = updatedEntry
-            list.sort(by: sortEntriesNewestOnTop)
-        }
-        saveAndNotify(handler)
-        log { Event("Entry updated: \(updatedEntry.id)") }
-    }
-
-    func updateDrug(originalDrug: Drug,
-                    updatedDrug: Drug,
-                    _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
-        guard let updateIndex = appData.drugListIndexFor(originalDrug) else {
-            handler(.failure(AppStateError.generic(message: "Drug mismatch. Expected = \(originalDrug.id)")))
-            return
-        }
-
-        appData.updateDrugList { list in
-            list.drugs[updateIndex] = updatedDrug
-            list.drugs.sort()
-        }
-        saveAndNotify(handler)
-        log { Event("Drug updated: \(updatedDrug.drugName)") }
-    }
-
-    func addDrug(newDrug: Drug,
-                 _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Adding drug: \(newDrug)") }
-        appData.updateDrugList { list in
-            list.drugs.append(newDrug)
-            list.drugs.sort()
-        }
-        saveAndNotify(handler)
-    }
-
-    func removeDrug(drugToRemove: Drug,
-                    _ handler: @escaping (Result<Void, Error>) -> Void) {
-        log { Event("Removing drug: \(drugToRemove)") }
-        guard let updateIndex = appData.drugListIndexFor(drugToRemove) else {
-            handler(.failure(AppStateError.generic(message: "Couldn't find drug to remove: \(drugToRemove)")))
-            return
-        }
-
-        appData.updateDrugList { list in
-            list.drugs.remove(at: updateIndex)
-        }
-        saveAndNotify(handler)
-        log { Event("Removed drug: \(drugToRemove.drugName)") }
-    }
-
-    func saveAndNotify(
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        saveQueue.async {
-            self.medicineStore.save(applicationData: self.appData) { result in
-                self.notifyHandler(result, handler)
-            }
-        }
-    }
-
-    func notifyHandler(
-        _ result: Result<Void, Error>,
-        _ handler: @escaping (Result<Void, Error>) -> Void
-    ) {
-        mainQueue.async {
-            handler(result)
-        }
-    }
 }
 
 public class MedicineLogDataManager: ObservableObject {
@@ -173,52 +36,101 @@ public class MedicineLogDataManager: ObservableObject {
 
     func addEntry(
         medicineEntry: MedicineEntry,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        log { Event("Adding new entry: \(medicineEntry).") }
+        appData.updateEntryList{ list in
+            list.insert(medicineEntry, at: 0)
+        }
         persistenceManager.perform(operation: .addEntry(medicineEntry),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 
     func removeEntry(
         id: String,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        guard let index = appData.mainEntryList.firstIndex(where: { $0.id == id }) else {
+            handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
+            return
+        }
+        appData.updateEntryList{ list in
+            let removed = list.remove(at: index)
+            log { Event("Removed medicine entry \(removed)") }
+        }
         persistenceManager.perform(operation: .removeEntry(id),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 
     func updateEntry(
         updatedEntry: MedicineEntry,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        log { Event("Updating entry: \(updatedEntry).") }
+        guard let index = appData.mainEntryList.firstIndex(where: { $0.id == updatedEntry.id }) else {
+            handler(.failure(AppStateError.generic(message: "Entry mismatch. Expected = \(updatedEntry.id)")))
+            return
+        }
+
+        // Default on-save-sorting. This might be a terrible idea.
+        func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
+            return left.date > right.date
+        }
+
+        appData.updateEntryList{ list in
+            list[index] = updatedEntry
+            list.sort(by: sortEntriesNewestOnTop)
+        }
         persistenceManager.perform(operation: .updateEntry(updatedEntry),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 
     func updateDrug(
         originalDrug: Drug,
         updatedDrug: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        log { Event("Updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
+        guard let updateIndex = appData.availableDrugList.drugs.firstIndex(where: { $0.id == originalDrug.id }) else {
+            handler(.failure(AppStateError.generic(message: "Drug mismatch. Expected = \(originalDrug.id)")))
+            return
+        }
+        appData.updateDrugList { list in
+            list.drugs[updateIndex] = updatedDrug
+            list.drugs.sort()
+        }
         persistenceManager.perform(operation: .updateDrug(originalDrug: originalDrug,
                                                           updatedDrug: updatedDrug),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 
     func addDrug(
         newDrug: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        log { Event("Adding drug: \(newDrug)") }
+        appData.updateDrugList { list in
+            list.drugs.append(newDrug)
+            list.drugs.sort()
+        }
         persistenceManager.perform(operation: .addDrug(newDrug),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 
     func removeDrug(
         drugToRemove: Drug,
-        _ handler: @escaping (Result<Void, Error>) -> Void
+        _ handler: @escaping ManagerCallback
     ) {
+        log { Event("Removing drug: \(drugToRemove)") }
+        guard let updateIndex = appData.availableDrugList.drugs.firstIndex(where: { $0.id == drugToRemove.id }) else {
+            handler(.failure(AppStateError.generic(message: "Couldn't find drug to remove: \(drugToRemove)")))
+            return
+        }
+        appData.updateDrugList { list in
+            list.drugs.remove(at: updateIndex)
+        }
         persistenceManager.perform(operation: .removeDrug(drugToRemove),
-                                   with: &appData, handler)
+                                   with: appData, handler)
     }
 }
 
@@ -282,9 +194,4 @@ extension MedicineLogDataManager {
             list.first(where: { $0.id == targetId })
         }.eraseToAnyPublisher()
     }
-}
-
-// MARK: Default on-save-sorting. This might be a terrible idea.
-private func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
-    return left.date > right.date
 }

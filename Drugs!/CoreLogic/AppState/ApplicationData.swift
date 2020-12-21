@@ -43,18 +43,6 @@ extension ApplicationData {
         log { Event("AvailableDrugList updating") }
         handler(&availableDrugList)
     }
-
-    public func medicineListIndexFor(_ id: String) -> Int? {
-        let foundIndex = mainEntryList.firstIndex(where: { $0.id == id })
-        log { Event("MainEntryList query with id: \(id), found: \(String(describing: foundIndex))", foundIndex != nil ? .info : .error) }
-        return foundIndex
-    }
-
-    public func drugListIndexFor(_ drug: Drug) -> Int? {
-        let foundIndex = availableDrugList.drugs.firstIndex(where: { $0.id == drug.id })
-        log { Event("DrugList query: \(drug), found: \(String(describing: foundIndex))", foundIndex != nil ? .info : .error) }
-        return foundIndex
-    }
 }
 
 // MARK: - Helper for simpler handling of decoding keys

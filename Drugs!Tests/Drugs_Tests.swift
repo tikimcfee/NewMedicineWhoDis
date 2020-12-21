@@ -13,21 +13,31 @@ class Drugs_Tests: XCTestCase {
 
     private let testQueue = DispatchQueue(label: "TestBackgroundQueue")
 
+    private var medicineStore: MedicineLogFileStore!
     private var dataManager: MedicineLogDataManager!
 
     private var notificationState: NotificationInfoViewState!
     private var rootScreenState: RootScreenState!
 
     override func setUp() {
-        dataManager = makeTestMedicineOperator()
-        dataManager.TEST_clearAllEntries()
+        // Remove test data
+        let lock = DispatchSemaphore(value: 1)
+        medicineStore.save(applicationData: ApplicationData()) { _ in lock.signal() }
+        lock.wait()
 
+        dataManager = MedicineLogDataManager(
+            persistenceManager: FilePersistenceManager(store: medicineStore),
+            appData: medicineStore.load().applicationData
+        )
         notificationState = NotificationInfoViewState(dataManager)
         rootScreenState = RootScreenState(dataManager, NotificationScheduler(notificationState: notificationState))
     }
 
     override func tearDown() {
-
+        // Remove test data
+        let lock = DispatchSemaphore(value: 1)
+        medicineStore.save(applicationData: ApplicationData()) { _ in lock.signal() }
+        lock.wait()
     }
 
     func testDateFormat() {
@@ -46,7 +56,7 @@ class Drugs_Tests: XCTestCase {
 
         var rand: Int { Int.random(in: 0...100) }
 
-        func makeMap() -> [AvailableDrug: Int] { [
+        func makeMap() -> [Drug: Int] { [
             Drug("Drug 1", [], 6) : rand,
             Drug("Drug 2", [], 12) : rand,
             Drug("Drug 3", [Ingredient("AnIngredient")], 3) : rand,
@@ -55,10 +65,10 @@ class Drugs_Tests: XCTestCase {
         ] }
 
         // Make test map
-        let entryMap: [AvailableDrug: Int] = makeMap()
+        let entryMap: [Drug: Int] = makeMap()
 
         // Set on state
-        rootScreenState.inProgressEntry.entryMap = entryMap
+        rootScreenState.drugSelectionModel.inProgressEntry.entryMap = entryMap
 
         // Save once
         let saveFinished = XCTestExpectation(description: "Save completes")
@@ -84,7 +94,7 @@ class Drugs_Tests: XCTestCase {
         testQueue.async {
             for _ in 0...10 {
                 let newMap = makeMap()
-                self.rootScreenState.inProgressEntry.entryMap = newMap
+                self.rootScreenState.drugSelectionModel.inProgressEntry.entryMap = newMap
                 self.rootScreenState.saveNewEntry()
                 allSavesFinished.fulfill()
             }
