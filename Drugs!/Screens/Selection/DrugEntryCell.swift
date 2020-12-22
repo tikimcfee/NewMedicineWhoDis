@@ -41,16 +41,16 @@ struct DrugEntryViewCell: View {
                 .animation(.none)
                 .frame(width: 24.0)
                 .padding(2)
-                .background(Color(.displayP3, red: 0.5, green: 0.7, blue: 0.8, opacity: 0.5))
+                .background(Color(.displayP3, red: 0.25, green: 0.0, blue: 0.80, opacity: 0.8))
                 .clipShape(Circle())
 
         let titleColor, countColor: Color
         if model.isSelected {
             titleColor = Color.medicineCellSelected
-            countColor = Color(.displayP3, red: 1, green: 0.0, blue: 0.0, opacity: 1.0)
+            countColor = Color(.displayP3, red: 1.0, green: 1.0, blue: 1.0, opacity: 1.0)
         } else {
             titleColor = Color.medicineCellNotSelected
-            countColor = Color(.displayP3, red: 1, green: 0.0, blue: 0.0, opacity: 0.75)
+            countColor = Color(.displayP3, red: 1.0, green: 1.0, blue: 1.0, opacity: 0.75)
         }
 
         return HStack {

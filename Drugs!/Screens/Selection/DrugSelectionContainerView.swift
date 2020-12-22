@@ -62,7 +62,11 @@ struct DrugSelectionContainerView: View {
 #if DEBUG
 
 struct DrugEntryView_Preview: PreviewProvider {
-    static var wrapper = WrappedBinding(DrugSelectionContainerModel())
+    static var wrapper = WrappedBinding({ () -> DrugSelectionContainerModel in
+        var model = DrugSelectionContainerModel()
+        model.availableDrugs = AvailableDrugList.defaultList
+        return model
+    }())
     static var previews: some View {
         DrugSelectionContainerView(
             model: Self.wrapper.binding

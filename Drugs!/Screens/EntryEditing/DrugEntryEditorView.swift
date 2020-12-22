@@ -10,14 +10,13 @@ struct DrugEntryEditorView: View {
 	
 	var body: some View {
 		VStack(spacing: 0) {
-			timeSection
             containerView
+            timeSection
             HStack(spacing: 0) {
                 saveButton
                 cancelButton
             }
 		}
-        
         .onDisappear(perform: { self.editorState.editorIsVisible = false })
         .alert(item: self.$editorState.editorError) { error in
 			Alert(
@@ -32,24 +31,19 @@ struct DrugEntryEditorView: View {
         DrugSelectionContainerView(
             model: $editorState.selectionModel
         )
-        .darkBoringBorder
+        .boringBorder
         .padding(8)
     }
 
     private var timeSection: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            time("Original Time:",
-                 editorState.sourceEntry.date,
-                 EditEntryScreen.oldTimeLabel.rawValue)
-            time("New Time:",
-                 editorState.selectionModel.inProgressEntry.date,
-                 EditEntryScreen.newTimeLabel.rawValue)
+        VStack(alignment: .center, spacing: 8) {
             timePicker
                 .screenWide
-                .darkBoringBorder
             updatedDifferenceView
         }
         .screenWide
+        .padding(4)
+        .boringBorder
         .padding(8)
     }
 
@@ -79,12 +73,16 @@ struct DrugEntryEditorView: View {
     }
 	
 	private var updatedDifferenceView: some View {
-		return HStack(alignment: .firstTextBaseline) {
-			Text(distance)
+        return HStack(alignment: .bottom) {
+            Text("Was \(editorState.sourceEntry.date, formatter: DateFormatting.ShortDateShortTime)")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            Spacer()
+			Text("\(distance)")
 				.font(.subheadline)
 				.foregroundColor(.gray)
-				.padding(.horizontal, 24)
-		}
+
+        }
 	}
 	
 	private func time(_ title: String,
@@ -113,6 +111,7 @@ struct DrugEntryEditorView: View {
             .labelsHidden()
 			.frame(height: 64)
 			.clipped()
+            .padding(8)
             .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)
         }
 	}
@@ -126,8 +125,9 @@ extension DrugEntryEditorView {
     }
 
     var distance: String {
-        return editorState.sourceEntry.date
-            .distanceString($editorState.selectionModel.inProgressEntry.date.wrappedValue)
+        let originalDate = editorState.sourceEntry.date
+        let newDate = editorState.selectionModel.inProgressEntry.date
+        return originalDate.distanceString(newDate)
     }
 }
 
