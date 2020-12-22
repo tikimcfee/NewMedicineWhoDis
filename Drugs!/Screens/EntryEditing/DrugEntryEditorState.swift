@@ -14,6 +14,7 @@ public final class DrugEntryEditorState: ObservableObject {
                 sourceEntry: MedicineEntry) {
         self.dataManager = dataManager
         self.sourceEntry = sourceEntry
+        self.selectionModel.inProgressEntry = sourceEntry.editableEntry
 
         dataManager.availabilityInfoStream
             .sink { [weak self] in self?.selectionModel.info = $0 }
@@ -24,7 +25,7 @@ public final class DrugEntryEditorState: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func saveEdits() {
+    func saveEdits(_ didComplete: @escaping Action) {
         guard selectionModel.inProgressEntry != sourceEntry else { return }
 
         var safeCopy = sourceEntry
@@ -44,8 +45,10 @@ public final class DrugEntryEditorState: ObservableObject {
             guard let self = self else { return }
             switch result {
                 case .success:
+                    self.sourceEntry = safeCopy
                     self.editorIsVisible = false
                     self.editorError = nil
+                    didComplete()
 
                 case .failure(let error):
                     self.editorError = error as? AppStateError ?? .updateError

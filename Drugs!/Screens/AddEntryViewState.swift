@@ -7,7 +7,7 @@ protocol ACoolNameForAStartStopPublisher {
     func stopPublishing()
 }
 
-public final class RootScreenState: ObservableObject {
+public final class AddEntryViewState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private let notificationScheduler: NotificationScheduler
     private var cancellables = Set<AnyCancellable>()
@@ -19,24 +19,10 @@ public final class RootScreenState: ObservableObject {
     @Published var currentEntries = [MedicineEntry]()
     @Published var saveError: AppStateError? = nil
 
-    // Navigation flags; refactor these soon
-    @Published var selectedMedicineId: String? = nil
-    @Published var isMedicineEntrySelected = false
-
     init(_ dataManager: MedicineLogDataManager,
          _ notificationScheduler: NotificationScheduler) {
         self.dataManager = dataManager
         self.notificationScheduler = notificationScheduler
-
-        dataManager.mainEntryListStream
-            .receive(on: RunLoop.main)
-            .sink { [weak self] in
-//                // TODO: Slice to reduce displayed rows
-//                let slice = $0[0..<(min(10, $0.count))]
-//                self?.currentEntries = Array(slice)
-                self?.currentEntries = $0
-            }
-            .store(in: &cancellables)
 
         dataManager.availabilityInfoStream
             .receive(on: RunLoop.main)
@@ -51,37 +37,6 @@ public final class RootScreenState: ObservableObject {
                 self?.drugSelectionModel.availableDrugs = $0
             }
             .store(in: &cancellables)
-
-        $selectedMedicineId
-            .receive(on: RunLoop.main)
-            .map { $0 != nil }
-            .sink { [weak self] in
-                self?.isMedicineEntrySelected = $0
-            }
-            .store(in: &cancellables)
-    }
-
-    func selectForDetails(_ entry: MedicineEntry) {
-        selectedMedicineId = entry.id
-    }
-    
-    func deselectDetails() {
-        selectedMedicineId = nil
-    }
-
-    func makeNewDetailsState() -> MedicineEntryDetailsViewState? {
-        if let selectedId = selectedMedicineId {
-            return MedicineEntryDetailsViewState(dataManager, selectedId)
-        } else {
-            return nil
-        }
-    }
-
-    func deleteEntry(at index: Int) {
-        guard index < currentEntries.count else { return }
-        dataManager.removeEntry(id: currentEntries[index].id) { result in
-            log { Event("Deleted entry at \(index)") }
-        }
     }
 
     func saveNewEntry() {
@@ -123,5 +78,17 @@ public final class RootScreenState: ObservableObject {
     func createNewEntry(with map: [Drug: Int]) -> MedicineEntry {
         // NOTE: the date is set AT TIME of creation, NOT from the progress entry
         return MedicineEntry(Date(), map)
+    }
+
+    func deleteEntry(at index: Int) {
+        guard index < currentEntries.count else { return }
+        dataManager.removeEntry(index: index) { result in
+            switch result {
+            case .success:
+                log { Event("Deleted entry at \(index)") }
+            case .failure(let error):
+                log { Event("Deletion failed with error: \(error.localizedDescription)") }
+            }
+        }
     }
 }

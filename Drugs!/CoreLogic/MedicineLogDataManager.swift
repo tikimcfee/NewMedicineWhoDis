@@ -24,7 +24,15 @@ protocol PersistenceManager {
 
 public class MedicineLogDataManager: ObservableObject {
     private let persistenceManager: PersistenceManager
+
     @Published private var appData: ApplicationData
+
+    lazy var sharedEntryStream: AnyPublisher<[MedicineEntry], Never> = {
+        $appData
+            .map { $0.mainEntryList }
+            .share()
+            .eraseToAnyPublisher()
+    }()
 
     init(
         persistenceManager: PersistenceManager,
@@ -47,18 +55,19 @@ public class MedicineLogDataManager: ObservableObject {
     }
 
     func removeEntry(
-        id: String,
+        index: Int,
         _ handler: @escaping ManagerCallback
     ) {
-        guard let index = appData.mainEntryList.firstIndex(where: { $0.id == id }) else {
-            handler(.failure(AppStateError.generic(message: "Missing medicine entry with id \(id)")))
+        guard index < appData.mainEntryList.count else {
+            handler(.failure(AppStateError.generic(message: "Invalid delete index: \(index)")))
             return
         }
+        let entry = appData.mainEntryList[index]
         appData.updateEntryList{ list in
             let removed = list.remove(at: index)
             log { Event("Removed medicine entry \(removed)") }
         }
-        persistenceManager.perform(operation: .removeEntry(id),
+        persistenceManager.perform(operation: .removeEntry(entry.id),
                                    with: appData, handler)
     }
 
@@ -74,7 +83,7 @@ public class MedicineLogDataManager: ObservableObject {
 
         // Default on-save-sorting. This might be a terrible idea.
         func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
-            return left.date > right.date
+            left.date > right.date
         }
 
         appData.updateEntryList{ list in
@@ -168,14 +177,19 @@ extension MedicineLogDataManager {
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
         let streamNumber = streamId
         var refreshCount = 0
+        log { Event("Creating new availability stream: [\(streamNumber)]") }
         return Publishers.CombineLatest3
             .init(refreshTimer, mainEntryListStream, drugListStream)
             .map{ (updateInterval, list, drugs) -> AvailabilityInfo in
-                log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
+//                log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
                 refreshCount = refreshCount + 1
                 return list.availabilityInfo(updateInterval, drugs)
             }
             .eraseToAnyPublisher()
+    }
+
+    func medicineEntry(with id: String) -> MedicineEntry? {
+        return appData.mainEntryList.first { $0.id == id }
     }
 
     func liveChanges(for targetId: String) -> AnyPublisher<MedicineEntry?, Never> {

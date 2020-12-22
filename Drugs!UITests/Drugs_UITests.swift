@@ -183,8 +183,6 @@ class Drugs_UITests: XCTestCase {
         let mainTable = app.tables[MedicineLogScreen.entryCellList.rawValue]
         XCTAssert(mainTable.exists, "Main list wasn't found")
 
-        // TODO: Ask someone why child labels get 'swallowed up' and they can't be found.
-        // This is happening with a Button that has a 'View' with two 'Text' children
         let entryButtons = app.buttons[MedicineLogScreen.entryCellButton.rawValue]
         let firstEntryButtonText = entryButtons.firstMatch.label.lowercased()
         let allDrugsInLabel = drugs.allSatisfy { firstEntryButtonText.contains($0.rawValue.lowercased()) }

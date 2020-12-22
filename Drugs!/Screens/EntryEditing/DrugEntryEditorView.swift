@@ -2,39 +2,22 @@ import Combine
 import SwiftUI
 
 struct DrugEntryEditorView: View {
-	
-	@EnvironmentObject private var editorState: DrugEntryEditorState
+
+    @EnvironmentObject private var editorState: DrugEntryEditorState
 	@State var selectedDate: Date = Date()
+
+    @Environment(\.presentationMode) var presentationMode
 	
 	var body: some View {
-		return VStack(spacing: 0) {
-			DrugSelectionContainerView(
-                model: $editorState.selectionModel
-            )
-            .frame(height: 300)
-			.darkBoringBorder
-			.padding(8)
-			
-			VStack(alignment: .trailing, spacing: 8) {
-                time("Original Time:",
-                     editorState.sourceEntry.date,
-                     EditEntryScreen.oldTimeLabel.rawValue)
-                time("New Time:",
-                     editorState.selectionModel.inProgressEntry.date,
-                     EditEntryScreen.newTimeLabel.rawValue)
-				timePicker
-					.screenWide
-					.darkBoringBorder
-				updatedDifferenceView
-			}
-            .screenWide
-			.padding(8)
-			
-            Components.fullWidthButton("Save changes", editorState.saveEdits)
-            .padding(8)
-            .accessibility(identifier: EditEntryScreen.saveEditsButton.rawValue)
+		VStack(spacing: 0) {
+			timeSection
+            containerView
+            HStack(spacing: 0) {
+                saveButton
+                cancelButton
+            }
 		}
-        .background(Color(red: 0.8, green: 0.9, blue: 0.9))
+        
         .onDisappear(perform: { self.editorState.editorIsVisible = false })
         .alert(item: self.$editorState.editorError) { error in
 			Alert(
@@ -44,6 +27,56 @@ struct DrugEntryEditorView: View {
 			)
 		}
 	}
+
+    private var containerView: some View {
+        DrugSelectionContainerView(
+            model: $editorState.selectionModel
+        )
+        .darkBoringBorder
+        .padding(8)
+    }
+
+    private var timeSection: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            time("Original Time:",
+                 editorState.sourceEntry.date,
+                 EditEntryScreen.oldTimeLabel.rawValue)
+            time("New Time:",
+                 editorState.selectionModel.inProgressEntry.date,
+                 EditEntryScreen.newTimeLabel.rawValue)
+            timePicker
+                .screenWide
+                .darkBoringBorder
+            updatedDifferenceView
+        }
+        .screenWide
+        .padding(8)
+    }
+
+    private var saveButton: some View {
+        Components.fullWidthButton("Save changes", {
+            editorState.saveEdits {
+                presentationMode.wrappedValue.dismiss()
+            }
+        })
+        .padding(4)
+        .accessibility(identifier: EditEntryScreen.saveEditsButton.rawValue)
+    }
+
+    private var cancelButton: some View {
+        Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            Text("Cancel")
+                .foregroundColor(Color.white)
+                .padding(8)
+                .frame(maxWidth: UIScreen.main.bounds.width)
+        }
+        .buttonStyle(ComponentFullWidthButtonStyle(
+            pressedColor: Color.red.opacity(0.22),
+            standardColor: Color.red.opacity(0.44)
+        ))
+        .padding(4)
+        .accessibility(identifier: EditEntryScreen.cancelEditsButton.rawValue)
+    }
 	
 	private var updatedDifferenceView: some View {
 		return HStack(alignment: .firstTextBaseline) {
@@ -141,7 +174,14 @@ extension View {
 #if DEBUG
 struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
-		return DrugEntryEditorView().environmentObject(makeTestMedicineOperator())
+        let op = makeTestMedicineOperator()
+		return DrugEntryEditorView()
+            .environmentObject(
+                DrugEntryEditorState(
+                    dataManager: op,
+                    sourceEntry: MedicineEntry(Date(), [:])
+                )
+            )
 	}
 }
 #endif

@@ -14,6 +14,7 @@ enum DetailScreen: String {
 
 enum EditEntryScreen: String {
     case saveEditsButton
+    case cancelEditsButton
 
     case oldTimeLabel
     case newTimeLabel

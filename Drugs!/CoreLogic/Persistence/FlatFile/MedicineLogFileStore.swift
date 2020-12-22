@@ -17,9 +17,8 @@ public class MedicineLogFileStore {
         handler(result)
     }
 
+    // Useful for testing
     func load() -> Result<ApplicationData, Error> {
-        // TODO: get rid of this, and load everything
-        // asynchronously with lazies and yadda yadda
         let result = filestore.loadApplicationData()
         return result
     }

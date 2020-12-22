@@ -46,9 +46,17 @@ extension InProgressEntry {
 
         // Add each set of drugs to a map and check that the ID and count exists in the other.
         // This is weak guarantee and a little non performant.
-        var comparisonMap = [DrugId: Int]()
-        inProgress.entryMap.forEach { comparisonMap[$0.key.drugId] = $0.value }
-        return other.drugsTaken.allSatisfy { comparisonMap[$0.key.id] == $0.value }
+        struct Comparison: Equatable { let name: String; let count: Int }
+
+        let inProgressTuples = inProgress.entryMap
+            .sorted(by: { l, r in l.key.drugName < r.key.drugName })
+            .map { Comparison(name: $0.key.drugName, count: $0.value) }
+
+        let entryTuples = other.drugsTaken
+            .sorted(by: { l, r in l.key.drugName < r.key.drugName })
+            .map { Comparison(name: $0.key.drugName, count: $0.value) }
+
+        return inProgressTuples == entryTuples
     }
 }
 
@@ -77,7 +85,7 @@ struct DrugSelectionContainerModel {
 
 // MARK: Selectable drug rows
 
-struct DrugSelectionListRowModel {
+public struct DrugSelectionListRowModel {
     let drug: SelectableDrug
     let count: Int
     let canTake: Bool
@@ -85,6 +93,6 @@ struct DrugSelectionListRowModel {
     let didSelect: Action
 }
 
-struct DrugSelectionListModel {
+public struct DrugSelectionListModel {
     let selectableDrugs: [DrugSelectionListRowModel]
 }

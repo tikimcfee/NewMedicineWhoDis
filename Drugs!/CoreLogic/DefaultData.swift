@@ -125,3 +125,66 @@ public func makeTestMedicineOperator() -> MedicineLogDataManager {
         appData: loaded
     )
 }
+
+public func makeTestDrugSelectionListModel() -> DrugSelectionListModel {
+    DrugSelectionListModel(
+        selectableDrugs: [
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "a"),
+                count: 8,
+                canTake: true,
+                isSelected: false,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "b"),
+                count: 8,
+                canTake: true,
+                isSelected: false,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "c"),
+                count: 8,
+                canTake: true,
+                isSelected: true,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "d"),
+                count: 8,
+                canTake: true,
+                isSelected: false,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "e"),
+                count: 77,
+                canTake: false,
+                isSelected: false,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "f"),
+                count: 8,
+                canTake: false,
+                isSelected: true,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "g"),
+                count: 8,
+                canTake: true,
+                isSelected: false,
+                didSelect: {}
+            ),
+            DrugSelectionListRowModel(
+                drug: SelectableDrug(drugName: "Drug", drugId: "h"),
+                count: 8,
+                canTake: true,
+                isSelected: false,
+                didSelect: {}
+            )
+        ]
+    )
+}

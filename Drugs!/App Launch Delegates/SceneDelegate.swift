@@ -34,7 +34,7 @@ public class MasterEnvironmentContainer: ObservableObject {
     let notificationState: NotificationInfoViewState
     let notificationScheduler: NotificationScheduler
 
-    let rootScreenState: RootScreenState
+    let rootScreenState: AddEntryViewState
 
     init() {
         self.fileStore = MedicineLogFileStore()
@@ -45,7 +45,7 @@ public class MasterEnvironmentContainer: ObservableObject {
         )
         self.notificationState = NotificationInfoViewState(dataManager)
         self.notificationScheduler = NotificationScheduler(notificationState: notificationState)
-        self.rootScreenState = RootScreenState(dataManager, notificationScheduler)
+        self.rootScreenState = AddEntryViewState(dataManager, notificationScheduler)
     }
 
     public func makeNewDrugEditorState() -> DrugListEditorViewState {

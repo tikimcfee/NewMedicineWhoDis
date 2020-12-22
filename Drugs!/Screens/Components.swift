@@ -1,27 +1,48 @@
 import SwiftUI
 
 struct ComponentFullWidthButtonStyle: ButtonStyle {
+    let pressedColor: Color
+    let standardColor: Color
+    let disabledColor: Color
+
+    init(pressedColor: Color = Color.buttonBackgroundPressed,
+         standardColor: Color = Color.buttonBackground,
+         disabledColor: Color = Color.buttonBackgroundDisabled
+    ) {
+        self.pressedColor = pressedColor
+        self.standardColor = standardColor
+        self.disabledColor = disabledColor
+    }
+
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
-        ComponentFullWidthButton(configuration: configuration)
+        ComponentFullWidthButton(
+            configuration: configuration,
+            pressedColor: pressedColor,
+            standardColor: standardColor,
+            disabledColor: disabledColor
+        )
     }
 
     struct ComponentFullWidthButton: View {
         let configuration: ButtonStyle.Configuration
+        let pressedColor: Color
+        let standardColor: Color
+        let disabledColor: Color
+
         @Environment(\.isEnabled) private var isEnabled: Bool
+
         var body: some View {
-            configuration
-                .label
-                .background(
-                    Rectangle()
-                        .cornerRadius(4.0)
-                        .foregroundColor(
-                            isEnabled
-                                ? configuration.isPressed
-                                    ? Color.buttonBackgroundPressed
-                                    : Color.buttonBackground
-                                : Color.buttonBackgroundDisabled
+            configuration.label.background(
+                Rectangle()
+                    .cornerRadius(4.0)
+                    .foregroundColor(
+                        isEnabled
+                            ? configuration.isPressed
+                                ? pressedColor
+                                : standardColor
+                            : disabledColor
                     )
-                )
+            )
         }
     }
 }
@@ -31,8 +52,7 @@ public class Components {
         _ label: String,
         _ action: @escaping () -> Void
     ) -> some View {
-
-        return Button(action: action) {
+        Button(action: action) {
             Text(label)
                 .padding(8)
                 .foregroundColor(Color.buttonText)

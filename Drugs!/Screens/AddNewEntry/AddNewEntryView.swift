@@ -3,7 +3,7 @@ import Combine
 
 struct AddNewEntryView: View {
 
-    @EnvironmentObject private var rootScreenState: RootScreenState
+    @EnvironmentObject private var rootScreenState: AddEntryViewState
 
     var body: some View {
         return VStack() {
@@ -41,23 +41,6 @@ struct AddNewEntryView: View {
     }
 }
 
-struct HomeMedicineInfoCell: View {
-    let drugList: String
-    let dateString: String
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text(drugList)
-                .fontWeight(.semibold)
-                .accessibility(identifier: MedicineLogScreen.entryCellTitleText.rawValue)
-
-            Text(dateString)
-                .fontWeight(.ultraLight)
-                .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
-        }
-    }
-}
-
 #if DEBUG
 
 struct ContentView_Previews: PreviewProvider {
@@ -66,7 +49,7 @@ struct ContentView_Previews: PreviewProvider {
         let dataManager = makeTestMedicineOperator()
         let notificationState = NotificationInfoViewState(dataManager)
         let scheduler = NotificationScheduler(notificationState: notificationState)
-        let rootState = RootScreenState(dataManager, scheduler)
+        let rootState = AddEntryViewState(dataManager, scheduler)
         return Group {
             return RootAppStartupView()
                 .environmentObject(data)

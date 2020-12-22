@@ -60,7 +60,7 @@ extension RootAppStartupView {
     }
 
     private var entryListView: some View {
-        MedicineLogView()
+        EntryListView()
             .asEntryListTab
     }
 
@@ -106,7 +106,7 @@ struct RootAppStartupView_Previews: PreviewProvider {
         let dataManager = makeTestMedicineOperator()
         let notificationState = NotificationInfoViewState(dataManager)
         let scheduler = NotificationScheduler(notificationState: notificationState)
-        let rootState = RootScreenState(dataManager, scheduler)
+        let rootState = AddEntryViewState(dataManager, scheduler)
         return RootAppStartupView()
             .environmentObject(dataManager)
             .environmentObject(rootState)

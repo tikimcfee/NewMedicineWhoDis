@@ -11,7 +11,7 @@ struct DrugSelectionListView: View {
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {
-            HStack(alignment: .top, spacing: 2) {
+            HStack(alignment: .top, spacing: 8) {
                 VStack {
                     ForEach(drugsSliceLeft, id: \.drug.drugId) { tuple in
                         DrugEntryViewCell(model: modelFor(tuple))
@@ -45,9 +45,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugSelectionListView(
-                model: DrugSelectionListModel(
-                    selectableDrugs: []
-                )
+                model: makeTestDrugSelectionListModel()
             )
         }
     }
