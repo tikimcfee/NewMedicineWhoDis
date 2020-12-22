@@ -59,13 +59,6 @@ struct DrugSelectionContainerView: View {
     }
 }
 
-private extension AvailabilityInfo {
-    func canTake(_ drug: Drug) -> Bool {
-        return self[drug]?.canTake == true
-    }
-}
-
-
 #if DEBUG
 
 struct DrugEntryView_Preview: PreviewProvider {

@@ -122,8 +122,6 @@ public final class RootScreenState: ObservableObject {
 
     func createNewEntry(with map: [Drug: Int]) -> MedicineEntry {
         // NOTE: the date is set AT TIME of creation, NOT from the progress entry
-        // Potential source of date bug if this gets mixed up (also means there's a
-        // date we don't need sometimes...)
         return MedicineEntry(Date(), map)
     }
 }

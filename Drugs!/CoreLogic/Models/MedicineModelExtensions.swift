@@ -83,6 +83,12 @@ extension AvailableDrugList {
 
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
+extension AvailabilityInfo {
+    func canTake(_ drug: Drug) -> Bool {
+        return self[drug]?.canTake == true
+    }
+}
+
 extension Array where Element == MedicineEntry {
     func availabilityInfo(_ startDate: Date = Date(),
                           _ availableDrugs: AvailableDrugList) -> AvailabilityInfo {
