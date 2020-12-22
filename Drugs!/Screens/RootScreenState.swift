@@ -93,13 +93,26 @@ public final class RootScreenState: ObservableObject {
             return
         }
 
-        let newEntry = createNewEntry(with: drugMap)
+        let convertedMap: [Drug: Int]
+        do {
+            convertedMap = try drugSelectionModel.inProgressEntry.drugMap(
+                in: drugSelectionModel.availableDrugs
+            )
+        } catch InProgressEntryError.mappingBackToDrugs {
+            log { Event("Missing drug from known available map during creation", .error) }
+            return
+        } catch {
+            log { Event("Unknown error during creation: \(error.localizedDescription)", .error) }
+            return
+        }
+
+        let newEntry = createNewEntry(with: convertedMap)
         dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
             switch result {
             case .success:
                 self?.drugSelectionModel.resetEdits()
                 self?.notificationScheduler.scheduleLocalNotifications(
-                    for: Array(drugMap.keys)
+                    for: Array(convertedMap.keys)
                 )
             case .failure(let saveError):
                 self?.saveError = .saveError(cause: saveError)
@@ -107,7 +120,7 @@ public final class RootScreenState: ObservableObject {
         }
     }
 
-    func createNewEntry(with map: [Drug:Int]) -> MedicineEntry {
+    func createNewEntry(with map: [Drug: Int]) -> MedicineEntry {
         // NOTE: the date is set AT TIME of creation, NOT from the progress entry
         // Potential source of date bug if this gets mixed up (also means there's a
         // date we don't need sometimes...)

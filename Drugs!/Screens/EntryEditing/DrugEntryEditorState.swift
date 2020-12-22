@@ -25,13 +25,20 @@ public final class DrugEntryEditorState: ObservableObject {
     }
 
     func saveEdits() {
-        guard sourceEntry.date != selectionModel.inProgressEntry.date
-                || sourceEntry.drugsTaken != selectionModel.inProgressEntry.entryMap
-        else { return }
+        guard selectionModel.inProgressEntry != sourceEntry else { return }
 
         var safeCopy = sourceEntry
         safeCopy.date = selectionModel.inProgressEntry.date
-        safeCopy.drugsTaken = selectionModel.inProgressEntry.entryMap
+
+        do {
+            safeCopy.drugsTaken = try selectionModel.inProgressEntry.drugMap(
+                in: selectionModel.availableDrugs
+            )
+        } catch InProgressEntryError.mappingBackToDrugs {
+            log { Event("Missing drug from known available map", .error) }
+        } catch {
+            log { Event("Unexpected error during drug map: \(error.localizedDescription)", .error) }
+        }
 
         dataManager.updateEntry(updatedEntry: safeCopy) { [weak self] result in
             guard let self = self else { return }

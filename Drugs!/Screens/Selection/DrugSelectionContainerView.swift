@@ -1,26 +1,6 @@
 import SwiftUI
 import Combine
 
-struct DrugSelectionContainerModel {
-    var inProgressEntry = InProgressEntry()
-    var currentSelectedDrug: Drug?
-    var info = AvailabilityInfo()
-    var availableDrugs = AvailableDrugList.defaultList
-
-    func count(for drug: Drug) -> Int {
-        inProgressEntry.entryMap[drug] ?? 0
-    }
-
-    mutating func updateCount(_ count: Int?, for drug: Drug) {
-        inProgressEntry.entryMap[drug] = count
-    }
-
-    mutating func resetEdits() {
-        inProgressEntry = InProgressEntry()
-        currentSelectedDrug = nil
-    }
-}
-
 struct DrugSelectionContainerView: View {
     @Binding var model: DrugSelectionContainerModel
 
@@ -36,24 +16,25 @@ struct DrugSelectionContainerView: View {
     }
 
     private var listModel: DrugSelectionListModel {
-        func didSelect(_ drug: Drug) {
+        func didSelect(_ drug: SelectableDrug) {
             let wasSelected = model.currentSelectedDrug == drug
             let newOrToggledSelection = wasSelected ? nil : drug
             model.currentSelectedDrug = newOrToggledSelection
         }
 
-        let drugModels = model.availableDrugs.drugs.map { drug in
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: drug.drugName, drugId: drug.id),
-                count: model.count(for: drug),
+        let drugModels = model.availableDrugs.drugs.map { drug -> DrugSelectionListRowModel in
+            let selectableDrug = SelectableDrug(drugName: drug.drugName, drugId: drug.id)
+            return DrugSelectionListRowModel(
+                drug: selectableDrug,
+                count: model.count(for: selectableDrug),
                 canTake: model.info.canTake(drug),
-                isSelected: model.currentSelectedDrug == drug,
-                didSelect: { didSelect(drug) }
+                isSelected: model.currentSelectedDrug == selectableDrug,
+                didSelect: { didSelect(selectableDrug) }
             )
         }
 
         let listModel = DrugSelectionListModel(
-            availableDrugs: drugModels
+            selectableDrugs: drugModels
         )
 
         return listModel

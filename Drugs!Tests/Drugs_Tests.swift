@@ -43,9 +43,9 @@ class Drugs_Tests: XCTestCase {
     func testDateFormat() {
         let formatter = DateFormatter()
         formatter.dateFormat = "eee MMM dd"
-        let date = formatter.date(from: "Thu Dec 10")
-        let string = formatter.string(from: date!)
-        let final = string
+//        let date = formatter.date(from: "Thu Dec 10")
+//        let string = formatter.string(from: date!)
+//        let final = string
     }
 
     func testTakableMeds() {

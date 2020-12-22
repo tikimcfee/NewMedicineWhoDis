@@ -2,23 +2,11 @@ import Foundation
 import SwiftUI
 import Combine
 
-struct DrugSelectionListRowModel {
-    let drug: SelectableDrug
-    let count: Int
-    let canTake: Bool
-    let isSelected: Bool
-    let didSelect: Action
-}
-
-struct DrugSelectionListModel {
-    let availableDrugs: [DrugSelectionListRowModel]
-}
-
 struct DrugSelectionListView: View {
     let model: DrugSelectionListModel
 
     var body: some View {
-        let drugs = model.availableDrugs
+        let drugs = model.selectableDrugs
         let half = drugs.count / 2 + drugs.count % 2 // mod adds uneven counts to left
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
@@ -58,7 +46,7 @@ struct DrugSelectionListView_Preview: PreviewProvider {
         Group {
             DrugSelectionListView(
                 model: DrugSelectionListModel(
-                    availableDrugs: []
+                    selectableDrugs: []
                 )
             )
         }

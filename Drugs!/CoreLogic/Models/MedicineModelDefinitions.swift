@@ -16,11 +16,13 @@ public struct AvailableDrugList: EquatableFileStorable {
     }
 }
 
+public typealias DrugId = String
+
 public struct Drug: EquatableFileStorable, Comparable, Identifiable {
     private(set) var drugName: String
     private(set) var ingredients: [Ingredient]
     private(set) var hourlyDoseTime: Double
-    public var id: String { return drugName } // Here there be dragons
+    public var id: DrugId { return drugName } // Here there be dragons
 
     public init(_ drugName: String,
                 _ ingredients: [Ingredient],
@@ -45,11 +47,11 @@ public struct Ingredient: EquatableFileStorable {
 public struct MedicineEntry: EquatableFileStorable, Identifiable {
     let uuid: String
     var date: Date
-    var drugsTaken: [Drug:Int]
+    var drugsTaken: [Drug: Int]
     public var id: String { return uuid }
     init(
         _ date: Date,
-        _ drugsTaken: [Drug:Int],
+        _ drugsTaken: [Drug: Int],
         _ uuid: String = UUID.init().uuidString
     ) {
         self.date = date
