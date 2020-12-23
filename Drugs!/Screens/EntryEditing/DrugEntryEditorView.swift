@@ -101,20 +101,19 @@ struct DrugEntryEditorView: View {
 	}
 	
 	private var timePicker: some View {
-		VStack {
-			DatePicker(
-                selection: $editorState.selectionModel.inProgressEntry.date,
-				displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
-				label: { EmptyView() }
-			)
-            .datePickerStyle(WheelDatePickerStyle())
-            .labelsHidden()
-			.frame(height: 64)
-			.clipped()
-            .padding(8)
-            .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)
-        }
-	}
+        DatePicker(
+            selection: $editorState.selectionModel.inProgressEntry.date,
+            displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
+            label: { Group { EmptyView() } }
+        )
+        .datePickerStyle(WheelDatePickerStyle())
+        .labelsHidden()
+        .frame(height: 64)
+        .padding(8)
+        .contentShape(Rectangle()) // Without this, DatePicker touch area overlaps surrounding views
+        .clipped()
+        .compositingGroup()
+        .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)	}
 	
 }
 

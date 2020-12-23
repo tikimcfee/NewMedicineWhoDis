@@ -50,7 +50,7 @@ public final class DrugListEditorViewState: ObservableObject {
         self.dataManager = dataManager
 
         dataManager
-            .drugListStream
+            .sharedDrugListStream
             .sink(receiveValue: { [weak self] in
                 self?.currentDrugList = $0
             })

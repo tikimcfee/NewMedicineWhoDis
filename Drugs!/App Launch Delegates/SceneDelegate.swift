@@ -38,10 +38,8 @@ public class MasterEnvironmentContainer: ObservableObject {
 
     init() {
         self.fileStore = MedicineLogFileStore()
-        let appData = fileStore.load().applicationData
         self.dataManager = MedicineLogDataManager(
-            persistenceManager: FilePersistenceManager(store: fileStore),
-            appData: appData
+            persistenceManager: FilePersistenceManager(store: fileStore)
         )
         self.notificationState = NotificationInfoViewState(dataManager)
         self.notificationScheduler = NotificationScheduler(notificationState: notificationState)

@@ -62,12 +62,6 @@ struct DrugEntryNumberPad: View {
 		return headerText
 	}
 	
-	private func createButtonsFor(_ numbersIn: Int...) -> some View {
-		return ForEach(numbersIn, id:\.self) {
-			numberButton(trackedNumber: $0)
-		}
-	}
-	
 	private func numberButton(trackedNumber: Int) -> some View {
 		return Button(action: {
             model.didSelectNumber(trackedNumber)

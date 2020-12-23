@@ -25,7 +25,7 @@ public struct Event: CustomStringConvertible, EquatableFileStorable {
 	public var description: String {
 		return "(\(criticality.rawValue))"
 			+ " \(tag)"
-			+ " ::: \(message)"
+			+ " -> \(message)"
 	}
 }
 

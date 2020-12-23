@@ -31,7 +31,7 @@ public final class AddEntryViewState: ObservableObject {
             }
             .store(in: &cancellables)
 
-        dataManager.drugListStream
+        dataManager.sharedDrugListStream
             .receive(on: RunLoop.main)
             .sink { [weak self] in
                 self?.drugSelectionModel.availableDrugs = $0

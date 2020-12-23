@@ -20,7 +20,7 @@ public final class DrugEntryEditorState: ObservableObject {
             .sink { [weak self] in self?.selectionModel.info = $0 }
             .store(in: &cancellables)
 
-        dataManager.drugListStream
+        dataManager.sharedDrugListStream
             .sink { [weak self] in self?.selectionModel.availableDrugs = $0 }
             .store(in: &cancellables)
     }
