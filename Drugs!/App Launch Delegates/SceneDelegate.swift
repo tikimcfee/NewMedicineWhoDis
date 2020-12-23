@@ -28,7 +28,7 @@ public enum AppTestArguments: String {
 }
 
 public class MasterEnvironmentContainer: ObservableObject {
-    let fileStore: MedicineLogFileStore
+    let fileStore: EntryListFileStore
     let dataManager: MedicineLogDataManager
 
     let notificationState: NotificationInfoViewState
@@ -37,7 +37,7 @@ public class MasterEnvironmentContainer: ObservableObject {
     let rootScreenState: AddEntryViewState
 
     init() {
-        self.fileStore = MedicineLogFileStore()
+        self.fileStore = EntryListFileStore()
         self.dataManager = MedicineLogDataManager(
             persistenceManager: FilePersistenceManager(store: fileStore)
         )

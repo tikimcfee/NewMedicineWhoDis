@@ -3,7 +3,7 @@ import Combine
 
 public class FilePersistenceManager: PersistenceManager {
     // Dependencies
-    private let medicineStore: MedicineLogFileStore
+    private let medicineStore: EntryListFileStore
     private var initialLoadRequired = true
 
     @Published private var appData = ApplicationData()
@@ -19,18 +19,19 @@ public class FilePersistenceManager: PersistenceManager {
     private let saveQueue = DispatchQueue(label: "FPM", qos: .userInteractive)
     private var cancellables = Set<AnyCancellable>()
 
-    init(store: MedicineLogFileStore) {
+    init(store: EntryListFileStore) {
         self.medicineStore = store
     }
 
     func onInitialLoad(_ fromSubscription: Subscription) {
         guard initialLoadRequired else { return }
         initialLoadRequired = false
+        log { Event("Starting initial app data load from first subscription") }
         switch medicineStore.load() {
         case .success(let data):
             appData = data
         case .failure(let error):
-            log { Event("Failed to load data: \(error)") }
+            log { Event("Failed to load data: \(error)", .error) }
         }
     }
 
@@ -38,7 +39,7 @@ public class FilePersistenceManager: PersistenceManager {
         log{ Event("Saving") }
         self.medicineStore.save(applicationData: appData) { result in
             handler(result)
-            log { Event("Autosave result: \(result)") }
+            log { Event("Save result: \(result)") }
         }
     }
 
@@ -99,7 +100,7 @@ public class FilePersistenceManager: PersistenceManager {
         updatedDrug: Drug,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
+        log { Event("Updating drug:\n\(originalDrug)\nto: \(updatedDrug)") }
         guard let updateIndex = appData.availableDrugList.drugs.firstIndex(where: { $0.id == originalDrug.id }) else {
             handler(.failure(AppStateError.generic(message: "Drug mismatch. Expected = \(originalDrug.id)")))
             return

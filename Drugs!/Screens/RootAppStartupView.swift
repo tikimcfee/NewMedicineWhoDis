@@ -1,46 +1,14 @@
 import SwiftUI
 import Combine
 
-enum RootScreenTabTag {
-    case addEntry
-    case entryList
-    case notifications
-    case drugList
-}
-
-struct TagModifier: ViewModifier {
-    let tag: RootScreenTabTag
-    func body(content: Content) -> some View {
-        switch tag {
-        case .addEntry:
-            return content.tabItem {
-                Image(systemName: "plus.square.fill")
-                Text("Add Entry")
-            }.tag(RootScreenTabTag.addEntry)
-        case .entryList:
-            return content.tabItem {
-                Image(systemName: "list.dash")
-                Text("Entries")
-            }.tag(RootScreenTabTag.entryList)
-        case .notifications:
-            return content.tabItem {
-                Image(systemName: "calendar.circle.fill")
-                Text("Reminders")
-            }.tag(RootScreenTabTag.notifications)
-        case .drugList:
-            return content.tabItem {
-                Image(systemName: "heart.circle.fill")
-                Text("Medicines")
-            }.tag(RootScreenTabTag.drugList)
-        }
-    }
-}
-
-
 struct RootAppStartupView: View {
 
     @EnvironmentObject var container: MasterEnvironmentContainer
-    @State var selectionTag: RootScreenTabTag = .addEntry
+    @State private var selectionTag: RootScreenTabTag = .addEntry
+
+    @State private var showingActionSheet = false
+    @State private var showingShareSheet = false
+    @State private var cleanAppLogsAlert = false
 
     var body: some View {
         TabView(selection: $selectionTag) {
@@ -48,15 +16,65 @@ struct RootAppStartupView: View {
             entryListView
             notificationsView
             drugListEditorView
+        }.sheet(isPresented: $showingShareSheet, content: {
+            let eventsFile = AppEvents.shared.logFile
+            ActivityView(activityItems: [eventsFile] as [Any],
+                         applicationActivities: nil)
+        }).actionSheet(isPresented: $showingActionSheet) {
+            ActionSheet(title: Text("Help and Settings"),
+                        message: Text("What would you like to do?"),
+                        buttons: [
+                            .default(Text("Share app logs")) { didTapShowShareSheet() },
+                            .default(Text("Delete app logs")) { didTapCleanAppLogs() },
+                            .cancel()
+                        ])
+        }.alert(isPresented: $cleanAppLogsAlert) {
+            Alert(title: Text("Clear out logs and start fresh?"),
+                  message: nil,
+                  primaryButton: Alert.Button.destructive(Text("Yep, start fresh")) {
+                    didConfirmCleanAppLogs()
+                  },
+                  secondaryButton: .cancel()
+            )
         }
+    }
+
+    private func didTapAddEntryViewGearButton() {
+        showingActionSheet = true
+    }
+
+    private func didTapShowShareSheet() {
+        showingShareSheet = true
+    }
+
+    private func didTapCleanAppLogs() {
+        cleanAppLogsAlert = true
+    }
+
+    private func didConfirmCleanAppLogs() {
+        AppEvents.shared.eraseLogs()
     }
 }
 
 // View helpers
 extension RootAppStartupView {
     private var addEntryView: some View {
-        AddNewEntryView()
-            .asAddEntryTab
+        NavigationView {
+            AddNewEntryView()
+                .navigationBarTitle("", displayMode: .inline)
+                .navigationBarItems(trailing: {
+                    Button(action: didTapAddEntryViewGearButton) {
+                        HStack {
+                            Image(systemName: "gear")
+                                .foregroundColor(.gray)
+                            Text("Help")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                }())
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .asAddEntryTab
     }
 
     private var entryListView: some View {
@@ -74,11 +92,40 @@ extension RootAppStartupView {
             DrugListEditorView()
                 .environmentObject(container.makeNewDrugEditorState())
                 .navigationBarTitle("", displayMode: .inline)
-
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .asMedicinesTab
+    }
+}
 
+enum RootScreenTabTag {
+    case addEntry
+    case entryList
+    case notifications
+    case drugList
+
+    var configuration: (String, String) {
+        switch self {
+        case .addEntry:
+            return ("Add Entry", "plus.square.fill")
+        case .entryList:
+            return ("Entries", "list.dash")
+        case .notifications:
+            return ("Reminders", "calendar.circle.fill")
+        case .drugList:
+            return ("Med List", "heart.circle.fill")
+        }
+    }
+}
+
+struct TagModifier: ViewModifier {
+    let tag: RootScreenTabTag
+    func body(content: Content) -> some View {
+        content.tabItem {
+            let configuration = tag.configuration
+            Image(systemName: configuration.1)
+            Text(configuration.0)
+        }.tag(tag)
     }
 }
 

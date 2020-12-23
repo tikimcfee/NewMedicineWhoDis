@@ -42,6 +42,42 @@ private var medicineLogsDefaultFile: URL {
     return file(named: "core_logs_file.json", in: medicineLogsDirectory)
 }
 
+private var appEventLoggingFile: URL {
+    return file(named: "app_event_logs.txt", in: medicineLogsDirectory)
+}
+
+public class LogFileStore {
+    var logFile: URL { appEventLoggingFile }
+
+    func cleanFile() {
+        do {
+            try FileManager.default.removeItem(at: logFile)
+            log { Event("Log file cleared - welcome to a whole new world.") }
+        } catch {
+            log { Event("Log file not removed: \(error)") }
+        }
+    }
+
+    func appendText(_ text: String, encoded encoding: String.Encoding = .utf8) {
+        if let data = text.data(using: encoding) {
+            do {
+                try appendToFile(data)
+            } catch {
+                #if DEBUG
+                fatalError("Text appending failed: \(error)")
+                #endif
+            }
+        }
+    }
+
+    func appendToFile(_ data: Data) throws {
+        let handle = try FileHandle(forUpdating: logFile)
+        handle.seekToEndOfFile()
+        handle.write(data)
+        try handle.close()
+    }
+}
+
 public class FileStore {
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()

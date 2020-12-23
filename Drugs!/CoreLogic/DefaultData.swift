@@ -118,7 +118,7 @@ public final class DefaultDrugList {
 }
 
 public func makeTestMedicineOperator() -> MedicineLogDataManager {
-    let medicineStore = MedicineLogFileStore()
+    let medicineStore = EntryListFileStore()
     return MedicineLogDataManager(
         persistenceManager: FilePersistenceManager(store: medicineStore)
     )

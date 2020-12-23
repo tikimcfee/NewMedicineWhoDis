@@ -59,3 +59,37 @@ public struct MedicineEntry: EquatableFileStorable, Identifiable {
         self.uuid = uuid
     }
 }
+
+// MARK: String output
+
+fileprivate let modelDescriptionEncoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .withoutEscapingSlashes
+    return encoder
+}()
+
+fileprivate func jsonDescription<C: Codable>(of codable: C) -> String {
+    guard let data = try? modelDescriptionEncoder.encode(codable) else {
+        return "{Failed to encode \(type(of: codable))} \(codable)"
+    }
+    guard let string = String(data: data, encoding: .utf8) else {
+        return "{Failed to decode \(type(of: codable))} \(codable)"
+    }
+    return string
+}
+
+extension MedicineEntry: CustomStringConvertible {
+    public var description: String { jsonDescription(of: self) }
+}
+
+extension Drug: CustomStringConvertible {
+    public var description: String { jsonDescription(of: self) }
+}
+
+extension Ingredient: CustomStringConvertible {
+    public var description: String { jsonDescription(of: self) }
+}
+
+extension AvailableDrugList: CustomStringConvertible {
+    public var description: String { jsonDescription(of: self) }
+}

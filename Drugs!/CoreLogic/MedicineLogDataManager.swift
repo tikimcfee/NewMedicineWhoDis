@@ -83,7 +83,6 @@ extension MedicineLogDataManager {
         medicineEntry: MedicineEntry,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager adding new entry: \(medicineEntry).") }
         persistenceManager.addEntry(medicineEntry: medicineEntry, handler)
     }
 
@@ -91,7 +90,6 @@ extension MedicineLogDataManager {
         index: Int,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager removing: \(index).") }
         persistenceManager.removeEntry(index: index, handler)
     }
 
@@ -99,7 +97,6 @@ extension MedicineLogDataManager {
         updatedEntry: MedicineEntry,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager updating entry: \(updatedEntry).") }
         persistenceManager.updateEntry(updatedEntry: updatedEntry, handler)
     }
 
@@ -108,7 +105,6 @@ extension MedicineLogDataManager {
         updatedDrug: Drug,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager updating drug: \(originalDrug) ::to:: \(updatedDrug) ") }
         persistenceManager.updateDrug(originalDrug: originalDrug,
                                       updatedDrug: updatedDrug,
                                       handler)
@@ -118,7 +114,6 @@ extension MedicineLogDataManager {
         newDrug: Drug,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager adding drug: \(newDrug)") }
         persistenceManager.addDrug(newDrug: newDrug, handler)
     }
 
@@ -126,7 +121,6 @@ extension MedicineLogDataManager {
         drugToRemove: Drug,
         _ handler: @escaping ManagerCallback
     ) {
-        log { Event("Manager removing drug: \(drugToRemove)") }
         persistenceManager.removeDrug(drugToRemove: drugToRemove, handler)
     }
 }
@@ -158,6 +152,7 @@ extension MedicineLogDataManager {
             .init(refreshTimer, persistenceManager.appDataStream)
             .map{ (updateInterval, appData) -> AvailabilityInfo in
                 refreshCount = refreshCount + 1
+                log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
                 return appData.mainEntryList.availabilityInfo(updateInterval, appData.availableDrugList)
             }
             .eraseToAnyPublisher()

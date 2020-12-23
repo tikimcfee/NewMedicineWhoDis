@@ -27,6 +27,12 @@ struct DateFormatting {
         dateFormatter.timeStyle = .short
         return dateFormatter
     }()
+
+    static let CustomFormatLoggingTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "y-MM-dd H:m:ss.SSSS"
+        return dateFormatter
+    }()
 }
 
 extension Date {
