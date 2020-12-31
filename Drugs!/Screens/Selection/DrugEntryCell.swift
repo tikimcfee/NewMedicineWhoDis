@@ -1,48 +1,52 @@
 import Foundation
 import SwiftUI
 
-struct DrugEntryViewCellModel {
-    let drugName: String
-    let count: Int
-    let isSelected: Bool
-    let canTake: Bool
-    let tapAction: Action
-}
-
 struct DrugEntryViewCell: View {
 
-    let model: DrugEntryViewCellModel
+    let model: DrugSelectionListRowModel
 
     var body: some View {
-        Button(action: model.tapAction) {
+        Button(action: model.didSelect) {
             text()
-                .padding(8)
+                .padding(4)
                 .background(model.canTake
                     ? Color.clear
                     : Color.computedCannotTake
                 )
                 .cornerRadius(4)
-                .boringBorder
-        }.accessibility(identifier: model.drugName)
+                .modifier(
+                    BoringBorder(
+                        model.isSelected ? .blue : .gray,
+                        .clear
+                    )
+                )
+        }
+        .padding(4)
+        .accessibility(identifier: model.drug.drugName)
     }
 
     private func text() -> some View {
         let title =
-            Text("\(model.drugName)")
-                .font(.subheadline)
+            Text("\(model.drug.drugName)")
+                .font(.body)
                 .fontWeight(.regular)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(.none)
 
         let count =
             Text("\(model.count)")
-                .font(.subheadline)
-                .fontWeight(.light)
+                .font(.body)
+                .fontWeight(.semibold)
                 .animation(.none)
-                .frame(width: 24.0)
-                .padding(2)
+                .frame(width: 32.0)
                 .background(Color(.displayP3, red: 0.25, green: 0.0, blue: 0.80, opacity: 0.8))
-                .clipShape(Circle())
+                .clipShape(RoundedRectangle(cornerRadius: 4.0))
+
+        let message =
+            Text(model.timingMessage)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .fontWeight(.light)
 
         let titleColor, countColor: Color
         if model.isSelected {
@@ -53,9 +57,19 @@ struct DrugEntryViewCell: View {
             countColor = Color(.displayP3, red: 1.0, green: 1.0, blue: 1.0, opacity: 0.75)
         }
 
-        return HStack {
-            count.foregroundColor(countColor)
-            title.foregroundColor(titleColor)
+        return VStack(alignment: .trailing, spacing: 8) {
+            HStack {
+                count.foregroundColor(countColor)
+                title.foregroundColor(titleColor)
+            }
+
+            HStack(alignment: .center, spacing: 4) {
+                if model.timingIcon != "" {
+                    Image(systemName: model.timingIcon)
+                        .foregroundColor(Color.secondary.opacity(0.75))
+                }
+                message
+            }.frame(minHeight: 24.0)
         }
     }
 }
@@ -68,14 +82,16 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
     static var previews: some View {
         Group {
             DrugEntryViewCell(
-                model: DrugEntryViewCellModel(
-                    drugName: "<DrugEntryViewCellModel>",
+                model: DrugSelectionListRowModel(
+                    drug: SelectableDrug(drugName: "A drug name", drugId: "12345"),
                     count: 14,
+                    canTake: false,
+                    timingMessage: "6:37 pm",
+                    timingIcon: "timer",
                     isSelected: true,
-                    canTake: true,
-                    tapAction: { }
+                    didSelect: { }
                 )
-            )
+            ).frame(height: 64.0)
         }
     }
 }

@@ -11,15 +11,15 @@ struct DrugSelectionListView: View {
         let drugsSliceLeft = drugs[0..<half]
         let drugsSliceRight = drugs[half..<drugs.count]
         return ScrollView {
-            HStack(alignment: .top, spacing: 8) {
-                VStack {
+            HStack(alignment: .top, spacing: 0) {
+                VStack(spacing: 0) {
                     ForEach(drugsSliceLeft, id: \.drug.drugId) { tuple in
-                        DrugEntryViewCell(model: modelFor(tuple))
+                        DrugEntryViewCell(model: tuple)
                     }
                 }
-                VStack {
+                VStack(spacing: 0) {
                     ForEach(drugsSliceRight, id: \.drug.drugId) { tuple in
-                        DrugEntryViewCell(model: modelFor(tuple))
+                        DrugEntryViewCell(model: tuple)
                     }
                 }
             }
@@ -27,16 +27,6 @@ struct DrugSelectionListView: View {
             .listRowBackground(Color.clear)
             .environment(\.defaultMinListRowHeight, 0)
         }
-    }
-
-    private func modelFor(_ tuple: DrugSelectionListRowModel) -> DrugEntryViewCellModel {
-        DrugEntryViewCellModel(
-            drugName: tuple.drug.drugName,
-            count: tuple.count,
-            isSelected: tuple.isSelected,
-            canTake: tuple.canTake,
-            tapAction: tuple.didSelect
-        )
     }
 }
 

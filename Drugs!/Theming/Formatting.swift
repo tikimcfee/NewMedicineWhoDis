@@ -22,6 +22,13 @@ struct DateFormatting {
         return dateFormatter
     }()
 
+    static let NoDateShortTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
+
     static let DefaultDateShortTime: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.timeStyle = .short

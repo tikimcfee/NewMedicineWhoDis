@@ -36,6 +36,8 @@
 		F005CA20258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F005CA1E258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld */; };
 		F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
+		F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
+		F01B6700259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
 		F01BBBB2246F900900BBC3A3 /* FileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB1246F900900BBC3A3 /* FileStore.swift */; };
 		F01BBBB4246F939600BBC3A3 /* EntryListFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB3246F939600BBC3A3 /* EntryListFileStore.swift */; };
 		F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */; };
@@ -700,6 +702,7 @@
 				F022624A2471A74700F31141 /* AddNewEntryView.swift in Sources */,
 				F06CE02E2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */,
 				F0FE7F91255E2853004D6D62 /* RootAppStartupView.swift in Sources */,
+				F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */,
 				F0FE7F7C255E27FC004D6D62 /* NotificationInfoView.swift in Sources */,
 				F02262542471AA8C00F31141 /* Components.swift in Sources */,
 				F0FE7F8C255E284F004D6D62 /* SceneDelegate.swift in Sources */,
@@ -743,6 +746,7 @@
 				F022624B2471A74800F31141 /* AddNewEntryView.swift in Sources */,
 				F0FE7F9E255E3237004D6D62 /* AddEntryViewState.swift in Sources */,
 				F0FE7FA6255E3256004D6D62 /* NotificationInfoViewState.swift in Sources */,
+				F01B6700259BE2D700C013CB /* ActivityView.swift in Sources */,
 				F06CE02F2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */,
 				F02262552471AA8C00F31141 /* Components.swift in Sources */,
 				4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */,
@@ -919,7 +923,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_ASSET_PATHS = "\"Drugs!/Preview Content\"";
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
@@ -930,7 +934,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -947,7 +951,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_ASSET_PATHS = "\"Drugs!/Preview Content\"";
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
@@ -958,7 +962,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";

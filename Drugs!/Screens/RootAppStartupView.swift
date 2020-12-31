@@ -16,35 +16,51 @@ struct RootAppStartupView: View {
             entryListView
             notificationsView
             drugListEditorView
-        }.sheet(isPresented: $showingShareSheet, content: {
-            let eventsFile = AppEvents.shared.logFile
-            ActivityView(activityItems: [eventsFile] as [Any],
-                         applicationActivities: nil)
-        }).actionSheet(isPresented: $showingActionSheet) {
-            ActionSheet(title: Text("Help and Settings"),
-                        message: Text("What would you like to do?"),
-                        buttons: [
-                            .default(Text("Share app logs")) { didTapShowShareSheet() },
-                            .default(Text("Delete app logs")) { didTapCleanAppLogs() },
-                            .cancel()
-                        ])
-        }.alert(isPresented: $cleanAppLogsAlert) {
-            Alert(title: Text("Clear out logs and start fresh?"),
-                  message: nil,
-                  primaryButton: Alert.Button.destructive(Text("Yep, start fresh")) {
-                    didConfirmCleanAppLogs()
-                  },
-                  secondaryButton: .cancel()
-            )
         }
+        .sheet(isPresented: $showingShareSheet, content: { activityViewShareSheet })
+        .actionSheet(isPresented: $showingActionSheet) { actionSheetHelpOptions }
+        .alert(isPresented: $cleanAppLogsAlert) { alertViewClearAppLogsConfirm }
+    }
+
+
+    // MARK: Action Sheet
+
+    private var actionSheetHelpOptions: ActionSheet {
+        ActionSheet(title: Text("Help and Settings"),
+                    message: Text("What would you like to do?"),
+                    buttons: [
+                        .default(Text("Share app logs")) { didTapShowShareSheet() },
+                        .default(Text("Delete app logs")) { didTapCleanAppLogs() },
+                        .cancel()
+                    ])
     }
 
     private func didTapAddEntryViewGearButton() {
         showingActionSheet = true
     }
 
+    // MARK: Share Sheet (ActivityView)
+
     private func didTapShowShareSheet() {
         showingShareSheet = true
+    }
+
+    private var activityViewShareSheet: some View {
+        let eventsFile = AppEvents.shared.logFile
+        return ActivityView(activityItems: [eventsFile] as [Any],
+                            applicationActivities: nil)
+    }
+
+    // MARK: App log clearing
+
+    private var alertViewClearAppLogsConfirm: Alert {
+        Alert(title: Text("Clear out logs and start fresh?"),
+              message: nil,
+              primaryButton: Alert.Button.destructive(Text("Yep, start fresh")) {
+                didConfirmCleanAppLogs()
+              },
+              secondaryButton: .cancel()
+        )
     }
 
     private func didTapCleanAppLogs() {

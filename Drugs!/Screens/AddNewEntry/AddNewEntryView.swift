@@ -51,7 +51,7 @@ struct ContentView_Previews: PreviewProvider {
         let scheduler = NotificationScheduler(notificationState: notificationState)
         let rootState = AddEntryViewState(dataManager, scheduler)
         return Group {
-            return RootAppStartupView()
+            return AddNewEntryView()
                 .environmentObject(data)
                 .environmentObject(rootState)
         }

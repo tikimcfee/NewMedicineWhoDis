@@ -89,6 +89,8 @@ public struct DrugSelectionListRowModel {
     let drug: SelectableDrug
     let count: Int
     let canTake: Bool
+    let timingMessage: String
+    let timingIcon: String
     let isSelected: Bool
     let didSelect: Action
 }

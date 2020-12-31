@@ -124,65 +124,32 @@ public func makeTestMedicineOperator() -> MedicineLogDataManager {
     )
 }
 
+func randomNameString(length: Int = 7)->String{
+    enum s {
+        static let c = Array("abcdefghjklmnpqrstuvwxyz12345789")
+        static let k = UInt32(c.count)
+    }
+    var result = [Character](repeating: "-", count: length)
+    for i in 0..<length {
+        let r = Int(arc4random_uniform(s.k))
+        result[i] = s.c[r]
+    }
+    return String(result)
+}
+
 public func makeTestDrugSelectionListModel() -> DrugSelectionListModel {
-    DrugSelectionListModel(
-        selectableDrugs: [
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "a"),
-                count: 8,
-                canTake: true,
-                isSelected: false,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "b"),
-                count: 8,
-                canTake: true,
-                isSelected: false,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "c"),
-                count: 8,
-                canTake: true,
-                isSelected: true,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "d"),
-                count: 8,
-                canTake: true,
-                isSelected: false,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "e"),
-                count: 77,
-                canTake: false,
-                isSelected: false,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "f"),
-                count: 8,
-                canTake: false,
-                isSelected: true,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "g"),
-                count: 8,
-                canTake: true,
-                isSelected: false,
-                didSelect: {}
-            ),
-            DrugSelectionListRowModel(
-                drug: SelectableDrug(drugName: "Drug", drugId: "h"),
-                count: 8,
-                canTake: true,
-                isSelected: false,
-                didSelect: {}
-            )
-        ]
+    let models = (0..<10).map { _ in
+        DrugSelectionListRowModel(
+            drug: SelectableDrug(drugName: randomNameString(), drugId: randomNameString()),
+            count: Int.random(in: 0..<8),
+            canTake: Bool.random(),
+            timingMessage: "Next ready at 9:02 PM",
+            timingIcon: Bool.random() ? "🕦" : "🕥",
+            isSelected: Bool.random(),
+            didSelect: { }
+        )
+    }
+    return DrugSelectionListModel(
+        selectableDrugs: models
     )
 }
