@@ -51,8 +51,8 @@ struct EntryListView: View {
         }
         .onReceive(dataManager.sharedEntryStream, perform: mapEntriesToModel)
         .sheet(item: $entryForEdit, content: { entry in
-            DrugEntryEditorView()
-                .environmentObject(DrugEntryEditorState(
+            ExistingEntryEditorView()
+                .environmentObject(ExistingEntryEditorState(
                     dataManager: dataManager,
                     sourceEntry: entry
                 ))

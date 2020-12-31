@@ -1,11 +1,3 @@
-//
-//  MedicineModelExtensions.swift
-//  Drugs!
-//
-//  Created by Ivan Lugo on 12/5/19.
-//  Copyright © 2019 Ivan Lugo. All rights reserved.
-//
-
 import Foundation
 
 extension Drug {
@@ -89,25 +81,39 @@ extension AvailabilityInfo {
     }
 }
 
-extension Array where Element == MedicineEntry {
-    func availabilityInfo(_ startDate: Date = Date(),
-                          _ availableDrugs: AvailableDrugList) -> AvailabilityInfo {
+class AvailabilityInfoCalculator {
+    static func computeInfo(startDate: Date = Date(),
+                            availableDrugs: AvailableDrugList,
+                            entries: [MedicineEntry]) -> AvailabilityInfo {
         var drugDates = [Drug: Date]()
         availableDrugs.drugs.forEach { drugDates[$0] = startDate }
-        forEach { entry in
-            entry.timesDrugsAreNextAvailable.forEach { drug, dateDrugIsAvailable in
-                guard let lastKnownTakenDate = drugDates[drug] else {
-                    drugDates[drug] = dateDrugIsAvailable
-                    return
+
+        // Use the newest drug info if there is one.
+        // This is important so old entries don't step on new drugs.
+        for entry in entries {
+            for (drug, _) in entry.drugsTaken {
+                let newestDrug = availableDrugs.drugFor(id: drug.id) ?? drug
+                let nextDoseTime = entry.date.advanced(by: newestDrug.doseTimeInSeconds)
+
+                guard let lastKnownTakenDate = drugDates[newestDrug] else {
+                    drugDates[newestDrug] = nextDoseTime
+                    continue
                 }
-                // If this date is later, it means we have to wait longer
-                if dateDrugIsAvailable > lastKnownTakenDate {
-                    drugDates[drug] = dateDrugIsAvailable
+
+                if nextDoseTime > lastKnownTakenDate {
+                    drugDates[newestDrug] = nextDoseTime
                 }
             }
         }
+
         return drugDates.reduce(into: AvailabilityInfo()) { result, entry in
             result[entry.key] = (entry.value <= startDate, entry.value)
         }
+    }
+}
+
+private extension AvailableDrugList {
+    func drugFor(id: DrugId) -> Drug? {
+        drugs.first(where: { $0.id == id })
     }
 }

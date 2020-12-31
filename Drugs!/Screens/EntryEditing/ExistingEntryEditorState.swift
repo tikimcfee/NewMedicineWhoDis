@@ -1,6 +1,6 @@
 import Combine
 
-public final class DrugEntryEditorState: ObservableObject {
+public final class ExistingEntryEditorState: ObservableObject {
     private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
 

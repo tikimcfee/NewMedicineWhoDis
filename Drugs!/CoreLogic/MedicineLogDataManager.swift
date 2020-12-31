@@ -137,7 +137,7 @@ extension MedicineLogDataManager {
 
     private var refreshTimer: AnyPublisher<Date, Never> {
         Timer
-            .publish(every: 5, on: .main, in: .common)
+            .publish(every: 10, on: .main, in: .common)
             .autoconnect()
             .map{ $0 as Date }
             .merge(with: Just(.init()))
@@ -153,7 +153,10 @@ extension MedicineLogDataManager {
             .map{ (updateInterval, appData) -> AvailabilityInfo in
                 refreshCount = refreshCount + 1
                 log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
-                return appData.mainEntryList.availabilityInfo(updateInterval, appData.availableDrugList)
+                return AvailabilityInfoCalculator.computeInfo(
+                    availableDrugs: appData.availableDrugList,
+                    entries: appData.mainEntryList
+                )
             }
             .eraseToAnyPublisher()
     }

@@ -1,11 +1,3 @@
-//
-//  MedicineDefinitions.swift
-//  Drugs!
-//
-//  Created by Ivan Lugo on 9/7/19.
-//  Copyright © 2019 Ivan Lugo. All rights reserved.
-//
-
 import Foundation
 
 public struct AvailableDrugList: EquatableFileStorable {
@@ -34,6 +26,17 @@ public struct Drug: EquatableFileStorable, Comparable, Identifiable {
 
     public static func < (lhs: Drug, rhs: Drug) -> Bool {
         return lhs.drugName < rhs.drugName
+    }
+
+    public static func == (lhs: Drug, rhs: Drug) -> Bool {
+        return lhs.drugName == rhs.drugName
+            && lhs.ingredients == rhs.ingredients
+            && lhs.hourlyDoseTime == rhs.hourlyDoseTime
+            && lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

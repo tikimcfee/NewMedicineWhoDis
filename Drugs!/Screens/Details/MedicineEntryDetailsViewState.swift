@@ -22,7 +22,7 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
 
     // Output
     @Published public var editorIsVisible: Bool = false
-    @Published public var editorState: DrugEntryEditorState?
+    @Published public var editorState: ExistingEntryEditorState?
     @Published public var viewModel = MedicineEntryDetailsViewModel()
     @Published private var currentEntry: MedicineEntry?
 
@@ -58,7 +58,7 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
         // internal 'setSelected' stuff.. but still not great. EditorState should also fetch
         // models manually by ID... oof.
         guard let entry = currentEntry else { fatalError("Started editing without a selection") }
-        editorState = DrugEntryEditorState(dataManager: dataManager, sourceEntry: entry)
+        editorState = ExistingEntryEditorState(dataManager: dataManager, sourceEntry: entry)
         editorState?.editorIsVisible = true
         editorState?.$editorIsVisible
             .receive(on: RunLoop.main)

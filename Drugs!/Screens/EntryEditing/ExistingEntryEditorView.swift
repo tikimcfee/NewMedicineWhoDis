@@ -1,9 +1,9 @@
 import Combine
 import SwiftUI
 
-struct DrugEntryEditorView: View {
+struct ExistingEntryEditorView: View {
 
-    @EnvironmentObject private var editorState: DrugEntryEditorState
+    @EnvironmentObject private var editorState: ExistingEntryEditorState
 	@State var selectedDate: Date = Date()
 
     @Environment(\.presentationMode) var presentationMode
@@ -118,7 +118,7 @@ struct DrugEntryEditorView: View {
 }
 
 // Data
-extension DrugEntryEditorView {
+extension ExistingEntryEditorView {
     var errorBinding: Binding<AppStateError?> {
         return $editorState.editorError
     }
@@ -174,9 +174,9 @@ extension View {
 struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
         let op = makeTestMedicineOperator()
-		return DrugEntryEditorView()
+		return ExistingEntryEditorView()
             .environmentObject(
-                DrugEntryEditorState(
+                ExistingEntryEditorState(
                     dataManager: op,
                     sourceEntry: MedicineEntry(Date(), [:])
                 )
