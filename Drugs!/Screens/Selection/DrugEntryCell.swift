@@ -64,11 +64,11 @@ struct DrugEntryViewCell: View {
             }
 
             HStack(alignment: .center, spacing: 4) {
+                message
                 if model.timingIcon != "" {
                     Image(systemName: model.timingIcon)
                         .foregroundColor(Color.secondary.opacity(0.75))
                 }
-                message
             }.frame(minHeight: 24.0)
         }
     }
