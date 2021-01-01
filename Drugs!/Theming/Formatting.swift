@@ -45,9 +45,10 @@ struct DateFormatting {
 extension Date {
     func timeDifference(from date: Date) -> (days: Int, hours: Int, minutes: Int) {
         let calendar = Calendar.current
-        let timeComponents = calendar.dateComponents([.day, .hour, .minute, .second], from: self)
-        let nowComponents = calendar.dateComponents([.day, .hour, .minute, .second], from: date)
-        let difference = calendar.dateComponents([.day, .hour, .minute, .second], from: timeComponents, to: nowComponents)
+        let components: Set<Calendar.Component> = [.calendar, .era, .year, .month, .weekOfYear, .day, .hour, .minute, .second, .nanosecond]
+        let thisComponents = calendar.dateComponents(components, from: self)
+        let requestedComponents = calendar.dateComponents(components, from: date)
+        let difference = calendar.dateComponents(components, from: thisComponents, to: requestedComponents)
         return (
             max(difference.day!, difference.day! * -1),
             max(difference.hour!, difference.hour! * -1),

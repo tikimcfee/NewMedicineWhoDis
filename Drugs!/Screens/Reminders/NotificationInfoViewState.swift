@@ -46,20 +46,22 @@ public final class NotificationInfoViewState: ObservableObject {
             .handleEvents(receiveOutput: { date in
                 log { Event("\(date): Fetching pending notifications") }
             })
-            .map{ _ in
-                let semaphore = DispatchSemaphore(value: 0)
-                var fetchedRequests: [UNNotificationRequest] = []
-                UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-                    fetchedRequests = requests
-                    semaphore.signal()
-                }
-                semaphore.wait()
-                return fetchedRequests
-            }
+            .compactMap{ [weak self] _ in self?.fetchedRequests() }
             .handleEvents(receiveOutput: { models in
                 log { Event("Got pending notifications: \(models.count)") }
             })
             .eraseToAnyPublisher()
+    }
+
+    private func fetchedRequests() -> [UNNotificationRequest] {
+        let semaphore = DispatchSemaphore(value: 0)
+        var fetchedRequests: [UNNotificationRequest] = []
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            fetchedRequests = requests
+            semaphore.signal()
+        }
+        semaphore.wait()
+        return fetchedRequests
     }
 
     private var modelStream: AnyPublisher<[NotificationInfoViewModel], Never> {
@@ -108,9 +110,9 @@ public final class NotificationInfoViewState: ObservableObject {
         }
     }
 
-    func scheduleForDrug(_ drug: Drug = Drug.init("TestDrug", [], 0.1)) {
+    func scheduleForDrug(_ drug: Drug) {
         let notificationCenter = UNUserNotificationCenter.current()
-        let request = drug.asNotificationRequest
+        let request = drug.asNotificationRequest()
         notificationCenter.add(request) { [weak self] error in
             if let error = error {
                 log{ Event("Failed to schedule notification: \(error)", .error) }
@@ -130,5 +132,99 @@ public struct NotificationScheduler {
 
     func scheduleLocalNotifications(for drugs: [Drug]) {
         drugs.forEach{ scheduleLocalNotification(for: $0) }
+    }
+}
+
+struct DrugNotificationUserInfo {
+    let drugId: DrugId
+    let drugName: String
+
+    init (id: DrugId,
+          name: String) {
+        self.drugId = id
+        self.drugName = name
+    }
+
+    init? (_ info: [AnyHashable: Any]) {
+        guard let drugName = info["drugName"] as? String else { return nil }
+        self.drugId = info["drugId"] as? DrugId ?? drugName
+        self.drugName = drugName
+    }
+
+    var toNotificationContent: [AnyHashable: Any] {
+        return [
+            "drugId": drugId,
+            "drugName": drugName
+        ]
+    }
+}
+
+extension Drug {
+    func asNotificationRequest(_ startDate: Date = Date()) -> UNNotificationRequest {
+        let calendar = Calendar.current
+        let sourceDate = calendar.date(byAdding: .second, value: Int(doseTimeInSeconds), to: startDate)!
+
+        // Make content
+        let content = UNMutableNotificationContent()
+        content.title = "You can take \(drugName)"
+        content.body = "Scheduled reminder for \(DateFormatting.DefaultDateShortTime.string(from: sourceDate))."
+        content.sound = UNNotificationSound(named: .init("slow-spring-board.caf"))
+        content.userInfo = DrugNotificationUserInfo(id: id, name: drugName)
+            .toNotificationContent
+
+        // Create time to notify
+        let requestedComponents = calendar.dateComponents(
+            [.second, .minute, .hour, .day, .month, .year],
+            from: sourceDate
+        )
+
+        // Trigger determines next available display time
+        let calendarTrigger = UNCalendarNotificationTrigger(
+            dateMatching: requestedComponents,
+            repeats: false
+        )
+
+        // Create the request
+        let uuidString = UUID().uuidString
+        return UNNotificationRequest(
+            identifier: uuidString,
+            content: content,
+            trigger: calendarTrigger
+        )
+    }
+}
+
+extension UNNotificationRequest {
+    var calendarDate: Date? {
+        (trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()
+    }
+
+    var logInfo: String {
+        return String(describing: trigger)
+            .appending("\n--")
+            .appending(String(describing: (trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()))
+            .appending("\n--")
+            .appending(String(describing: content.userInfo["drugName"] as? String))
+    }
+
+    var asInfoViewModel: NotificationInfoViewModel? {
+        guard let triggerDate = calendarDate,
+              let info = DrugNotificationUserInfo(content.userInfo)
+        else {
+            log { Event("Notification missing data: \(logInfo)", .error) }
+            return nil
+        }
+
+        let timeUntilTrigger = Date().distanceString(triggerDate,
+                                                     postfixSelfIsBefore: "from now",
+                                                     postfixSelfIsAfter: "ago")
+        return NotificationInfoViewModel(
+            notificationId: identifier,
+            titleText: content.title,
+            messageText: content.body,
+            triggerDateText: "Scheduled for \(timeUntilTrigger).",
+            deleteTitleName: info.drugName,
+            triggerDate: triggerDate
+        )
     }
 }

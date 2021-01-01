@@ -90,7 +90,7 @@ public struct NotificationInfoView: View {
         VStack(spacing: 2) {
             if self.viewState.permissionsGranted {
                 Components.fullWidthButton("Schedule default notification test") {
-                    self.viewState.scheduleForDrug()
+                    self.viewState.scheduleForDrug(Drug.init("TestDrug", [], 0.1))
                 }
 
                 Components.fullWidthButton("Clear pending notifications") {
@@ -105,77 +105,11 @@ public struct NotificationInfoView: View {
     }
 }
 
-extension Drug {
-    var asNotificationRequest: UNNotificationRequest {
-        let sourceDate = Date().advanced(by: doseTimeInSeconds)
-        let calendar = Calendar.current
-
-        // Make content
-        let content = UNMutableNotificationContent()
-        content.title = "You can take \(drugName)"
-        content.body = "Scheduled reminder for \(DateFormatting.DefaultDateShortTime.string(from: sourceDate))."
-        content.sound = UNNotificationSound(named: .init("slow-spring-board.caf"))
-        content.userInfo = ["drugName": drugName]
-
-        // Create time to notify
-        let requestedComponents = calendar.dateComponents(
-            [.second, .minute, .hour, .day, .month, .year],
-            from: sourceDate
-        )
-
-        // Trigger determines next available display time
-        let calendarTrigger = UNCalendarNotificationTrigger(
-            dateMatching: requestedComponents,
-            repeats: false
-        )
-
-        // Create the request
-        let uuidString = UUID().uuidString
-        return UNNotificationRequest(
-            identifier: uuidString,
-            content: content,
-            trigger: calendarTrigger
-        )
-    }
-}
-
-extension UNNotificationRequest {
-    var logInfo: String {
-        return String(describing: trigger)
-            .appending("\n--")
-            .appending(String(describing: (trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()))
-            .appending("\n--")
-            .appending(String(describing: content.userInfo["drugName"] as? String))
-    }
-
-    var asInfoViewModel: NotificationInfoViewModel? {
-        guard let trigger = trigger as? UNCalendarNotificationTrigger,
-              let triggerDate = trigger.nextTriggerDate(),
-              let drugName = content.userInfo["drugName"] as? String
-        else {
-            log { Event("Notification missing data: \(logInfo)", .error) }
-            return nil
-        }
-        
-        let timeUntilTrigger = Date().distanceString(triggerDate,
-                                                     postfixSelfIsBefore: "from now",
-                                                     postfixSelfIsAfter: "ago")
-        return NotificationInfoViewModel(
-            notificationId: identifier,
-            titleText: content.title,
-            messageText: content.body,
-            triggerDateText: "Scheduled for \(timeUntilTrigger).",
-            deleteTitleName: drugName,
-            triggerDate: triggerDate
-        )
-    }
-}
-
 #if DEBUG
 struct NotificationInfoView_Previews: PreviewProvider {
     private static func testModels() -> [NotificationInfoViewModel] {
         AvailableDrugList.defaultList.drugs
-            .map { $0.asNotificationRequest }
+            .map { $0.asNotificationRequest() }
             .compactMap{ $0.asInfoViewModel }
     }
 
