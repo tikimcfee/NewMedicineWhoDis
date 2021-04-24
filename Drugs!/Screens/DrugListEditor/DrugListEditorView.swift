@@ -108,7 +108,7 @@ struct DrugListEditorView: View {
                     .boringBorder
                     .padding(.horizontal, 8)
                 }
-            }
+            }.padding(.vertical, 8.0)
         }
     }
 
