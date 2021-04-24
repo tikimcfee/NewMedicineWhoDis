@@ -39,6 +39,43 @@ class Drugs_Tests: XCTestCase {
         medicineStore.save() { _ in lock.signal() }
         lock.wait()
     }
+    
+    func testAppStateCodable() {
+        var appData = ApplicationData()
+        appData.availableDrugList = AvailableDrugList.defaultList
+        
+        var entryCount = 100
+        repeat {
+            appData.mainEntryList.append(TestData.shared.randomEntry())
+            entryCount -= 1
+        } while entryCount > 0
+        
+        let testFileStore = MedicineLogFileStore(
+            filestore: FileStore(
+                targetFile: file(named: "test_app_data.json", in: directory(named: "test_data"))
+            )
+        )
+        
+        func waitForSave(of appData: ApplicationData) {
+            let saveFinished = XCTestExpectation(description: "Save finished")
+            testFileStore.save(applicationData: appData) { result in
+                saveFinished.fulfill()
+            }
+            wait(for: [saveFinished], timeout: 3.0)
+        }
+        
+        waitForSave(of: appData)
+        var reloadedAppData = testFileStore.load().applicationData
+        XCTAssertEqual(appData, reloadedAppData)
+        
+        appData.mainEntryList.remove(at: 0)
+        reloadedAppData.mainEntryList.remove(at: 0)
+        
+        waitForSave(of: reloadedAppData)
+        reloadedAppData = testFileStore.load().applicationData
+        XCTAssertEqual(appData, reloadedAppData)
+        
+    }
 
     func testDateFormat() {
         let formatter = DateFormatter()

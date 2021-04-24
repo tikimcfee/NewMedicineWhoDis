@@ -112,7 +112,7 @@ public struct DetailEntryModel: Identifiable, EquatableFileStorable {
 
 #if DEBUG
 struct DrugDetailView_Previews: PreviewProvider {
-    @State var selected: MedicineEntry = DefaultDrugList.shared.defaultEntry
+    @State var selected: MedicineEntry = TestData.shared.defaultEntry
     static var previews: some View {
         let data = makeTestMedicineOperator()
         let state = MedicineEntryDetailsViewState(data, "")

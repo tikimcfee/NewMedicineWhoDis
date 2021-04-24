@@ -2,7 +2,11 @@ import Foundation
 
 public class EntryListFileStore {
 
-    private let filestore = FileStore()
+    let filestore: FileStore
+    
+    init(filestore: FileStore = FileStore()) {
+        self.filestore = filestore
+    }
 
     func save(applicationData: ApplicationData, _ handler: (Result<Void, Error>) -> Void) {
         if let error = filestore.saveApplicationData(applicationData) {

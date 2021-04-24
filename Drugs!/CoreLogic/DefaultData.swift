@@ -47,9 +47,9 @@ public class DrugBinding {
     )
 }
 
-public final class DefaultDrugList {
+public final class TestData {
 
-    public static let shared = DefaultDrugList()
+    public static let shared = TestData()
 
     @State static var inProgressEntry: InProgressEntry = InProgressEntry()
 
