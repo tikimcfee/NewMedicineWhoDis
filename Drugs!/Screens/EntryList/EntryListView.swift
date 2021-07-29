@@ -23,11 +23,6 @@ struct EntryListView: View {
     // TODO: refactor to a model when the data layer has a better API
 
     var body: some View {
-        let view = medicineList
-        return view
-    }
-
-    var medicineList: some View {
         Group {
             if let model = model {
                 List {

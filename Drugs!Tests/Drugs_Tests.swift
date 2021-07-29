@@ -50,11 +50,11 @@ class Drugs_Tests: XCTestCase {
             entryCount -= 1
         } while entryCount > 0
         
-        let testFileStore = MedicineLogFileStore(
-            filestore: FileStore(
-                targetFile: file(named: "test_app_data.json", in: directory(named: "test_data"))
-            )
-        )
+        
+        let testDirectory = AppFiles.directory(named: "test_data")
+        let testFile = AppFiles.file(named: "test_app_data.json", in: testDirectory)
+        let store = FileStore(targetFile: testFile)
+        let testFileStore = EntryListFileStore(filestore: store)
         
         func waitForSave(of appData: ApplicationData) {
             let saveFinished = XCTestExpectation(description: "Save finished")

@@ -33,7 +33,8 @@ extension XCUIApplication {
         switch button {
         case .datePickerButton:
             datePickers[button.rawValue].tap()
-        case .saveEditsButton:
+        case .saveEditsButton,
+             .cancelEditsButton:
             buttons[button.rawValue].tap()
         case .newTimeLabel,
              .oldTimeLabel:

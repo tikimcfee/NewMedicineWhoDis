@@ -1,53 +1,49 @@
 import Foundation
 
 // MARK: - File Operations
-private let fileManager = FileManager.default
-
-private var documentsDirectory: URL {
-    let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
-    return paths[0]
-}
-
-private func directory(named directoryName: String) -> URL {
-    let directory = documentsDirectory.appendingPathComponent(directoryName, isDirectory: true)
-    if !fileManager.fileExists(atPath: directory.path) {
-        try! fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+public struct AppFiles {
+    
+    private static let fileManager = FileManager.default
+    
+    private static var documentsDirectory: URL {
+        let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
-    return directory
-}
-
-private func file(named fileName: String, in directory: URL) -> URL {
-    let fileUrl = directory.appendingPathComponent(fileName)
-    if !fileManager.fileExists(atPath: fileUrl.path) {
-        fileManager.createFile(atPath: fileUrl.path, contents: Data(), attributes: nil)
+    
+    public static func directory(named directoryName: String) -> URL {
+        let directory = documentsDirectory.appendingPathComponent(directoryName, isDirectory: true)
+        if !fileManager.fileExists(atPath: directory.path) {
+            try! fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+        }
+        return directory
     }
-    return fileUrl
-}
-
-extension URL {
-    var hasData: Bool {
-        let attributes = try? fileManager.attributesOfItem(atPath: path) as NSDictionary
-        let size = attributes?.fileSize() ?? 0
-        return size > 0
+    
+    public static func file(named fileName: String, in directory: URL) -> URL {
+        let fileUrl = directory.appendingPathComponent(fileName)
+        if !fileManager.fileExists(atPath: fileUrl.path) {
+            fileManager.createFile(atPath: fileUrl.path, contents: Data(), attributes: nil)
+        }
+        return fileUrl
     }
 }
 
 // MARK: - Default file locations
-
-private var medicineLogsDirectory: URL {
-    return directory(named: "medicineLogs")
-}
-
-private var medicineLogsDefaultFile: URL {
-    return file(named: "core_logs_file.json", in: medicineLogsDirectory)
-}
-
-private var appEventLoggingFile: URL {
-    return file(named: "app_event_logs.txt", in: medicineLogsDirectory)
+extension AppFiles {
+    public static var medicineLogsDirectory: URL {
+        directory(named: "medicineLogs")
+    }
+    
+    public static var medicineLogsFile: URL {
+        file(named: "core_logs_file.json", in: medicineLogsDirectory)
+    }
+    
+    public static var appEventLogging: URL {
+        file(named: "app_event_logs.txt", in: medicineLogsDirectory)
+    }
 }
 
 public class LogFileStore {
-    var logFile: URL { appEventLoggingFile }
+    var logFile: URL { AppFiles.appEventLogging }
 
     func cleanFile() {
         do {
@@ -81,11 +77,19 @@ public class LogFileStore {
 public class FileStore {
     private let jsonEncoder = JSONEncoder()
     private let jsonDecoder = JSONDecoder()
+    
+    let targetFile: URL
+    
+    public init(
+        targetFile: URL = AppFiles.medicineLogsFile
+    ) {
+        self.targetFile = targetFile
+    }
 
     public func saveApplicationData(_ appData: ApplicationData) -> Error? {
         do {
             let jsonData = try jsonEncoder.encode(appData)
-            try jsonData.write(to: medicineLogsDefaultFile, options: .atomic)
+            try jsonData.write(to: targetFile, options: .atomic)
             return nil
         } catch {
             log { Event("Encoding error : \(error)", .error) }
@@ -94,17 +98,25 @@ public class FileStore {
     }
 
     public func loadApplicationData() -> Result<ApplicationData, Error> {
-        guard medicineLogsDefaultFile.hasData else {
+        guard targetFile.hasData else {
             log { Event("No existing logs; creating new CoreAppState") }
             return .success(ApplicationData())
         }
         do {
-            let appData = try Data.init(contentsOf: medicineLogsDefaultFile)
+            let appData = try Data.init(contentsOf: targetFile)
             let decodedData = try jsonDecoder.decode(ApplicationData.self, from: appData)
             return .success(decodedData)
         } catch {
             log { Event("Decoding error : \(error); returning a new CoreAppState", .error) }
             return .failure(error)
         }
+    }
+}
+
+extension URL {
+    var hasData: Bool {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: path) as NSDictionary
+        let size = attributes?.fileSize() ?? 0
+        return size > 0
     }
 }

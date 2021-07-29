@@ -51,10 +51,13 @@ struct ContentView_Previews: PreviewProvider {
         let scheduler = NotificationScheduler(notificationState: notificationState)
         let rootState = AddEntryViewState(dataManager, scheduler)
         return Group {
-            return AddNewEntryView()
-                .environmentObject(data)
-                .environmentObject(rootState)
+            return ZStack {
+                AddNewEntryView()
+                    .environmentObject(data)
+                    .environmentObject(rootState)
+            }
         }
+
     }
 }
 
