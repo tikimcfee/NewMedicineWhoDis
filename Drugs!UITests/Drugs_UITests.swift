@@ -104,16 +104,12 @@ class Drugs_UITests: XCTestCase {
 
         // Test edit
         tapCellInEntryTable()
-        app.tap(.editThisEntry)
         app.tap(.datePickerButton)
-        setEditEntryDatePickerTime(dayDelta: 0, hourDelta: -4, minuteDelta: 0)
+        app.setupModalEditorDatePicker("Sep 15", 5, 30, "PM")
         app.tap(.saveEditsButton)
 
         // Check the list again
-        app.tapBackButton()
         checkFirstCellInTableFor(drugs: testDrugs)
-
-
     }
 
     // So far, this test shows a lot of performance degradation in the entry list.
@@ -175,6 +171,7 @@ class Drugs_UITests: XCTestCase {
         app.tap(.saveEntry)
     }
     
+    @discardableResult
     func selectEntryList() -> XCUIElement {
         app.tabBars.buttons.element(boundBy: 1).tap()
         let table = app.tables[MedicineLogScreen.entryCellList.rawValue]
@@ -191,65 +188,30 @@ class Drugs_UITests: XCTestCase {
     }
 
     func checkFirstCellInTableFor(drugs: [DrugList]) {
-        let mainTable = selectEntryList()
-
+        selectEntryList()
         let entryButtons = app.buttons[MedicineLogScreen.entryCellButton.rawValue]
         let firstEntryButtonText = entryButtons.firstMatch.label.lowercased()
         let allDrugsInLabel = drugs.allSatisfy { firstEntryButtonText.contains($0.rawValue.lowercased()) }
         XCTAssert(allDrugsInLabel, "Drugs are missing from the entry.")
     }
-
-    // MARK: Edit screen date picker
-
-    // This whole thing is amazingly fragile <3
-    func setEditEntryDatePickerTime(dayDelta: Double, hourDelta: Double, minuteDelta: Double) {
-        let minuteInSeconds = 60.0
-        let hourInSeconds = minuteInSeconds * 60.0
-        let dayInSeconds = hourInSeconds * 24.0
-
-//            let oldTimeLabel = app.staticTexts[EditEntryScreen.oldTimeLabel.rawValue].label
-//            let oldParsedDate = dateTimeFormatter.date(from: oldTimeLabel)!
-        let newTimeLabel = app.staticTexts[EditEntryScreen.newTimeLabel.rawValue].label
-        let datePicker = app.datePickers[EditEntryScreen.datePickerButton.rawValue]
-        let newParsedDate = DateFormatting.ShortDateShortTime.date(from: newTimeLabel)!
-
-        // Thu Dec 10 9 o' clock PM
-        // eee MMM dd hh 'o''clock' a
-        // This is a lame guess from checking debug values in the picker.
-        // It expects the below format.. perhaps it's the short format? Can test later.
-        // THIS IS HORRIBLE!
-        let pickerFormatter = DateFormatter()
-        pickerFormatter.dateFormat = "MMM d"
-
-        // Advance and get day + month (Nov 25 / Oct 1)
-        let advancedInterval = dayDelta * dayInSeconds
-            + hourDelta * hourInSeconds
-            + minuteDelta * minuteInSeconds
-        let newDate = newParsedDate.advanced(by: advancedInterval)
-        let newDayMonthString = pickerFormatter.string(from: newDate)
-
-        // Get hour component; fixup to clock time
-        var newHourComponent = Calendar.current.component(.hour, from: newDate)
-        newHourComponent = newHourComponent == 0 ? 12 // 00:15 is 12:15am; 01:15 is 01:15am
-            : newHourComponent <= 12 ? newHourComponent
-            : newHourComponent - 12
-        let newHourString = String(newHourComponent)
-
-        // Get minute component
-        let newMinuteComponent = Calendar.current.component(.minute, from: newDate)
-        let newMinuteString = newMinuteComponent < 10 ? "0\(newMinuteComponent)" : String(newMinuteComponent)
-
-        // These bindings work on iOS 14 with WheelDatePickerStyle
-        let dayMonthWheel = datePicker.pickerWheels.element(boundBy: 0)
-        let hourWheel = datePicker.pickerWheels.element(boundBy: 1)
-        let minuteWheel = datePicker.pickerWheels.element(boundBy: 2)
-
-        dayMonthWheel.adjust(toPickerWheelValue: newDayMonthString)
-        hourWheel.adjust(toPickerWheelValue: newHourString)
-        minuteWheel.adjust(toPickerWheelValue: newMinuteString)
-    }
 }
 
-
-
-
+extension XCUIApplication {
+    var modalEditorDatePicker: XCUIElement { datePickers.firstMatch }
+    var dayWheel: XCUIElement { modalEditorDatePicker.pickerWheels.element(boundBy: 0) }
+    var hourWheel: XCUIElement { modalEditorDatePicker.pickerWheels.element(boundBy: 1) }
+    var minuteWheel: XCUIElement { modalEditorDatePicker.pickerWheels.element(boundBy: 2) }
+    var amPmWheel: XCUIElement { modalEditorDatePicker.pickerWheels.element(boundBy: 3) }
+    
+    func setupModalEditorDatePicker(
+        _ day: String?,
+        _ hour: Int?,
+        _ minute: Int?,
+        _ amPM: String?
+    ) {
+        if let day = day { dayWheel.adjust(toPickerWheelValue: day) }
+        if let hour = hour { hourWheel.adjust(toPickerWheelValue: String(hour)) }
+        if let minute = minute { minuteWheel.adjust(toPickerWheelValue: String(minute)) }
+        if let amPM = amPM { amPmWheel.adjust(toPickerWheelValue: amPM.uppercased()) }
+    }
+}
