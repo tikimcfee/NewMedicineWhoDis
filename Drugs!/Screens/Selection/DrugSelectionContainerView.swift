@@ -5,13 +5,11 @@ struct DrugSelectionContainerView: View {
     @Binding var model: DrugSelectionContainerModel
 
     var body: some View {
-        VStack(alignment: .center, spacing: 0) {
+        VStack(alignment: .center, spacing: 4) {
             DrugSelectionListView(model: listModel)
                 .boringBorder
-                .padding(4)
             DrugEntryNumberPad(model: numberPadModel)
-                .padding(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 8))
-        }
+        }.padding(4.0)
     }
 
     private var listModel: DrugSelectionListModel {
@@ -51,12 +49,22 @@ struct DrugSelectionContainerView: View {
         }
         return DrugEntryNumberPadModel(
             currentSelection: selection,
-            didSelectNumber: { number in
-                guard let selectedDrug = model.currentSelectedDrug
-                else { return }
-                let countForSelection = model.roundedCount(for: selectedDrug)
+            didSelectNumber: { selectedNumber in
+                guard let selectedDrug = model.currentSelectedDrug else { return }
+                let number = Double(selectedNumber)
+                let countForSelection = model.count(for: selectedDrug)
                 let setOrToggleOff = countForSelection != number ? number : nil
                 model.updateCount(setOrToggleOff, for: selectedDrug)
+            },
+            didIncrementSelection: { incrementAmount in
+                guard let selectedDrug = model.currentSelectedDrug else { return }
+                let currentCount = model.count(for: selectedDrug)
+                model.updateCount(currentCount + incrementAmount, for: selectedDrug)
+            },
+            didDecrementSelection: { decrementAmount in
+                guard let selectedDrug = model.currentSelectedDrug else { return }
+                let currentCount = model.count(for: selectedDrug)
+                model.updateCount(currentCount - decrementAmount, for: selectedDrug)
             }
         )
     }

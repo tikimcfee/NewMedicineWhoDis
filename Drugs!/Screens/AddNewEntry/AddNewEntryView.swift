@@ -6,9 +6,10 @@ struct AddNewEntryView: View {
     @EnvironmentObject private var rootScreenState: AddEntryViewState
 
     var body: some View {
-        return VStack() {
+        return VStack(spacing: 0) {
             drugEntryView
-            saveButton.padding(4.0)
+            saveButton
+                .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
         }
         .alert(item: $rootScreenState.saveError, content: makeAlert)
     }

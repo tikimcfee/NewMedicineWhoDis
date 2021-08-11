@@ -73,12 +73,12 @@ struct DrugSelectionContainerModel {
         inProgressEntry.entryMap[drug] ?? 0
     }
     
-    func roundedCount(for drug: SelectableDrug) -> Int {
-        Int(count(for: drug).rounded(.toNearestOrAwayFromZero))
+    func roundedCount(for drug: SelectableDrug) -> Double {
+        count(for: drug).rounded(.toNearestOrEven)
     }
 
-    mutating func updateCount(_ count: Int?, for drug: SelectableDrug) {
-        inProgressEntry.entryMap[drug] = count.map(Double.init)
+    mutating func updateCount(_ count: Double?, for drug: SelectableDrug) {
+        inProgressEntry.entryMap[drug] = count
     }
 
     mutating func resetEdits() {

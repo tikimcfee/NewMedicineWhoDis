@@ -10,7 +10,7 @@ struct DrugEntryViewCell: View {
             text()
                 .padding(4)
                 .background(model.canTake
-                    ? Color.clear
+                    ? Color(.displayP3, red: 0.33, green: 0.66, blue: 0.80, opacity: 0.2)
                     : Color.computedCannotTake
                 )
                 .cornerRadius(4)
@@ -30,7 +30,7 @@ struct DrugEntryViewCell: View {
             Text("\(model.drug.drugName)")
                 .font(.body)
                 .fontWeight(.regular)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .animation(.none)
 
         let count =
@@ -38,8 +38,8 @@ struct DrugEntryViewCell: View {
                 .font(.body)
                 .fontWeight(.semibold)
                 .animation(.none)
-                .frame(width: 32.0)
-                .background(Color(.displayP3, red: 0.25, green: 0.0, blue: 0.80, opacity: 0.8))
+                .frame(width: 30.0)
+                .background(Color(.displayP3, red: 0.00, green: 0.40, blue: 0.80, opacity: 0.8))
                 .clipShape(RoundedRectangle(cornerRadius: 4.0))
 
         let message =
@@ -57,19 +57,20 @@ struct DrugEntryViewCell: View {
             countColor = Color(.displayP3, red: 1.0, green: 1.0, blue: 1.0, opacity: 0.75)
         }
 
-        return VStack(alignment: .trailing, spacing: 8) {
-            HStack {
-                count.foregroundColor(countColor)
-                title.foregroundColor(titleColor)
-            }
-
+        return VStack(alignment: .trailing, spacing: 0) {
             HStack(alignment: .center, spacing: 4) {
+                count.foregroundColor(countColor)
+                Spacer()
                 message
                 if model.timingIcon != "" {
                     Image(systemName: model.timingIcon)
                         .foregroundColor(Color.secondary.opacity(0.75))
                 }
             }.frame(minHeight: 24.0)
+            
+            HStack(spacing: 0) {
+                title.foregroundColor(titleColor)
+            }
         }
     }
 }
@@ -84,7 +85,7 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
             DrugEntryViewCell(
                 model: DrugSelectionListRowModel(
                     drug: SelectableDrug(drugName: "A drug name", drugId: "12345"),
-                    count: 14,
+                    count: 99,
                     canTake: false,
                     timingMessage: "6:37 pm",
                     timingIcon: "timer",

@@ -6,6 +6,10 @@ struct DrugSelectionListView: View {
     let model: DrugSelectionListModel
 
     var body: some View {
+        return bodyTwoStack
+    }
+    
+    var bodyTwoStack: some View {
         let drugs = model.selectableDrugs
         let half = drugs.count / 2 + drugs.count % 2 // mod adds uneven counts to left
         let drugsSliceLeft = drugs[0..<half]
@@ -21,6 +25,19 @@ struct DrugSelectionListView: View {
                     ForEach(drugsSliceRight, id: \.drug.drugId) { tuple in
                         DrugEntryViewCell(model: tuple)
                     }
+                }
+            }
+            .listStyle(PlainListStyle())
+            .listRowBackground(Color.clear)
+            .environment(\.defaultMinListRowHeight, 0)
+        }
+    }
+    
+    var bodySingleList: some View {
+        return ScrollView {
+            VStack(spacing: 0) {
+                ForEach(model.selectableDrugs, id: \.drug.drugId) { tuple in
+                    DrugEntryViewCell(model: tuple)
                 }
             }
             .listStyle(PlainListStyle())

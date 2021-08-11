@@ -12,6 +12,8 @@ import SwiftUI
 struct DrugEntryNumberPadModel {
     let currentSelection: (drugName: String, count: Double)?
     let didSelectNumber: (Int) -> Void
+    let didIncrementSelection: (Double) -> Void
+    let didDecrementSelection: (Double) -> Void
 }
 
 struct DrugEntryNumberPad: View {
@@ -23,22 +25,56 @@ struct DrugEntryNumberPad: View {
     }
 	
 	var body: some View {
-		HStack {
-            VStack(spacing: sharedSpacing) {
+        HStack {
+            Spacer()
+            VStack {
                 headerLabel
-                    .frame(width: 196, height: 32)
-                    .padding(.horizontal)
-                    .boringBorder
-				buttonGrid
-			}
+                fractionalInputs
+            }
+            Spacer()
+            buttonGrid
 		}
 	}
+    
+    static let twelveStack = [
+        [1, 2, 3, 4, 5, 6],
+        [7, 8, 9, 10, 11, 12]
+    ]
+    
+    static let fourWide = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+    ]
+    
+    static let threeWide = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+        [10, 11, 12],
+    ]
+    
+    private var fractionalInputs: some View {
+        return HStack {
+            Button("- ½", action: {
+                model.didDecrementSelection(0.5)
+            })
+            .foregroundColor(.black)
+            .padding(8)
+            .boringBorder
+            
+            
+            Button("+ ½", action: {
+                model.didIncrementSelection(0.5)
+            })
+            .foregroundColor(.black)
+            .padding(8)
+            .boringBorder
+        }
+    }
 	
 	private var buttonGrid: some View {
-        let grid = [
-            [1, 2, 3, 4, 5, 6],
-            [7, 8, 9, 10, 11, 12]
-        ]
+        let grid = Self.threeWide
 		return VStack(spacing: sharedSpacing) {
             ForEach(grid, id: \.self) { row in
                 HStack(spacing: sharedSpacing) {
@@ -51,18 +87,23 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private var headerLabel: some View {
-		var headerText: Text
-        if let selection = model.currentSelection {
-            let title = "\(selection.drugName) (\(selection.count))"
-			headerText = Text(title)
-				.bold()
-				.font(.subheadline)
-		} else {
-			headerText = Text("No med selected")
-				.fontWeight(.ultraLight)
-				.italic()
-		}
-		return headerText
+		return VStack {
+            if let selection = model.currentSelection {
+                Text(selection.drugName)
+                    .bold()
+                    .font(.headline)
+                if selection.count > 0 {
+                    Text(String(format: "%0.2f", selection.count))
+                        .font(.subheadline)
+                }
+            } else {
+                Text("No med selected")
+                    .fontWeight(.ultraLight)
+                    .italic()
+            }
+        }
+        .padding(2)
+            
 	}
 	
 	private func numberButton(trackedNumber: Int) -> some View {
@@ -103,7 +144,9 @@ struct DrugEntryNumberPad_Preview: PreviewProvider {
             DrugEntryNumberPad(
                 model: DrugEntryNumberPadModel(
                     currentSelection: ("A Drug", 19),
-                    didSelectNumber: { _ in }
+                    didSelectNumber: { _ in },
+                    didIncrementSelection: { _ in },
+                    didDecrementSelection: { _ in }
                 )
             )
         }
