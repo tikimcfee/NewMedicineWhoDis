@@ -100,7 +100,7 @@ class AvailabilityInfoCalculator {
                     continue
                 }
 
-                if nextDoseTime > lastKnownTakenDate {
+                if lastKnownTakenDate < nextDoseTime {
                     drugDates[newestDrug] = nextDoseTime
                 }
             }

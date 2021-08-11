@@ -1,6 +1,8 @@
 import Foundation
 
 public struct AvailableDrugList: EquatableFileStorable {
+    public static let empty = AvailableDrugList([])
+    
     var drugs: [Drug]
 
     init(_ list: [Drug]) {
@@ -11,14 +13,14 @@ public struct AvailableDrugList: EquatableFileStorable {
 public typealias DrugId = String
 
 public struct Drug: EquatableFileStorable, Comparable, Identifiable {
-    private(set) var drugName: String
-    private(set) var ingredients: [Ingredient]
-    private(set) var hourlyDoseTime: Double
-    public var id: DrugId { return drugName } // Here there be dragons
+    public var drugName: String
+    public var ingredients: [Ingredient]
+    public var hourlyDoseTime: Double
+    public var id: DrugId { drugName } // Here there be dragons
 
-    public init(_ drugName: String,
-                _ ingredients: [Ingredient],
-                _ hourlyDoseTime: Double) {
+    public init(_ drugName: String = "",
+                _ ingredients: [Ingredient] = [],
+                _ hourlyDoseTime: Double = 6) {
         self.drugName = drugName
         self.ingredients = ingredients
         self.hourlyDoseTime = hourlyDoseTime
@@ -49,9 +51,9 @@ public struct Ingredient: EquatableFileStorable {
 
 public struct MedicineEntry: EquatableFileStorable, Identifiable {
     let uuid: String
-    var date: Date
-    var drugsTaken: [Drug: Int]
-    public var id: String { return uuid }
+    public var date: Date
+    public var drugsTaken: [Drug: Int]
+    public var id: String { uuid }
     init(
         _ date: Date,
         _ drugsTaken: [Drug: Int],

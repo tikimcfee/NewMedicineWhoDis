@@ -1,38 +1,45 @@
 import Combine
+import Foundation
 
 public struct InProgressDrugEdit {
-    private static let defaultNewDrug = Drug("", [], 6)
-
     private var didMakeDrugSelection = false
-    var targetDrug: Drug? = nil {
-        didSet {
-            didMakeDrugSelection = targetDrug != nil
-            let updatedDrug = self.targetDrug ?? Self.defaultNewDrug
-            updatedName = updatedDrug.drugName
-            updatedDoseTime = Int(updatedDrug.hourlyDoseTime)
-            updatedIngredients = updatedDrug.ingredients
-        }
+    private(set) var targetDrug: Drug?
+    private var updatedDrug: Drug = Drug()
+    
+    var drugName: String {
+        get { updatedDrug.drugName }
+        set { updatedDrug.drugName = newValue }
     }
-    var updatedName: String = ""
-    var updatedDoseTime: Int = Int(defaultNewDrug.hourlyDoseTime)
-    var updatedIngredients: [Ingredient] = defaultNewDrug.ingredients
+    
+    var doseTime: Int {
+        get { Int(updatedDrug.hourlyDoseTime) }
+        set { updatedDrug.hourlyDoseTime = Double(newValue) }
+    }
 
-    var updateAsDrug: Drug {
-        return Drug(updatedName, updatedIngredients, Double(updatedDoseTime))
-    }
+    var currentUpdatesAsNewDrug: Drug { updatedDrug }
 
     var isEditSaveEnabled: Bool {
         return didMakeDrugSelection
-            && targetDrug != updateAsDrug
+            && targetDrug != updatedDrug
     }
 
     var isNewSaveEnabled: Bool {
         return didMakeDrugSelection
-            && !updatedName.isEmpty
+            && !updatedDrug.drugName.isEmpty
+    }
+    
+    mutating func setTarget(drug: Drug) {
+        targetDrug = drug
+        didMakeDrugSelection = targetDrug != nil
+        updatedDrug = Drug(
+            drug.drugName,
+            drug.ingredients,
+            drug.hourlyDoseTime
+        )
     }
 
     mutating func startEditingNewDrug() {
-        targetDrug = Self.defaultNewDrug
+        setTarget(drug: Drug())
     }
 }
 
@@ -41,33 +48,20 @@ public final class DrugListEditorViewState: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     @Published var inProgressEdit = InProgressDrugEdit()
-    @Published var currentDrugList = AvailableDrugList.defaultList
-    @Published var canSaveAsEdit: Bool = false
-    @Published var canSaveAsNew: Bool = false
+    @Published var currentDrugList: AvailableDrugList = .empty
+    
     @Published var saveError: Error? = nil
+    var canSaveAsEdit: Bool { inProgressEdit.isEditSaveEnabled }
+    var canSaveAsNew: Bool { inProgressEdit.isNewSaveEnabled }
 
     init(_ dataManager: MedicineLogDataManager) {
         self.dataManager = dataManager
 
         dataManager
             .sharedDrugListStream
-            .sink(receiveValue: { [weak self] in
+            .sink { [weak self] in
                 self?.currentDrugList = $0
-            })
-            .store(in: &cancellables)
-
-        $inProgressEdit
-            .map{ $0.isEditSaveEnabled }
-            .sink(receiveValue: { [weak self] in
-                self?.canSaveAsEdit = $0
-            })
-            .store(in: &cancellables)
-
-        $inProgressEdit
-            .map{ $0.isNewSaveEnabled }
-            .sink(receiveValue: { [weak self] in
-                self?.canSaveAsNew = $0
-            })
+            }
             .store(in: &cancellables)
     }
 
@@ -86,11 +80,11 @@ public final class DrugListEditorViewState: ObservableObject {
         guard inProgressEdit.isEditSaveEnabled,
             let original = inProgressEdit.targetDrug
             else { return }
-        let update = inProgressEdit.updateAsDrug
+        let update = inProgressEdit.currentUpdatesAsNewDrug
         dataManager.updateDrug(originalDrug: original, updatedDrug: update) { [weak self] result in
             switch result {
             case .success:
-                self?.inProgressEdit.targetDrug = update
+                self?.inProgressEdit.setTarget(drug: update)
                 self?.saveError = nil
             case .failure(let error):
                 self?.saveError = error
@@ -100,7 +94,7 @@ public final class DrugListEditorViewState: ObservableObject {
 
     func saveAsNew() {
         guard inProgressEdit.isEditSaveEnabled else { return }
-        let newDrug = inProgressEdit.updateAsDrug
+        let newDrug = inProgressEdit.currentUpdatesAsNewDrug
         dataManager.addDrug(newDrug: newDrug) { [weak self] result in
             switch result {
             case .success:
@@ -111,5 +105,4 @@ public final class DrugListEditorViewState: ObservableObject {
             }
         }
     }
-
 }

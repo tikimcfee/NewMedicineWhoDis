@@ -41,14 +41,7 @@ struct DrugListEditorView: View {
     @EnvironmentObject var drugListEditorState: DrugListEditorViewState
     @State private var currentMode: EditMode = .edit {
         didSet {
-            switch currentMode {
-            case .add:
-                drugListEditorState.inProgressEdit.startEditingNewDrug()
-            case .delete:
-                drugListEditorState.inProgressEdit.targetDrug = nil
-            case .edit:
-                drugListEditorState.inProgressEdit.targetDrug = nil
-            }
+            drugListEditorState.inProgressEdit.startEditingNewDrug()
         }
     }
     @State private var deleteTargetItem: Drug? = nil
@@ -123,7 +116,7 @@ struct DrugListEditorView: View {
                     // Shouldn't see the add button here.. woot, bad architecture design!
                     break
                 case .edit:
-                    self.drugListEditorState.inProgressEdit.targetDrug = drug
+                    self.drugListEditorState.inProgressEdit.setTarget(drug: drug)
                 case .delete:
                     self.deleteTargetItem = drug
                 }
@@ -179,12 +172,14 @@ struct DrugListEditorView: View {
                                    _ action: @escaping () -> Void) -> some View {
         return Group {
             HStack {
-                TextField
-                    .init(initialText, text: inProgressEdit.updatedName)
+                TextField(
+                    initialText,
+                    text: inProgressEdit.drugName
+                )
                     .padding()
                     .frame(minHeight: 64, maxHeight: 64, alignment: .center)
                     .boringBorder
-                Picker(selection: $drugListEditorState.inProgressEdit.updatedDoseTime, label: EmptyView()) {
+                Picker(selection: $drugListEditorState.inProgressEdit.doseTime, label: EmptyView()) {
                     ForEach((0..<25)) { hour in
                         Text("\("hour".simplePlural(hour, "Any time"))").tag(hour)
                     }
