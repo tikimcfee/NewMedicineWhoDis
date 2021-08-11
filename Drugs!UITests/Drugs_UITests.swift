@@ -41,6 +41,10 @@ extension XCUIApplication {
             staticTexts[button.rawValue].tap()
         }
     }
+    
+    func table(_ x: XCUIElementQuery) {
+        
+    }
 }
 
 class Drugs_UITests: XCTestCase {
@@ -170,10 +174,16 @@ class Drugs_UITests: XCTestCase {
         }
         app.tap(.saveEntry)
     }
+    
+    func selectEntryList() -> XCUIElement {
+        app.tabBars.buttons.element(boundBy: 1).tap()
+        let table = app.tables[MedicineLogScreen.entryCellList.rawValue]
+        XCTAssert(table.waitForExistence(timeout: 1), "Main list wasn't found")
+        return table
+    }
 
     func tapCellInEntryTable(_ position: Int = 0) {
-        let mainTable = app.tables[MedicineLogScreen.entryCellList.rawValue]
-        XCTAssert(mainTable.exists, "Main list wasn't found")
+        let mainTable = selectEntryList()
         mainTable.cells.element(boundBy: position).tap()
 
 //        let entryButtons = app.buttons[MedicineLogScreen.entryCellButton.rawValue]
@@ -181,8 +191,7 @@ class Drugs_UITests: XCTestCase {
     }
 
     func checkFirstCellInTableFor(drugs: [DrugList]) {
-        let mainTable = app.tables[MedicineLogScreen.entryCellList.rawValue]
-        XCTAssert(mainTable.exists, "Main list wasn't found")
+        let mainTable = selectEntryList()
 
         let entryButtons = app.buttons[MedicineLogScreen.entryCellButton.rawValue]
         let firstEntryButtonText = entryButtons.firstMatch.label.lowercased()

@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 struct DrugEntryNumberPadModel {
-    let currentSelection: (drugName: String, count: Int)?
+    let currentSelection: (drugName: String, count: Double)?
     let didSelectNumber: (Int) -> Void
 }
 
@@ -18,6 +18,9 @@ struct DrugEntryNumberPad: View {
     private let sharedSpacing: CGFloat = 8.0
 
     let model: DrugEntryNumberPadModel
+    private var currentCount: Double {
+        model.currentSelection?.count ?? 0
+    }
 	
 	var body: some View {
 		HStack {
@@ -71,7 +74,8 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func numberText(trackedNumber: Int) -> some View {
-        let isSelected = model.currentSelection?.count == trackedNumber
+        let roundedSelection = Int(currentCount.rounded(.toNearestOrAwayFromZero))
+        let isSelected = roundedSelection == trackedNumber
 
 		let text = Text("\(trackedNumber)")
             .fontWeight(.bold)

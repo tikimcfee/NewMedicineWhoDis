@@ -35,10 +35,11 @@ struct EntryListView: View {
                         }
                         .foregroundColor(.primary)
                         .accessibility(identifier: MedicineLogScreen.entryCellButton.rawValue)
-                    }.onDelete(perform: { indexSet in
+                    }
+                    .onDelete(perform: { indexSet in
                         guard let removedIndex = indexSet.first else { return }
                         model.didDeleteRow(removedIndex)
-                    }).animation(.default)
+                    })
                 }
                 .listStyle(PlainListStyle())
                 .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)

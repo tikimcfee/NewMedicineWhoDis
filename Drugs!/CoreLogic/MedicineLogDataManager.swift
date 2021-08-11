@@ -182,3 +182,12 @@ extension MedicineLogDataManager {
         }.eraseToAnyPublisher()
     }
 }
+
+//MARK: - Tests
+#if DEBUG
+extension MedicineLogDataManager {
+    func clearAllEntries() {
+        (self.persistenceManager as! FilePersistenceManager).clearMainEntryList()
+    }
+}
+#endif

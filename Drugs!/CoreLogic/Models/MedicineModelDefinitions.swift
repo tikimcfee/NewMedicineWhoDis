@@ -11,7 +11,6 @@ public struct AvailableDrugList: EquatableFileStorable {
 }
 
 public typealias DrugId = String
-
 public struct Drug: EquatableFileStorable, Comparable, Identifiable {
     public var drugName: String
     public var ingredients: [Ingredient]
@@ -49,14 +48,15 @@ public struct Ingredient: EquatableFileStorable {
     }
 }
 
+public typealias DrugCountMap = [Drug: Double]
 public struct MedicineEntry: EquatableFileStorable, Identifiable {
     let uuid: String
     public var date: Date
-    public var drugsTaken: [Drug: Int]
+    public var drugsTaken: DrugCountMap
     public var id: String { uuid }
     init(
         _ date: Date,
-        _ drugsTaken: [Drug: Int],
+        _ drugsTaken: DrugCountMap,
         _ uuid: String = UUID.init().uuidString
     ) {
         self.date = date
@@ -83,18 +83,18 @@ fileprivate func jsonDescription<C: Codable>(of codable: C) -> String {
     return string
 }
 
-extension MedicineEntry: CustomStringConvertible {
-    public var description: String { jsonDescription(of: self) }
-}
-
-extension Drug: CustomStringConvertible {
-    public var description: String { jsonDescription(of: self) }
-}
-
-extension Ingredient: CustomStringConvertible {
-    public var description: String { jsonDescription(of: self) }
-}
-
-extension AvailableDrugList: CustomStringConvertible {
-    public var description: String { jsonDescription(of: self) }
-}
+//extension MedicineEntry: CustomStringConvertible {
+//    public var description: String { jsonDescription(of: self) }
+//}
+//
+//extension Drug: CustomStringConvertible {
+//    public var description: String { jsonDescription(of: self) }
+//}
+//
+//extension Ingredient: CustomStringConvertible {
+//    public var description: String { jsonDescription(of: self) }
+//}
+//
+//extension AvailableDrugList: CustomStringConvertible {
+//    public var description: String { jsonDescription(of: self) }
+//}

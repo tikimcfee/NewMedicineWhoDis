@@ -120,16 +120,16 @@ enum RootScreenTabTag {
     case notifications
     case drugList
 
-    var configuration: (String, String) {
+    var configuration: (String, String, AppTabAccessID) {
         switch self {
         case .addEntry:
-            return ("Add Entry", "plus.square.fill")
+            return ("Add Entry", "plus.square.fill", .addEntry)
         case .entryList:
-            return ("Entries", "list.dash")
+            return ("Entries", "list.dash", .entryList)
         case .notifications:
-            return ("Reminders", "calendar.circle.fill")
+            return ("Reminders", "calendar.circle.fill", .notifications)
         case .drugList:
-            return ("Med List", "heart.circle.fill")
+            return ("Med List", "heart.circle.fill", .drugList)
         }
     }
 }
@@ -137,11 +137,14 @@ enum RootScreenTabTag {
 struct TagModifier: ViewModifier {
     let tag: RootScreenTabTag
     func body(content: Content) -> some View {
-        content.tabItem {
-            let configuration = tag.configuration
+        let configuration = tag.configuration
+        return content.tabItem {
             Image(systemName: configuration.1)
             Text(configuration.0)
-        }.tag(tag)
+        }
+        // warning: don't do this; it sets the id on the first visible element
+//        .accessibility(identifier: configuration.2.rawValue)
+        .tag(tag)
     }
 }
 

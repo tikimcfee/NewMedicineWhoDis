@@ -27,7 +27,7 @@ struct DrugSelectionContainerView: View {
             let message = model.info.nextDateMessage(drug)
             return DrugSelectionListRowModel(
                 drug: selectableDrug,
-                count: model.count(for: selectableDrug),
+                count: Int(model.count(for: selectableDrug)),
                 canTake: canTake,
                 timingMessage: message.message,
                 timingIcon: message.icon,
@@ -44,7 +44,7 @@ struct DrugSelectionContainerView: View {
     }
 
     private var numberPadModel: DrugEntryNumberPadModel {
-        var selection: (String, Int)?
+        var selection: (String, Double)?
         if let selectedDrug = model.currentSelectedDrug {
             let count = model.count(for: selectedDrug)
             selection = (selectedDrug.drugName, count)
@@ -54,7 +54,7 @@ struct DrugSelectionContainerView: View {
             didSelectNumber: { number in
                 guard let selectedDrug = model.currentSelectedDrug
                 else { return }
-                let countForSelection = model.count(for: selectedDrug)
+                let countForSelection = model.roundedCount(for: selectedDrug)
                 let setOrToggleOff = countForSelection != number ? number : nil
                 model.updateCount(setOrToggleOff, for: selectedDrug)
             }

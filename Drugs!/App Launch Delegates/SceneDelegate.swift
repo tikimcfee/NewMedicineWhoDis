@@ -86,8 +86,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         log { Event("Enabling test configuration. Ye have been warned.", .warning) }
 
         if AppTestArguments.clearEntriesOnLaunch.isSet {
-//            TODO: fix tests!
-//            container.dataManager.TEST_clearAllEntries()
+            container.dataManager.clearAllEntries()
         }
 
         if AppTestArguments.disableAnimations.isSet {

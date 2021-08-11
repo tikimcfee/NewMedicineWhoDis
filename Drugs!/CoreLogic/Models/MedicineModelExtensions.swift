@@ -47,7 +47,7 @@ extension MedicineEntry {
 
     var editableEntry: InProgressEntry {
         return InProgressEntry(
-            drugsTaken.reduce(into: [SelectableDrug: Int]()) { result, pair in
+            drugsTaken.reduce(into: InProgressDrugCountMap()) { result, pair in
                 result[pair.key.asSelectableDrug] = pair.value
             },
             date

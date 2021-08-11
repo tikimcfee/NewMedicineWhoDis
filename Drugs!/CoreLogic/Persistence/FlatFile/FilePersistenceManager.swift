@@ -37,9 +37,9 @@ public class FilePersistenceManager: PersistenceManager {
 
     func save(_ handler: @escaping ManagerCallback) {
         log{ Event("Saving") }
-        self.medicineStore.save(applicationData: appData) { result in
-            handler(result)
+        medicineStore.save(applicationData: appData) { result in
             log { Event("Save result: \(result)") }
+            handler(result)
         }
     }
 
@@ -140,3 +140,17 @@ public class FilePersistenceManager: PersistenceManager {
     }
 
 }
+
+//MARK: - Tests
+#if DEBUG
+extension FilePersistenceManager {
+    func clearMainEntryList() {
+        appData.mainEntryList.removeAll()
+        let lock = DispatchSemaphore(value: 1)
+        save { result in
+            lock.signal()
+        }
+        lock.wait()
+    }
+}
+#endif

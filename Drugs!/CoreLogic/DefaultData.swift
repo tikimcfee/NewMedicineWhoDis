@@ -78,8 +78,8 @@ public final class TestData {
             byAdding: .hour, value: time, to: Date()
         )!.addingTimeInterval(TimeInterval(minutes))
         return MedicineEntry(date,
-            Array(drugs[start...end]).reduce(into: [Drug: Int]()) { result, drug in
-                result[drug, default: 0] += Int.random(in: 1...4)
+            Array(drugs[start...end]).reduce(into: DrugCountMap()) { result, drug in
+                result[drug, default: 0] += Double.random(in: 1...4)
             }
         )
     }
@@ -91,8 +91,8 @@ public final class TestData {
     lazy var defaultEntry : MedicineEntry = {
         return MedicineEntry(
             Calendar.current.date(byAdding: .hour, value: -12, to: Date())!,
-            Array(drugs[0...4]).reduce(into: [Drug: Int]()) { result, drug in
-                result[drug, default: 0] += Int.random(in: 1...4)
+            Array(drugs[0...4]).reduce(into: DrugCountMap()) { result, drug in
+                result[drug, default: 0] += Double.random(in: 1...4)
             }
         )
     }()

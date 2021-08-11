@@ -48,7 +48,7 @@ public final class AddEntryViewState: ObservableObject {
             return
         }
 
-        let convertedMap: [Drug: Int]
+        let convertedMap: DrugCountMap
         do {
             convertedMap = try drugSelectionModel.inProgressEntry.drugMap(
                 in: drugSelectionModel.availableDrugs
@@ -75,7 +75,7 @@ public final class AddEntryViewState: ObservableObject {
         }
     }
 
-    func createNewEntry(with map: [Drug: Int]) -> MedicineEntry {
+    func createNewEntry(with map: DrugCountMap) -> MedicineEntry {
         // NOTE: the date is set AT TIME of creation, NOT from the progress entry
         return MedicineEntry(Date(), map)
     }

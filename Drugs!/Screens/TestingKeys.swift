@@ -1,3 +1,10 @@
+enum AppTabAccessID: String {
+    case addEntry
+    case entryList
+    case notifications
+    case drugList
+}
+
 enum MedicineLogScreen: String {
     case saveEntry
 
