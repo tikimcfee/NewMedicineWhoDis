@@ -29,7 +29,9 @@ struct DrugEntryNumberPad: View {
             Spacer()
             VStack {
                 headerLabel
-                fractionalInputs
+                if model.currentSelection != nil {
+                    fractionalInputs
+                }
             }
             Spacer()
             buttonGrid
@@ -115,7 +117,9 @@ struct DrugEntryNumberPad: View {
 	}
 	
 	private func numberText(trackedNumber: Int) -> some View {
-        let roundedSelection = Int(currentCount.rounded(.toNearestOrAwayFromZero))
+        let roundedSelection = currentCount > 0 && currentCount < 1
+            ? 1
+            : Int(currentCount.rounded(.down))
         let isSelected = roundedSelection == trackedNumber
 
 		let text = Text("\(trackedNumber)")

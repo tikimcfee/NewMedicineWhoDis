@@ -141,7 +141,7 @@ public func makeTestDrugSelectionListModel() -> DrugSelectionListModel {
     let models = (0..<10).map { _ in
         DrugSelectionListRowModel(
             drug: SelectableDrug(drugName: randomNameString(), drugId: randomNameString()),
-            count: Int.random(in: 0..<8),
+            count: Double.random(in: 0..<8),
             canTake: Bool.random(),
             timingMessage: "Next ready at 9:02 PM",
             timingIcon: Bool.random() ? "🕦" : "🕥",

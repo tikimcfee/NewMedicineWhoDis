@@ -74,7 +74,7 @@ struct DrugSelectionContainerModel {
     }
     
     func roundedCount(for drug: SelectableDrug) -> Double {
-        count(for: drug).rounded(.toNearestOrEven)
+        count(for: drug).rounded(.down)
     }
 
     mutating func updateCount(_ count: Double?, for drug: SelectableDrug) {
@@ -92,7 +92,7 @@ struct DrugSelectionContainerModel {
 
 public struct DrugSelectionListRowModel {
     let drug: SelectableDrug
-    let count: Int
+    let count: Double
     let canTake: Bool
     let timingMessage: String
     let timingIcon: String

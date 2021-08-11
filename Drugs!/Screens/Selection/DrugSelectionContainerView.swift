@@ -25,7 +25,7 @@ struct DrugSelectionContainerView: View {
             let message = model.info.nextDateMessage(drug)
             return DrugSelectionListRowModel(
                 drug: selectableDrug,
-                count: Int(model.count(for: selectableDrug)),
+                count: model.count(for: selectableDrug),
                 canTake: canTake,
                 timingMessage: message.message,
                 timingIcon: message.icon,
