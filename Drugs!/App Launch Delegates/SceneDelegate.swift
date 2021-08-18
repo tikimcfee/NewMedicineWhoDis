@@ -66,7 +66,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Loads app data on init. Bad idea?
 		let environmentContainer = MasterEnvironmentContainer()
+        #if DEBUG
         configureForTests(environmentContainer)
+        #endif
 
         let contentView = RootAppStartupView()
             .environmentObject(environmentContainer)
@@ -81,6 +83,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window?.makeKeyAndVisible()
     }
 
+    #if DEBUG
     private func configureForTests(_ container: MasterEnvironmentContainer) {
         guard AppTestArguments.enableTestConfiguration.isSet else { return }
         log { Event("Enabling test configuration. Ye have been warned.", .warning) }
@@ -93,6 +96,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             UIView.setAnimationsEnabled(false)
         }
     }
+    #endif
 }
 
 extension SceneDelegate {
