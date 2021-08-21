@@ -109,17 +109,43 @@ class Drugs_Tests: XCTestCase {
 //    }
 
     func test_CoreData() {
-        let expectation = expectation(description: "Whatever didn't work")
+        let expectation = expectation(description: "Made context")
         let manager = MedicineLogCoreDataManager()
         manager.createContainer()
-        manager.withContainer { context in
+        manager.withContainer { coreData, manager in
+            let mirror = CoreDataMirror(context: coreData)
             
-            let entry = CoreMedicineEntry(context: context)
+            let newDrug = try! mirror.safeInsertNewObject(of: CoreDrug.self)
+            newDrug.drugName = "This is a test, Mr. Lugo."
+            
+            try! coreData.save()
+            
             
             expectation.fulfill()
         }
-        
         wait(for: [expectation], timeout: 1.0)
     }
     
+}
+
+enum CoreDataManagerError: Error {
+    case noEntityDescription(named: String)
+    case invalidClass(query: String, actual: String)
+}
+
+struct CoreDataMirror {
+    let context: NSManagedObjectContext
+    
+    func safeInsertNewObject<T: NSManagedObject>(of type: T.Type) throws -> T {
+        let entityName = String(describing: type)
+        
+        guard let entityDescription = NSEntityDescription.entity(
+            forEntityName: entityName,
+            in: context
+        ) else { throw CoreDataManagerError.noEntityDescription(named: entityName) }
+        
+        let newObject = T(entity: entityDescription, insertInto: context)
+        
+        return newObject
+    }
 }

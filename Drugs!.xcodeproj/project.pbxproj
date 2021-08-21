@@ -39,6 +39,36 @@
 		B72E67CF26D1982E001F52F2 /* MedicineLogCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */; };
 		B72E67D026D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */; };
 		B72E67D126D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */; };
+		B7FC9E7E26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift */; };
+		B7FC9E7F26D1A8D10027E032 /* CoreDrug+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7526D1A8D10027E032 /* CoreDrug+CoreDataClass.swift */; };
+		B7FC9E8026D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7626D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift */; };
+		B7FC9E8126D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7726D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift */; };
+		B7FC9E8226D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */; };
+		B7FC9E8326D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7926D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift */; };
+		B7FC9E8426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */; };
+		B7FC9E8526D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */; };
+		B7FC9E8626D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */; };
+		B7FC9E8726D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */; };
+		B7FC9E8826D1A8E00027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift */; };
+		B7FC9E8926D1A8E00027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */; };
+		B7FC9E8A26D1A8E00027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7726D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift */; };
+		B7FC9E8B26D1A8E00027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */; };
+		B7FC9E8C26D1A8E00027E032 /* CoreDrug+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7926D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift */; };
+		B7FC9E8D26D1A8E00027E032 /* CoreDrug+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7526D1A8D10027E032 /* CoreDrug+CoreDataClass.swift */; };
+		B7FC9E8E26D1A8E00027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7626D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift */; };
+		B7FC9E8F26D1A8E00027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */; };
+		B7FC9E9026D1A8E00027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */; };
+		B7FC9E9126D1A8E00027E032 /* CoreIngredient+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */; };
+		B7FC9E9226D1A8E10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift */; };
+		B7FC9E9326D1A8E10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */; };
+		B7FC9E9426D1A8E10027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7726D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift */; };
+		B7FC9E9526D1A8E10027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */; };
+		B7FC9E9626D1A8E10027E032 /* CoreDrug+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7926D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift */; };
+		B7FC9E9726D1A8E10027E032 /* CoreDrug+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7526D1A8D10027E032 /* CoreDrug+CoreDataClass.swift */; };
+		B7FC9E9826D1A8E10027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7626D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift */; };
+		B7FC9E9926D1A8E10027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */; };
+		B7FC9E9A26D1A8E10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */; };
+		B7FC9E9B26D1A8E10027E032 /* CoreIngredient+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */; };
 		F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
@@ -179,6 +209,16 @@
 		B72E093A26B129AB00E53797 /* RadialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialButtons.swift; sourceTree = "<group>"; };
 		B72E67CA26D18702001F52F2 /* EntryModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = EntryModels.xcdatamodel; sourceTree = "<group>"; };
 		B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MedicineLogCoreDataManager.swift; sourceTree = "<group>"; };
+		B7FC9E7426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreAvailableDrugList+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B7FC9E7526D1A8D10027E032 /* CoreDrug+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreDrug+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B7FC9E7626D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntry+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B7FC9E7726D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreIngredient+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntrySelection+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B7FC9E7926D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreDrug+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreAvailableDrugList+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntrySelection+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntry+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreIngredient+CoreDataClass.swift"; sourceTree = "<group>"; };
 		F01BBBB1246F900900BBC3A3 /* FileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStore.swift; sourceTree = "<group>"; };
 		F01BBBB3246F939600BBC3A3 /* EntryListFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListFileStore.swift; sourceTree = "<group>"; };
 		F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
@@ -378,10 +418,28 @@
 		B72E67C826D186DF001F52F2 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				B7FC9E7326D1A8D10027E032 /* ManuallyGenerated */,
 				B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */,
 				B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */,
 			);
 			path = CoreData;
+			sourceTree = "<group>";
+		};
+		B7FC9E7326D1A8D10027E032 /* ManuallyGenerated */ = {
+			isa = PBXGroup;
+			children = (
+				B7FC9E7426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift */,
+				B7FC9E7526D1A8D10027E032 /* CoreDrug+CoreDataClass.swift */,
+				B7FC9E7626D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift */,
+				B7FC9E7726D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift */,
+				B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */,
+				B7FC9E7926D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift */,
+				B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */,
+				B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */,
+				B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */,
+				B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */,
+			);
+			path = ManuallyGenerated;
 			sourceTree = "<group>";
 		};
 		F005CA15258DA7F4003DEEE4 /* FlatFile */ = {
@@ -649,10 +707,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7FC9E8426D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */,
 				F02892F024EB87B7005A40D9 /* RootAppStartupView.swift in Sources */,
 				F01BBBB2246F900900BBC3A3 /* FileStore.swift in Sources */,
 				459679FB2337204C001DCBA1 /* Formatting.swift in Sources */,
 				F0E25B74258ED25F001EE2A7 /* EntryListView.swift in Sources */,
+				B7FC9E8526D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */,
 				F094CF4E247B710300CE50BA /* AutoCancel.swift in Sources */,
 				F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */,
 				B72E67CB26D18702001F52F2 /* EntryModels.xcdatamodeld in Sources */,
@@ -664,6 +724,7 @@
 				F0BB568124E760FB00BF91F2 /* MedicineEntryDetailsViewState.swift in Sources */,
 				F0DFB7672593A7B900F7A8CE /* ActivityView.swift in Sources */,
 				F0E25B6C258ED11A001EE2A7 /* DrugSelectionModels.swift in Sources */,
+				B7FC9E8626D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */,
 				F0456CDD247061450017B04E /* DrugEntryCell.swift in Sources */,
 				F066BB4F258EF98B00B1654B /* FilePersistenceManager.swift in Sources */,
 				F021ED1E24EE14E5007147B6 /* NotificationInfoViewState.swift in Sources */,
@@ -673,22 +734,29 @@
 				45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */,
 				459679F923371772001DCBA1 /* MedicineEntryDetailsView.swift in Sources */,
 				F0D35309256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
+				B7FC9E8726D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift in Sources */,
 				F02892F524EBA28A005A40D9 /* NotificationInfoView.swift in Sources */,
+				B7FC9E8026D1A8D10027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */,
+				B7FC9E8226D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */,
 				F02262532471AA8C00F31141 /* Components.swift in Sources */,
 				45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */,
 				F07E207E24E9CBFF004DFB8C /* AddEntryViewState.swift in Sources */,
+				B7FC9E7F26D1A8D10027E032 /* CoreDrug+CoreDataClass.swift in Sources */,
 				F066BB54258EFC5700B1654B /* ApplicationData+Mutation.swift in Sources */,
 				F0456CD024705D630017B04E /* DrugSelectionListView.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,
+				B7FC9E8126D1A8D10027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */,
 				F022624F2471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
 				F09E36EE248216220011C8BD /* ApplicationData.swift in Sources */,
+				B7FC9E8326D1A8D10027E032 /* CoreDrug+CoreDataProperties.swift in Sources */,
 				45135960239A2BCC00EB2D31 /* DefaultData.swift in Sources */,
 				F0D289C2248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
 				F07E208024E9CC2B004DFB8C /* DrugListEditState.swift in Sources */,
 				459679F723370558001DCBA1 /* AppColors.swift in Sources */,
 				4593B4B6231AFBD000787D91 /* AddNewEntryView.swift in Sources */,
 				F01BBBB4246F939600BBC3A3 /* EntryListFileStore.swift in Sources */,
+				B7FC9E7E26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* MedicineLogDataManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -698,7 +766,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */,
+				B7FC9E9826D1A8E10027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */,
 				F0FE7F84255E2810004D6D62 /* GlobalUtilityFunctions.swift in Sources */,
+				B7FC9E9626D1A8E10027E032 /* CoreDrug+CoreDataProperties.swift in Sources */,
+				B7FC9E9926D1A8E10027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */,
 				4517803123612F6C00E7C5F7 /* EventLogging.swift in Sources */,
 				F0FE7F74255E261D004D6D62 /* NotificationInfoViewState.swift in Sources */,
 				F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */,
@@ -716,23 +787,30 @@
 				F0FE7F8C255E284F004D6D62 /* SceneDelegate.swift in Sources */,
 				F066BB60258F06BE00B1654B /* DrugSelectionModels.swift in Sources */,
 				F0D3530A256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
+				B7FC9E9426D1A8E10027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */,
 				4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */,
 				B72E67CE26D1982D001F52F2 /* MedicineLogCoreDataManager.swift in Sources */,
 				4517803523612F7500E7C5F7 /* AppStateError.swift in Sources */,
 				F0456CDA24705F290017B04E /* DrugEntryNumberPad.swift in Sources */,
 				F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */,
+				B7FC9E9A26D1A8E10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */,
 				F02262502471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
 				F09E36EF248216220011C8BD /* ApplicationData.swift in Sources */,
 				F0D289C3248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
+				B7FC9E9526D1A8E10027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */,
 				F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				F094CF4F247B710300CE50BA /* AutoCancel.swift in Sources */,
+				B7FC9E9B26D1A8E10027E032 /* CoreIngredient+CoreDataClass.swift in Sources */,
 				B72E67D026D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */,
+				B7FC9E9326D1A8E10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */,
 				F066BB70258F06DE00B1654B /* EntryListView.swift in Sources */,
 				F06CE02C2477A7E50005441E /* Formatting.swift in Sources */,
 				F0FE7F78255E2707004D6D62 /* MedicineEntryDetailsViewState.swift in Sources */,
 				F05FA181246FAF5A00FF8FE9 /* EntryListFileStore.swift in Sources */,
+				B7FC9E9726D1A8E10027E032 /* CoreDrug+CoreDataClass.swift in Sources */,
 				F066BB58258F066E00B1654B /* FilePersistenceManager.swift in Sources */,
 				F0FE7F70255E25F2004D6D62 /* AddEntryViewState.swift in Sources */,
+				B7FC9E9226D1A8E10027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */,
 				F0456CD424705ECF0017B04E /* DrugSelectionContainerView.swift in Sources */,
 				F0FE7F99255E287A004D6D62 /* DrugListEditState.swift in Sources */,
 				4517802F23612F6700E7C5F7 /* MedicineLogDataManager.swift in Sources */,
@@ -744,7 +822,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0FE7F85255E2810004D6D62 /* GlobalUtilityFunctions.swift in Sources */,
+				B7FC9E8E26D1A8E00027E032 /* CoreMedicineEntry+CoreDataProperties.swift in Sources */,
 				F05FA184246FAF6A00FF8FE9 /* FileStore.swift in Sources */,
+				B7FC9E8C26D1A8E00027E032 /* CoreDrug+CoreDataProperties.swift in Sources */,
+				B7FC9E8F26D1A8E00027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */,
 				4517803223612F6C00E7C5F7 /* EventLogging.swift in Sources */,
 				F0456CD224705D630017B04E /* DrugSelectionListView.swift in Sources */,
 				F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */,
@@ -762,23 +843,30 @@
 				4593B4D4231AFBD200787D91 /* Drugs_UITests.swift in Sources */,
 				F066BB64258F06BE00B1654B /* DrugSelectionModels.swift in Sources */,
 				F0D3530B256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
+				B7FC9E8A26D1A8E00027E032 /* CoreIngredient+CoreDataProperties.swift in Sources */,
 				4517803623612F7500E7C5F7 /* AppStateError.swift in Sources */,
 				B72E67CF26D1982E001F52F2 /* MedicineLogCoreDataManager.swift in Sources */,
 				F0456CDB24705F290017B04E /* DrugEntryNumberPad.swift in Sources */,
 				F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */,
 				F02262512471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
+				B7FC9E9026D1A8E00027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */,
 				F09E36F0248216220011C8BD /* ApplicationData.swift in Sources */,
 				F0C035BF2467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				F094CF50247B710300CE50BA /* AutoCancel.swift in Sources */,
+				B7FC9E8B26D1A8E00027E032 /* CoreMedicineEntry+CoreDataClass.swift in Sources */,
 				F06CE02D2477A7E60005441E /* Formatting.swift in Sources */,
 				F0D289C4248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
+				B7FC9E9126D1A8E00027E032 /* CoreIngredient+CoreDataClass.swift in Sources */,
 				B72E67D126D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */,
+				B7FC9E8926D1A8E00027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift in Sources */,
 				F066BB6C258F06DD00B1654B /* EntryListView.swift in Sources */,
 				F0FE7F8D255E284F004D6D62 /* SceneDelegate.swift in Sources */,
 				F0FE7F92255E2853004D6D62 /* RootAppStartupView.swift in Sources */,
 				F0FE7F9A255E287B004D6D62 /* DrugListEditState.swift in Sources */,
+				B7FC9E8D26D1A8E00027E032 /* CoreDrug+CoreDataClass.swift in Sources */,
 				F066BB59258F066E00B1654B /* FilePersistenceManager.swift in Sources */,
 				F05FA182246FAF5B00FF8FE9 /* EntryListFileStore.swift in Sources */,
+				B7FC9E8826D1A8E00027E032 /* CoreAvailableDrugList+CoreDataProperties.swift in Sources */,
 				F0456CD524705ED00017B04E /* DrugSelectionContainerView.swift in Sources */,
 				F0FE7FA2255E324E004D6D62 /* MedicineEntryDetailsViewState.swift in Sources */,
 				4517803023612F6900E7C5F7 /* MedicineLogDataManager.swift in Sources */,

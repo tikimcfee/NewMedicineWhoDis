@@ -2,13 +2,19 @@ import Foundation
 import CoreData
 
 public class MedicineLogCoreDataManager {
+    
+    typealias CoreContextAction = (
+        _ coreData: NSManagedObjectContext,
+        _ manager: MedicineLogCoreDataManager
+    ) -> Void
+    
     private static let containerName = "EntryModels"
     
     private var container: NSPersistentContainer?
     
-    func withContainer(_ action: @escaping (NSManagedObjectContext) -> Void) {
-        container?.performBackgroundTask {
-            action($0)
+    func withContainer(_ action: @escaping CoreContextAction) {
+        container.map {
+            action($0.viewContext, self)
         }
     }
     
@@ -21,9 +27,6 @@ public class MedicineLogCoreDataManager {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
             log { Event("Loaded persistent CoreData store: \(storeDescription)") }
-            
-            
-            
             semaphore.signal()
         }
         self.container = container
