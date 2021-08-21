@@ -112,40 +112,19 @@ class Drugs_Tests: XCTestCase {
         let expectation = expectation(description: "Made context")
         let manager = MedicineLogCoreDataManager()
         manager.createContainer()
-        manager.withContainer { coreData, manager in
-            let mirror = CoreDataMirror(context: coreData)
-            
-            let newDrug = try! mirror.safeInsertNewObject(of: CoreDrug.self)
-            newDrug.drugName = "This is a test, Mr. Lugo."
-            
-            try! coreData.save()
-            
-            
-            expectation.fulfill()
+        manager.withContainer { mirror in
+            do {
+                let drug = try mirror.insertNew(of: CoreDrug.self)
+                drug.drugName = "This is a mirror drug"
+                try mirror.save()
+                expectation.fulfill()
+            } catch {
+                XCTFail((error as NSError).description)
+                return
+            }
         }
         wait(for: [expectation], timeout: 1.0)
     }
     
 }
 
-enum CoreDataManagerError: Error {
-    case noEntityDescription(named: String)
-    case invalidClass(query: String, actual: String)
-}
-
-struct CoreDataMirror {
-    let context: NSManagedObjectContext
-    
-    func safeInsertNewObject<T: NSManagedObject>(of type: T.Type) throws -> T {
-        let entityName = String(describing: type)
-        
-        guard let entityDescription = NSEntityDescription.entity(
-            forEntityName: entityName,
-            in: context
-        ) else { throw CoreDataManagerError.noEntityDescription(named: entityName) }
-        
-        let newObject = T(entity: entityDescription, insertInto: context)
-        
-        return newObject
-    }
-}

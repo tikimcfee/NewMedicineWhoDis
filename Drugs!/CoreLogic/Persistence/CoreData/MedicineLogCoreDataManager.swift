@@ -4,17 +4,16 @@ import CoreData
 public class MedicineLogCoreDataManager {
     
     typealias CoreContextAction = (
-        _ coreData: NSManagedObjectContext,
-        _ manager: MedicineLogCoreDataManager
+        _ coreDataMirror: CoreDataMirror
     ) -> Void
     
     private static let containerName = "EntryModels"
     
-    private var container: NSPersistentContainer?
+    private var loadedPersistentContainer: NSPersistentContainer?
     
     func withContainer(_ action: @escaping CoreContextAction) {
-        container.map {
-            action($0.viewContext, self)
+        loadedPersistentContainer.map {
+            action(CoreDataMirror.of($0.viewContext))
         }
     }
     
@@ -29,22 +28,67 @@ public class MedicineLogCoreDataManager {
             log { Event("Loaded persistent CoreData store: \(storeDescription)") }
             semaphore.signal()
         }
-        self.container = container
+        self.loadedPersistentContainer = container
         semaphore.wait()
     }
+}
 
-    func saveContext() {
-        guard let context = container?.viewContext,
-              context.hasChanges
-        else {
-            return
-        }
+struct CoreDataMirror {
+    private let context: NSManagedObjectContext
+    
+    static func of(_ context: NSManagedObjectContext) -> CoreDataMirror {
+        CoreDataMirror(context: context)
+    }
+    
+    func insertNew<T: NSManagedObject>(of type: T.Type) throws -> T {
+        let entityName = String(describing: type)
+        
+        guard let entityDescription = NSEntityDescription.entity(
+            forEntityName: entityName,
+            in: context
+        ) else { throw CoreDataManagerError.noEntityDescription(named: entityName) }
+        
+        let newObject = T(entity: entityDescription, insertInto: context)
+        
+        return newObject
+    }
+    
+    func save() throws {
+        guard context.hasChanges else { return }
         
         do {
             try context.save()
         } catch {
-            let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            throw CoreDataManagerError.saveFailed(error as NSError)
         }
     }
+}
+
+extension CoreDataMirror {
+    func insertNew<T: NSManagedObject>(
+        of type: T.Type,
+        _ action: (Result<T, NSError>) -> Void
+    ) {
+        do {
+            let newValue = try insertNew(of: type)
+            action(.success(newValue))
+        } catch {
+            action(.failure(error as NSError))
+        }
+    }
+    
+    func save(_ action: (Result<Void, NSError>) -> Void) {
+        do {
+            try save()
+            action(.success(()))
+        } catch {
+            action(.failure(error as NSError))
+        }
+    }
+}
+
+enum CoreDataManagerError: Error {
+    case noEntityDescription(named: String)
+    case invalidClass(query: String, actual: String)
+    case saveFailed(NSError)
 }

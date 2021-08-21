@@ -14,3 +14,5 @@ import CoreData
 public class CoreDrug: NSManagedObject {
 
 }
+
+
