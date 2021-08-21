@@ -11,7 +11,7 @@ public class MedicineLogCoreDataManager {
     
     private var loadedPersistentContainer: NSPersistentContainer?
     
-    func withContainer(_ action: @escaping CoreContextAction) {
+    func mirror(_ action: @escaping CoreContextAction) {
         loadedPersistentContainer.map {
             action(CoreDataMirror.of($0.viewContext))
         }
@@ -31,6 +31,28 @@ public class MedicineLogCoreDataManager {
         self.loadedPersistentContainer = container
         semaphore.wait()
     }
+    
+    #if DEBUG
+    public func clearFirstContainer() {
+        guard
+            let persistentStoreCoordinator = loadedPersistentContainer?.persistentStoreCoordinator,
+            let url = loadedPersistentContainer?.persistentStoreDescriptions.first?.url
+        else {
+            log { Event("Missing store coordinator or URL", .error) }
+            return
+        }
+
+        do {
+            try persistentStoreCoordinator.destroyPersistentStore(
+                at:url, ofType: NSSQLiteStoreType, options: nil)
+            try persistentStoreCoordinator.addPersistentStore(
+                ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: nil)
+            log { Event("Container reset: " + url.absoluteString, .info) }
+        } catch {
+            log { Event("Attempted to clear persistent store: " + error.localizedDescription, .error) }
+        }
+    }
+    #endif
 }
 
 struct CoreDataMirror {
@@ -55,7 +77,7 @@ struct CoreDataMirror {
     
     func save() throws {
         guard context.hasChanges else { return }
-        
+
         do {
             try context.save()
         } catch {

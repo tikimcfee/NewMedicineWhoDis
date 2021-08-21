@@ -69,6 +69,7 @@
 		B7FC9E9926D1A8E10027E032 /* CoreAvailableDrugList+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7A26D1A8D10027E032 /* CoreAvailableDrugList+CoreDataClass.swift */; };
 		B7FC9E9A26D1A8E10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7826D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataClass.swift */; };
 		B7FC9E9B26D1A8E10027E032 /* CoreIngredient+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */; };
+		B7FC9E9D26D1BA640027E032 /* Drugs_CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9E9C26D1BA640027E032 /* Drugs_CoreDataTests.swift */; };
 		F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
@@ -219,6 +220,7 @@
 		B7FC9E7B26D1A8D10027E032 /* CoreMedicineEntrySelection+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntrySelection+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		B7FC9E7C26D1A8D10027E032 /* CoreMedicineEntry+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreMedicineEntry+CoreDataClass.swift"; sourceTree = "<group>"; };
 		B7FC9E7D26D1A8D10027E032 /* CoreIngredient+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreIngredient+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B7FC9E9C26D1BA640027E032 /* Drugs_CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_CoreDataTests.swift; sourceTree = "<group>"; };
 		F01BBBB1246F900900BBC3A3 /* FileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStore.swift; sourceTree = "<group>"; };
 		F01BBBB3246F939600BBC3A3 /* EntryListFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListFileStore.swift; sourceTree = "<group>"; };
 		F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
@@ -323,6 +325,7 @@
 			isa = PBXGroup;
 			children = (
 				4593B4C8231AFBD200787D91 /* Drugs_Tests.swift */,
+				B7FC9E9C26D1BA640027E032 /* Drugs_CoreDataTests.swift */,
 				4593B4CA231AFBD200787D91 /* Info.plist */,
 			);
 			path = "Drugs!Tests";
@@ -781,6 +784,7 @@
 				F022624A2471A74700F31141 /* AddNewEntryView.swift in Sources */,
 				F06CE02E2477A7FC0005441E /* MedicineEntryDetailsView.swift in Sources */,
 				F0FE7F91255E2853004D6D62 /* RootAppStartupView.swift in Sources */,
+				B7FC9E9D26D1BA640027E032 /* Drugs_CoreDataTests.swift in Sources */,
 				F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */,
 				F0FE7F7C255E27FC004D6D62 /* NotificationInfoView.swift in Sources */,
 				F02262542471AA8C00F31141 /* Components.swift in Sources */,

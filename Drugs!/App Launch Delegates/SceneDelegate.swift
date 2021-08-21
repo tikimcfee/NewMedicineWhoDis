@@ -23,6 +23,7 @@ public enum AppTestArguments: String {
     case enableTestConfiguration
     case clearEntriesOnLaunch
     case disableAnimations
+    case unitTestingStartup
 
     var isSet: Bool { CommandLine.arguments.contains(rawValue) }
 }
@@ -54,8 +55,14 @@ public class MasterEnvironmentContainer: ObservableObject {
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        
+        // Don't launch a scene if the app is unit testing
+        guard !AppTestArguments.unitTestingStartup.isSet else { return }
 
         AppLaunchThemingUtil.setGlobalThemes()
 
@@ -65,7 +72,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
 
         // Loads app data on init. Bad idea?
-		let environmentContainer = MasterEnvironmentContainer()
+        let environmentContainer = MasterEnvironmentContainer()
         #if DEBUG
         configureForTests(environmentContainer)
         #endif

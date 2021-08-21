@@ -107,24 +107,5 @@ class Drugs_Tests: XCTestCase {
 //            ClockWords.clockFor(date)
 //        }
 //    }
-
-    func test_CoreData() {
-        let expectation = expectation(description: "Made context")
-        let manager = MedicineLogCoreDataManager()
-        manager.createContainer()
-        manager.withContainer { mirror in
-            do {
-                let drug = try mirror.insertNew(of: CoreDrug.self)
-                drug.drugName = "This is a mirror drug"
-                try mirror.save()
-                expectation.fulfill()
-            } catch {
-                XCTFail((error as NSError).description)
-                return
-            }
-        }
-        wait(for: [expectation], timeout: 1.0)
-    }
-    
 }
 
