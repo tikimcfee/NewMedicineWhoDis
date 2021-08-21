@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20F71" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CoreAvailableDrugList" representedClassName="CoreAvailableDrugList" syncable="YES" codeGenerationType="class">
+        <relationship name="drugs" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CoreDrug" inverseName="sourceList" inverseEntity="CoreDrug"/>
+    </entity>
+    <entity name="CoreDrug" representedClassName="CoreDrug" syncable="YES" codeGenerationType="class">
+        <attribute name="drugName" optional="YES" attributeType="String"/>
+        <attribute name="hourlyDoseTime" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="ingredients" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CoreIngredient" inverseName="targetDrug" inverseEntity="CoreIngredient"/>
+        <relationship name="sourceList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CoreAvailableDrugList" inverseName="drugs" inverseEntity="CoreAvailableDrugList"/>
+    </entity>
+    <entity name="CoreIngredient" representedClassName="CoreIngredient" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="ingredientName" optional="YES" attributeType="String"/>
+        <relationship name="targetDrug" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CoreDrug" inverseName="ingredients" inverseEntity="CoreDrug"/>
+    </entity>
+    <entity name="CoreMedicineEntry" representedClassName="CoreMedicineEntry" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="selections" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="CoreMedicineEntrySelection" inverseName="sourceEntry" inverseEntity="CoreMedicineEntrySelection"/>
+    </entity>
+    <entity name="CoreMedicineEntrySelection" representedClassName="CoreMedicineEntrySelection" syncable="YES" codeGenerationType="class">
+        <attribute name="count" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="drugId" optional="YES" attributeType="String"/>
+        <relationship name="sourceEntry" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CoreMedicineEntry" inverseName="selections" inverseEntity="CoreMedicineEntry"/>
+        <fetchedProperty name="drug" optional="YES">
+            <fetchRequest name="fetchedPropertyFetchRequest" entity="CoreDrug" predicateString="id == $FETCHED_SOURCE.drugId"/>
+        </fetchedProperty>
+    </entity>
+    <elements>
+        <element name="CoreIngredient" positionX="-198.0078125" positionY="-96.22265625" width="128" height="88"/>
+        <element name="CoreDrug" positionX="-258.23828125" positionY="44.8359375" width="128" height="118"/>
+        <element name="CoreAvailableDrugList" positionX="-387.96875" positionY="-81.578125" width="128" height="58"/>
+        <element name="CoreMedicineEntry" positionX="106.21875" positionY="-315.64453125" width="128" height="88"/>
+        <element name="CoreMedicineEntrySelection" positionX="-14.890625" positionY="-11.05078125" width="128" height="116"/>
+    </elements>
+</model>

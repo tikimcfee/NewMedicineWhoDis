@@ -85,27 +85,41 @@ class Drugs_Tests: XCTestCase {
         print(string)
     }
 
-    func testClockWords() {
-        let dates = [
-            Date() - TimeInterval(60 * 60 * 3),
-            Date() - TimeInterval(60 * 60 * 2),
-            Date() - TimeInterval(60 * 60),
-            Date(),
-            Date() + TimeInterval(60 * 20),
-            Date() + TimeInterval(60 * 60),
-            Date() + TimeInterval(60 * 20 * 2),
-            Date() + TimeInterval(60 * 60 * 2),
-            Date() + TimeInterval(60 * 20 * 4),
-            Date() + TimeInterval(60 * 60 * 3),
-            Date() + TimeInterval(60 * 20 * 6),
-            Date() + TimeInterval(60 * 60 * 4),
-            Date() + TimeInterval(60 * 20 * 8),
-            Date() + TimeInterval(60 * 60 * 5),
-        ]
+//    func testClockWords() {
+//        let dates = [
+//            Date() - TimeInterval(60 * 60 * 3),
+//            Date() - TimeInterval(60 * 60 * 2),
+//            Date() - TimeInterval(60 * 60),
+//            Date(),
+//            Date() + TimeInterval(60 * 20),
+//            Date() + TimeInterval(60 * 60),
+//            Date() + TimeInterval(60 * 20 * 2),
+//            Date() + TimeInterval(60 * 60 * 2),
+//            Date() + TimeInterval(60 * 20 * 4),
+//            Date() + TimeInterval(60 * 60 * 3),
+//            Date() + TimeInterval(60 * 20 * 6),
+//            Date() + TimeInterval(60 * 60 * 4),
+//            Date() + TimeInterval(60 * 20 * 8),
+//            Date() + TimeInterval(60 * 60 * 5),
+//        ]
+//
+//        for date in dates {
+//            ClockWords.clockFor(date)
+//        }
+//    }
 
-        for date in dates {
-            ClockWords.clockFor(date)
+    func test_CoreData() {
+        let expectation = expectation(description: "Whatever didn't work")
+        let manager = MedicineLogCoreDataManager()
+        manager.createContainer()
+        manager.withContainer { context in
+            
+            let entry = CoreMedicineEntry(context: context)
+            
+            expectation.fulfill()
         }
+        
+        wait(for: [expectation], timeout: 1.0)
     }
-
+    
 }

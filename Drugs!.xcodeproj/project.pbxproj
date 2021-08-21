@@ -33,8 +33,12 @@
 		45DA2BC1232532E500649270 /* AppStateError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* AppStateError.swift */; };
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B72E093B26B129AB00E53797 /* RadialButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E093A26B129AB00E53797 /* RadialButtons.swift */; };
-		F005CA1A258DA80E003DEEE4 /* MedicineLogCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F005CA19258DA80E003DEEE4 /* MedicineLogCoreDataManager.swift */; };
-		F005CA20258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F005CA1E258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld */; };
+		B72E67CB26D18702001F52F2 /* EntryModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */; };
+		B72E67CD26D19640001F52F2 /* MedicineLogCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */; };
+		B72E67CE26D1982D001F52F2 /* MedicineLogCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */; };
+		B72E67CF26D1982E001F52F2 /* MedicineLogCoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */; };
+		B72E67D026D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */; };
+		B72E67D126D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */; };
 		F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
@@ -173,8 +177,8 @@
 		45DA2BC0232532E500649270 /* AppStateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateError.swift; sourceTree = "<group>"; };
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B72E093A26B129AB00E53797 /* RadialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialButtons.swift; sourceTree = "<group>"; };
-		F005CA19258DA80E003DEEE4 /* MedicineLogCoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineLogCoreDataManager.swift; sourceTree = "<group>"; };
-		F005CA1F258DA9E7003DEEE4 /* MedicineLog.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MedicineLog.xcdatamodel; sourceTree = "<group>"; };
+		B72E67CA26D18702001F52F2 /* EntryModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = EntryModels.xcdatamodel; sourceTree = "<group>"; };
+		B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MedicineLogCoreDataManager.swift; sourceTree = "<group>"; };
 		F01BBBB1246F900900BBC3A3 /* FileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStore.swift; sourceTree = "<group>"; };
 		F01BBBB3246F939600BBC3A3 /* EntryListFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListFileStore.swift; sourceTree = "<group>"; };
 		F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
@@ -371,14 +375,13 @@
 			path = InputViews;
 			sourceTree = "<group>";
 		};
-		F005CA14258DA7EB003DEEE4 /* AppleCoreData */ = {
+		B72E67C826D186DF001F52F2 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				F005CA3F258DBF06003DEEE4 /* Extensions */,
-				F005CA19258DA80E003DEEE4 /* MedicineLogCoreDataManager.swift */,
-				F005CA1E258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld */,
+				B72E67CC26D19640001F52F2 /* MedicineLogCoreDataManager.swift */,
+				B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */,
 			);
-			path = AppleCoreData;
+			path = CoreData;
 			sourceTree = "<group>";
 		};
 		F005CA15258DA7F4003DEEE4 /* FlatFile */ = {
@@ -391,13 +394,6 @@
 			path = FlatFile;
 			sourceTree = "<group>";
 		};
-		F005CA3F258DBF06003DEEE4 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		F0092492256DD364005F4ABE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -408,7 +404,7 @@
 		F01BBBB0246F8FE400BBC3A3 /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
-				F005CA14258DA7EB003DEEE4 /* AppleCoreData */,
+				B72E67C826D186DF001F52F2 /* CoreData */,
 				F005CA15258DA7F4003DEEE4 /* FlatFile */,
 			);
 			path = Persistence;
@@ -658,12 +654,12 @@
 				459679FB2337204C001DCBA1 /* Formatting.swift in Sources */,
 				F0E25B74258ED25F001EE2A7 /* EntryListView.swift in Sources */,
 				F094CF4E247B710300CE50BA /* AutoCancel.swift in Sources */,
-				F005CA20258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld in Sources */,
-				F005CA1A258DA80E003DEEE4 /* MedicineLogCoreDataManager.swift in Sources */,
 				F01BBBB6246F93BB00BBC3A3 /* Aliases.swift in Sources */,
+				B72E67CB26D18702001F52F2 /* EntryModels.xcdatamodeld in Sources */,
 				F075605D24EC5A4F00E81463 /* GlobalUtilityFunctions.swift in Sources */,
 				F0FE7FAB255E3CC5004D6D62 /* TestingKeys.swift in Sources */,
 				45452B8B235D308700273D79 /* EventLogging.swift in Sources */,
+				B72E67CD26D19640001F52F2 /* MedicineLogCoreDataManager.swift in Sources */,
 				45DA2BC1232532E500649270 /* AppStateError.swift in Sources */,
 				F0BB568124E760FB00BF91F2 /* MedicineEntryDetailsViewState.swift in Sources */,
 				F0DFB7672593A7B900F7A8CE /* ActivityView.swift in Sources */,
@@ -721,6 +717,7 @@
 				F066BB60258F06BE00B1654B /* DrugSelectionModels.swift in Sources */,
 				F0D3530A256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
 				4593B4C9231AFBD200787D91 /* Drugs_Tests.swift in Sources */,
+				B72E67CE26D1982D001F52F2 /* MedicineLogCoreDataManager.swift in Sources */,
 				4517803523612F7500E7C5F7 /* AppStateError.swift in Sources */,
 				F0456CDA24705F290017B04E /* DrugEntryNumberPad.swift in Sources */,
 				F05FA17F246FAF4400FF8FE9 /* Aliases.swift in Sources */,
@@ -729,6 +726,7 @@
 				F0D289C3248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
 				F0C035C02467AE4800599A4D /* MedicineModelExtensions.swift in Sources */,
 				F094CF4F247B710300CE50BA /* AutoCancel.swift in Sources */,
+				B72E67D026D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */,
 				F066BB70258F06DE00B1654B /* EntryListView.swift in Sources */,
 				F06CE02C2477A7E50005441E /* Formatting.swift in Sources */,
 				F0FE7F78255E2707004D6D62 /* MedicineEntryDetailsViewState.swift in Sources */,
@@ -765,6 +763,7 @@
 				F066BB64258F06BE00B1654B /* DrugSelectionModels.swift in Sources */,
 				F0D3530B256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
 				4517803623612F7500E7C5F7 /* AppStateError.swift in Sources */,
+				B72E67CF26D1982E001F52F2 /* MedicineLogCoreDataManager.swift in Sources */,
 				F0456CDB24705F290017B04E /* DrugEntryNumberPad.swift in Sources */,
 				F05FA180246FAF4500FF8FE9 /* Aliases.swift in Sources */,
 				F02262512471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
@@ -773,6 +772,7 @@
 				F094CF50247B710300CE50BA /* AutoCancel.swift in Sources */,
 				F06CE02D2477A7E60005441E /* Formatting.swift in Sources */,
 				F0D289C4248D50F700FEBA51 /* DrugListEditorView.swift in Sources */,
+				B72E67D126D19848001F52F2 /* EntryModels.xcdatamodeld in Sources */,
 				F066BB6C258F06DD00B1654B /* EntryListView.swift in Sources */,
 				F0FE7F8D255E284F004D6D62 /* SceneDelegate.swift in Sources */,
 				F0FE7F92255E2853004D6D62 /* RootAppStartupView.swift in Sources */,
@@ -1108,13 +1108,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		F005CA1E258DA9E7003DEEE4 /* MedicineLog.xcdatamodeld */ = {
+		B72E67C926D18702001F52F2 /* EntryModels.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				F005CA1F258DA9E7003DEEE4 /* MedicineLog.xcdatamodel */,
+				B72E67CA26D18702001F52F2 /* EntryModels.xcdatamodel */,
 			);
-			currentVersion = F005CA1F258DA9E7003DEEE4 /* MedicineLog.xcdatamodel */;
-			path = MedicineLog.xcdatamodeld;
+			currentVersion = B72E67CA26D18702001F52F2 /* EntryModels.xcdatamodel */;
+			path = EntryModels.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
