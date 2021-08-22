@@ -21,7 +21,7 @@ class Drugs_CoreDataTests: XCTestCase {
     }
     
     override func tearDownWithError() throws {
-        manager.clearFirstContainer()
+        manager.clearAllContainers()
     }
     
     func test_CoreDataBasicSave() {
@@ -39,6 +39,30 @@ class Drugs_CoreDataTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 1.0)
     }
-    
+
+    func test_CoreDataBasicReadAfterSave() throws {
+        manager.clearAllContainers()
+        
+        let expectation = expectation(description: "Failed to create, updated, and save")
+        let expectedUUID = UUID()
+        
+        manager.mirror { mirror in
+            do {
+                let drug = try mirror.insertNew(of: CoreDrug.self)
+                drug.drugName = "This is a mirror drug"
+                drug.id = expectedUUID
+                try mirror.save()
+                
+                let fetched = try mirror.fetchOne(CoreDrug.self)
+                XCTAssertTrue(fetched?.id == expectedUUID, "Did not find the expected single model. That's a shame.")
+                
+                expectation.fulfill()
+            } catch {
+                XCTFail((error as NSError).description)
+                return
+            }
+        }
+        wait(for: [expectation], timeout: 1.0)
+    }
 }
 
