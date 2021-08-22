@@ -162,6 +162,12 @@ class Drugs_UITests: XCTestCase {
     }
 
     // MARK: Home screen
+    
+    func makeRandom() {
+        app.tap(DrugList.allCases.randomElement()!)
+        app.tap(NumberPad.allCases.randomElement()!)
+        app.tap(.saveEntry)
+    }
 
     func make(_ list: [(DrugList, NumberPad)]) {
         list.forEach {

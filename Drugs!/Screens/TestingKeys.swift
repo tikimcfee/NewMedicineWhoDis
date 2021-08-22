@@ -28,7 +28,7 @@ enum EditEntryScreen: String {
     case datePickerButton
 }
 
-enum DrugList: String {
+enum DrugList: String, CaseIterable {
     case Gabapentin = "Gabapentin"
     case Tylenol = "Tylenol"
     case Venlafaxine = "Venlafaxine"
