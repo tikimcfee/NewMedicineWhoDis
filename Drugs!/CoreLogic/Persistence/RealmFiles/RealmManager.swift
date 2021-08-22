@@ -7,3 +7,25 @@
 //
 
 import Foundation
+import RealmSwift
+
+//MARK: - Realm Helper
+
+class EntryLogRealmManager {
+    public func loadEntryLogRealm() throws -> Realm {
+        var config = Realm.Configuration.defaultConfiguration
+        config.fileURL = AppFiles.entryLogRealm
+        let realm = try Realm(configuration: config)
+        return realm
+    }
+    
+    #if DEBUG
+    public func loadTestLogRealm() throws -> Realm {
+        var config = Realm.Configuration.defaultConfiguration
+        config.deleteRealmIfMigrationNeeded = true
+        config.fileURL = AppFiles.Testing__entryLogRealm
+        let realm = try Realm(configuration: config)
+        return realm
+    }
+    #endif
+}
