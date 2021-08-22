@@ -69,21 +69,23 @@ class Drugs_RealmTests: XCTestCase {
         
         let startCount = legacyAppData.mainEntryList.count
         XCTAssert(startCount > 0, "Legacy data did not have at least one entry")
-        let legacyLookup = legacyAppData.mainEntryList
-            .reduce(into: [String: MedicineEntry]()) { lookup, value in
-                lookup[value.id] = value
-            }
         
         let migrator = V1Migrator()
-        let newRLMModels = migrator.migrateToRealmObjects(legacyAppData.mainEntryList)
+        let newRLMList = migrator.migrateAvailableToRealmObjects(legacyAppData.availableDrugList)
+        let newRLMModels = migrator.migrateEntriesToRealmObjects(legacyAppData.mainEntryList)
         XCTAssert(newRLMModels.count == legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
+        XCTAssert(newRLMList.drugs.count == legacyAppData.availableDrugList.drugs.count, "Did not end up with same entry counts")
 
         try defaultLogRealm.write {
             newRLMModels.forEach {
                 defaultLogRealm.add($0)
             }
+            defaultLogRealm.add(newRLMList)
         }
         
+        let legacyLookup = legacyAppData.mainEntryList.reduce(
+            into: [String: MedicineEntry]()
+        ) { lookup, value in lookup[value.id] = value }
         let fetchedObjects = defaultLogRealm.objects(RLM_MedicineEntry.self)
         try fetchedObjects.enumerated().forEach { index, object in
             let matchingLegacy = try XCTUnwrap(legacyLookup[object.id], "Did not find a matching entry")
@@ -97,6 +99,17 @@ class Drugs_RealmTests: XCTestCase {
             }
             XCTAssertEqual(oldNames, drugNames, "Mismatched drug names")
         }
+        
+        let fetchedAvailable = defaultLogRealm.objects(RLM_AvailableDrugList.self)
+        XCTAssert(fetchedAvailable.count == 1, "Should only ever have one of these")
+        let realmList = fetchedAvailable.first!
+        let realmNames = realmList.drugs.reduce(into: Set<String>()) { set, drug in
+            set.insert(drug.name)
+        }
+        let oldDrugNames = legacyAppData.availableDrugList.drugs.reduce(into: Set<String>()) {
+            $0.insert($1.drugName)
+        }
+        XCTAssertEqual(realmNames, oldDrugNames, "Mismatched drug names in available list")
     }
     
     func clearTestData() throws {
@@ -112,8 +125,14 @@ public class V1Migrator {
     private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
     
-    public func migrateToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {
+    public func migrateEntriesToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {
         return oldList.map(fromV1Entry)
+    }
+    
+    public func migrateAvailableToRealmObjects(_ oldList: AvailableDrugList) -> RLM_AvailableDrugList {
+        let newList = RLM_AvailableDrugList()
+        newList.drugs.append(objectsIn: oldList.drugs.map(fromV1drug))
+        return newList
     }
     
     private func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
