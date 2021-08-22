@@ -74,7 +74,8 @@ class Drugs_RealmTests: XCTestCase {
                 lookup[value.id] = value
             }
         
-        let newRLMModels = legacyAppData.mainEntryList.map(RLM_MedicineEntry.fromV1Entry)
+        let migrator = V1Migrator()
+        let newRLMModels = migrator.migrateToRealmObjects(legacyAppData.mainEntryList)
         XCTAssert(newRLMModels.count == legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
 
         try defaultLogRealm.write {
@@ -107,67 +108,57 @@ class Drugs_RealmTests: XCTestCase {
 
 //MARK: Migration extensions
 
-extension RLM_MedicineEntry {
-    static func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
+public class V1Migrator {
+    private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
+    private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
+    
+    public func migrateToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {
+        return oldList.map(fromV1Entry)
+    }
+    
+    private func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
         let newEntry = RLM_MedicineEntry()
         newEntry.id = entry.id
         newEntry.date = entry.date
-        newEntry.drugsTaken = List.fromV1DrugMap(entry.drugsTaken)
+        newEntry.drugsTaken = fromV1DrugMap(entry.drugsTaken)
         return newEntry
     }
-}
-
-extension RLM_DrugSelection {
-    static func fromV1Selection(_ drug: Drug, _ count: Double) -> RLM_DrugSelection {
+    
+    private func fromV1Selection(_ drug: Drug, _ count: Double) -> RLM_DrugSelection {
         let newSelection = RLM_DrugSelection()
         newSelection.count = count
-        newSelection.drug = RLM_Drug.fromV1drug(drug)
+        newSelection.drug = fromV1drug(drug)
         return newSelection
     }
-}
-
-extension List where Element == RLM_DrugSelection {
-    static func fromV1DrugMap(_ drugMap: DrugCountMap) -> List<Element> {
-        return drugMap.reduce(into: List()) { list, element in
-            list.append(RLM_DrugSelection.fromV1Selection(element.key, element.value))
-        }
-    }
-}
-
-extension RLM_Drug {
-    static var __cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     
-    static func fromV1drug(_ drug: Drug) -> RLM_Drug {
-        if let cached = __cachedMigratedDrugNames[drug.id] { return cached }
-        
+    private func fromV1drug(_ drug: Drug) -> RLM_Drug {
+        if let cached = cachedMigratedDrugNames[drug.id] { return cached }
         let newDrug = RLM_Drug()
         newDrug.name = drug.drugName
         newDrug.hourlyDoseTime = drug.hourlyDoseTime
         newDrug.ingredients.append(
-            objectsIn: drug.ingredients.map(
-                RLM_Ingredient.fromV1Ingredient
-            )
+            objectsIn: drug.ingredients.map(fromV1Ingredient)
         )
-        
-        __cachedMigratedDrugNames[drug.id] = newDrug
+        cachedMigratedDrugNames[drug.id] = newDrug
         return newDrug
     }
-}
-
-extension RLM_Ingredient {
-    static var __cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
     
-    static func fromV1Ingredient(_ ingredient: Ingredient) -> RLM_Ingredient {
-        if let cached = __cachedMigratedIngredientNames[ingredient.ingredientName] { return cached }
+    private func fromV1DrugMap(_ drugMap: DrugCountMap) -> List<RLM_DrugSelection> {
+        drugMap.reduce(into: List()) { list, element in
+            list.append(fromV1Selection(element.key, element.value))
+        }
+    }
+    
+    private func fromV1Ingredient(_ ingredient: Ingredient) -> RLM_Ingredient {
+        if let cached = cachedMigratedIngredientNames[ingredient.ingredientName] { return cached }
         
         let newIngredient = RLM_Ingredient()
         newIngredient.ingredientName = ingredient.ingredientName
         
-        __cachedMigratedIngredientNames[ingredient.ingredientName] = newIngredient
+        cachedMigratedIngredientNames[ingredient.ingredientName] = newIngredient
         return newIngredient
     }
 }
-
 
 //MARK: - Realm Models
 
