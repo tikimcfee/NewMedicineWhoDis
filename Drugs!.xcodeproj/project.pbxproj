@@ -35,6 +35,7 @@
 		B72E093B26B129AB00E53797 /* RadialButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72E093A26B129AB00E53797 /* RadialButtons.swift */; };
 		B7FC9EA026D1D3310027E032 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9E9F26D1D3310027E032 /* RealmSwift */; };
 		B7FC9EA226D1D3310027E032 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9EA126D1D3310027E032 /* Realm */; };
+		B7FC9EA426D1D3A90027E032 /* Drugs_RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */; };
 		F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F00924BB256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */; };
 		F01B66FF259BE2D700C013CB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0DFB7662593A7B900F7A8CE /* ActivityView.swift */; };
@@ -173,6 +174,7 @@
 		45DA2BC0232532E500649270 /* AppStateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateError.swift; sourceTree = "<group>"; };
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B72E093A26B129AB00E53797 /* RadialButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialButtons.swift; sourceTree = "<group>"; };
+		B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_RealmTests.swift; sourceTree = "<group>"; };
 		F01BBBB1246F900900BBC3A3 /* FileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStore.swift; sourceTree = "<group>"; };
 		F01BBBB3246F939600BBC3A3 /* EntryListFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListFileStore.swift; sourceTree = "<group>"; };
 		F01BBBB5246F93BB00BBC3A3 /* Aliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Aliases.swift; sourceTree = "<group>"; };
@@ -278,8 +280,9 @@
 		4593B4C7231AFBD200787D91 /* Drugs!Tests */ = {
 			isa = PBXGroup;
 			children = (
-				4593B4C8231AFBD200787D91 /* Drugs_Tests.swift */,
 				4593B4CA231AFBD200787D91 /* Info.plist */,
+				4593B4C8231AFBD200787D91 /* Drugs_Tests.swift */,
+				B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */,
 			);
 			path = "Drugs!Tests";
 			sourceTree = "<group>";
@@ -687,6 +690,7 @@
 				F05FA183246FAF6900FF8FE9 /* FileStore.swift in Sources */,
 				F0FE7F84255E2810004D6D62 /* GlobalUtilityFunctions.swift in Sources */,
 				4517803123612F6C00E7C5F7 /* EventLogging.swift in Sources */,
+				B7FC9EA426D1D3A90027E032 /* Drugs_RealmTests.swift in Sources */,
 				F0FE7F74255E261D004D6D62 /* NotificationInfoViewState.swift in Sources */,
 				F00924B7256DD64A005F4ABE /* MedicineModelDefinitions.swift in Sources */,
 				F0456CD124705D630017B04E /* DrugSelectionListView.swift in Sources */,
