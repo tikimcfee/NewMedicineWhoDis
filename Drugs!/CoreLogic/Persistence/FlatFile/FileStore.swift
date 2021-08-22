@@ -29,6 +29,7 @@ public struct AppFiles {
 
 // MARK: - Default file locations
 extension AppFiles {
+    // Flat files
     public static var medicineLogsDirectory: URL {
         directory(named: "medicineLogs")
     }
@@ -40,6 +41,21 @@ extension AppFiles {
     public static var appEventLogging: URL {
         file(named: "app_event_logs.txt", in: medicineLogsDirectory)
     }
+    
+    // Realm files
+    public static var realmsDirectory: URL {
+        directory(named: "logs-in-realms")
+    }
+    
+    public static var entryLogRealm: URL {
+        file(named: "realmfile_entry_log", in: realmsDirectory)
+    }
+    
+    #if DEBUG
+    public static var Testing__entryLogRealm: URL {
+        file(named: "TESTS__realmfile_entry_log__TESTS", in: realmsDirectory)
+    }
+    #endif
 }
 
 public class LogFileStore {
