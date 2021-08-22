@@ -23,7 +23,29 @@ public class V1Migrator {
         return newList
     }
     
-    private func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
+    func toV1Entry(_ entry: RLM_MedicineEntry) -> MedicineEntry {
+        MedicineEntry(
+            entry.date,
+            entry.drugsTaken.reduce(into: DrugCountMap()) { acc, entry in
+                let converted = toV1Drug(entry.drug!)
+                acc[converted] = entry.count
+            },
+            entry.id
+        )
+    }
+    
+    
+    func toV1Drug(_ entry: RLM_Drug) -> Drug {
+        Drug(
+            entry.name,
+            entry.ingredients.reduce(into: [Ingredient]()) { acc, entry in
+                acc.append(Ingredient(entry.ingredientName))
+            },
+            entry.hourlyDoseTime
+        )
+    }
+    
+    func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
         let newEntry = RLM_MedicineEntry()
         newEntry.id = entry.id
         newEntry.date = entry.date
@@ -31,14 +53,14 @@ public class V1Migrator {
         return newEntry
     }
     
-    private func fromV1Selection(_ drug: Drug, _ count: Double) -> RLM_DrugSelection {
+    func fromV1Selection(_ drug: Drug, _ count: Double) -> RLM_DrugSelection {
         let newSelection = RLM_DrugSelection()
         newSelection.count = count
         newSelection.drug = fromV1drug(drug)
         return newSelection
     }
     
-    private func fromV1drug(_ drug: Drug) -> RLM_Drug {
+    func fromV1drug(_ drug: Drug) -> RLM_Drug {
         if let cached = cachedMigratedDrugNames[drug.id] { return cached }
         let newDrug = RLM_Drug()
         newDrug.name = drug.drugName
@@ -50,13 +72,13 @@ public class V1Migrator {
         return newDrug
     }
     
-    private func fromV1DrugMap(_ drugMap: DrugCountMap) -> List<RLM_DrugSelection> {
+    func fromV1DrugMap(_ drugMap: DrugCountMap) -> List<RLM_DrugSelection> {
         drugMap.reduce(into: List()) { list, element in
             list.append(fromV1Selection(element.key, element.value))
         }
     }
     
-    private func fromV1Ingredient(_ ingredient: Ingredient) -> RLM_Ingredient {
+    func fromV1Ingredient(_ ingredient: Ingredient) -> RLM_Ingredient {
         if let cached = cachedMigratedIngredientNames[ingredient.ingredientName] { return cached }
         
         let newIngredient = RLM_Ingredient()

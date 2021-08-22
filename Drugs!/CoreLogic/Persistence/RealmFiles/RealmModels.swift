@@ -33,5 +33,5 @@ public class RLM_MedicineEntry: Object {
 }
 
 public class RLM_AvailableDrugList: Object {
-    @Persisted var drugs: List<RLM_Drug> = List()
+    @Persisted public var drugs: List<RLM_Drug> = List()
 }

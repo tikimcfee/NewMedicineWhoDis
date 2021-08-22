@@ -9,6 +9,8 @@
 import XCTest
 import CoreData
 
+@testable import Meds_
+
 class Drugs_Tests: XCTestCase {
 
     private let testQueue = DispatchQueue(label: "TestBackgroundQueue")

@@ -7,7 +7,9 @@
 //
 
 import XCTest
+
 import RealmSwift
+@testable import Meds_
 
 class Drugs_RealmTests: XCTestCase {
     
@@ -15,8 +17,8 @@ class Drugs_RealmTests: XCTestCase {
     var defaultLogRealm: Realm!
 
     override func setUpWithError() throws {
-        manager = EntryLogRealmManager()
-        defaultLogRealm = try manager.loadTestLogRealm()
+        manager = TestingRealmManager()
+        defaultLogRealm = try manager.loadEntryLogRealm()
     }
 
     override func tearDownWithError() throws {
@@ -63,25 +65,7 @@ class Drugs_RealmTests: XCTestCase {
     
     func testMigration() throws {
         try clearTestData()
-        
-        let legacyFileManager = EntryListFileStore()
-        let legacyAppData = try legacyFileManager.load().get()
-        
-        let startCount = legacyAppData.mainEntryList.count
-        XCTAssert(startCount > 0, "Legacy data did not have at least one entry")
-        
-        let migrator = V1Migrator()
-        let newRLMList = migrator.migrateAvailableToRealmObjects(legacyAppData.availableDrugList)
-        let newRLMModels = migrator.migrateEntriesToRealmObjects(legacyAppData.mainEntryList)
-        XCTAssert(newRLMModels.count == legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
-        XCTAssert(newRLMList.drugs.count == legacyAppData.availableDrugList.drugs.count, "Did not end up with same entry counts")
-
-        try defaultLogRealm.write {
-            newRLMModels.forEach {
-                defaultLogRealm.add($0)
-            }
-            defaultLogRealm.add(newRLMList)
-        }
+        let (files, legacyAppData) = try addTestDataToRealm()
         
         let legacyLookup = legacyAppData.mainEntryList.reduce(
             into: [String: MedicineEntry]()
@@ -110,6 +94,42 @@ class Drugs_RealmTests: XCTestCase {
             $0.insert($1.drugName)
         }
         XCTAssertEqual(realmNames, oldDrugNames, "Mismatched drug names in available list")
+    }
+    
+    func testPersistenceManagerProtocol() throws {
+        try clearTestData()
+        
+        let realm = RealmPersistenceManager(manager: manager)
+        let (files, oldData) = try addTestDataToRealm()
+        
+        oldData.mainEntryList.forEach { testEntry in
+            let fromRealm = realm.getEntry(with: testEntry.id)
+            let fromFiles = files.getEntry(with: testEntry.id)
+            XCTAssertEqual(fromRealm, fromFiles, "Loaded entries do not match")
+        }
+    }
+    
+    func addTestDataToRealm() throws -> (FilePersistenceManager, ApplicationData) {
+        let files = FilePersistenceManager(store: EntryListFileStore())
+        let legacyAppData = try files.loadFromFileStoreImmediately()
+        
+        let startCount = legacyAppData.mainEntryList.count
+        XCTAssert(startCount > 0, "Legacy data did not have at least one entry")
+        
+        let migrator = V1Migrator()
+        let newRLMList = migrator.migrateAvailableToRealmObjects(legacyAppData.availableDrugList)
+        let newRLMModels = migrator.migrateEntriesToRealmObjects(legacyAppData.mainEntryList)
+        XCTAssert(newRLMModels.count == legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
+        XCTAssert(newRLMList.drugs.count == legacyAppData.availableDrugList.drugs.count, "Did not end up with same entry counts")
+        
+        try defaultLogRealm.write {
+            newRLMModels.forEach {
+                defaultLogRealm.add($0)
+            }
+            defaultLogRealm.add(newRLMList)
+        }
+        
+        return (files, legacyAppData)
     }
     
     func clearTestData() throws {

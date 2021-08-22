@@ -22,6 +22,14 @@ public class FilePersistenceManager: PersistenceManager {
     init(store: EntryListFileStore) {
         self.medicineStore = store
     }
+    
+    #if DEBUG
+    public func loadFromFileStoreImmediately() throws -> ApplicationData {
+        initialLoadRequired = false
+        self.appData = try medicineStore.load().get()
+        return self.appData
+    }
+    #endif
 
     func onInitialLoad(_ fromSubscription: Subscription) {
         guard initialLoadRequired else { return }

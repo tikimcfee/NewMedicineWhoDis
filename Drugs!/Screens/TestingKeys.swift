@@ -1,3 +1,12 @@
+public enum AppTestArguments: String {
+    case enableTestConfiguration
+    case clearEntriesOnLaunch
+    case disableAnimations
+    case launchingForUnitTests
+    
+    var isSet: Bool { CommandLine.arguments.contains(rawValue) }
+}
+
 enum AppTabAccessID: String {
     case addEntry
     case entryList

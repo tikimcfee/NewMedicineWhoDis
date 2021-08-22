@@ -2,19 +2,25 @@ import SwiftUI
 import Combine
 
 struct AddNewEntryView: View {
-
     @EnvironmentObject private var rootScreenState: AddEntryViewState
 
     var body: some View {
         return VStack(spacing: 0) {
-            drugEntryView
-            saveButton
-                .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
+            DrugSelectionContainerView(
+                model: $rootScreenState.drugSelectionModel
+            )
+            
+            Components.fullWidthButton(
+                "Take some drugs",
+                rootScreenState.saveNewEntry
+            )
+            .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
+            .accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)
         }
-        .alert(item: $rootScreenState.saveError, content: makeAlert)
+        .alert(item: $rootScreenState.saveError, content: makeSaveErrorAlert)
     }
 
-    private func makeAlert(_ error: Error) -> Alert {
+    private func makeSaveErrorAlert(_ error: Error) -> Alert {
         let message: String
         if case let AppStateError.saveError(cause) = error {
             message = cause.localizedDescription
@@ -26,19 +32,6 @@ struct AddNewEntryView: View {
             message: Text(message),
             dismissButton: .default(Text("Well that sucks."))
         )
-    }
-	
-    var drugEntryView: some View {
-        DrugSelectionContainerView(
-            model: $rootScreenState.drugSelectionModel
-        )
-    }
-    
-	var saveButton: some View {
-        Components.fullWidthButton(
-            "Take some drugs",
-            rootScreenState.saveNewEntry
-        ).accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)
     }
 }
 

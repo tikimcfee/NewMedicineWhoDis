@@ -19,14 +19,6 @@ public extension Result where Success == ApplicationData, Failure == Error {
     }
 }
 
-public enum AppTestArguments: String {
-    case enableTestConfiguration
-    case clearEntriesOnLaunch
-    case disableAnimations
-
-    var isSet: Bool { CommandLine.arguments.contains(rawValue) }
-}
-
 public class MasterEnvironmentContainer: ObservableObject {
     let fileStore: EntryListFileStore
     let dataManager: MedicineLogDataManager
@@ -56,7 +48,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-
+        if AppTestArguments.launchingForUnitTests.isSet {
+            debugPrint("---- Skipping Scene Set, in debug mode ----")
+            return
+        }
+        
         AppLaunchThemingUtil.setGlobalThemes()
 
         if let windowScene = scene as? UIWindowScene {
