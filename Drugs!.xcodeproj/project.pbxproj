@@ -472,6 +472,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				4518F0EA26D329BE0081A098 /* PBXTargetDependency */,
+				4518F0EC26D329BE0081A098 /* PBXTargetDependency */,
 				4593B4C6231AFBD200787D91 /* PBXTargetDependency */,
 			);
 			name = "Drugs!Tests";
@@ -649,6 +651,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4518F0EA26D329BE0081A098 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 4518F0E926D329BE0081A098 /* Realm */;
+		};
+		4518F0EC26D329BE0081A098 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 4518F0EB26D329BE0081A098 /* RealmSwift */;
+		};
 		4593B4C6231AFBD200787D91 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4593B4AD231AFBD000787D91 /* Drugs! */;
@@ -982,6 +992,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4518F0E926D329BE0081A098 /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B7FC9E9E26D1D3310027E032 /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = Realm;
+		};
+		4518F0EB26D329BE0081A098 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B7FC9E9E26D1D3310027E032 /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = RealmSwift;
+		};
 		B7FC9E9F26D1D3310027E032 /* RealmSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B7FC9E9E26D1D3310027E032 /* XCRemoteSwiftPackageReference "realm-cocoa" */;

@@ -54,36 +54,6 @@
                ReferencedContainer = "container:Drugs!.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F0A38600256EF224003ADA90"
-               BuildableName = "Meds! - Core Tests.xctest"
-               BlueprintName = "Meds! - Core Tests"
-               ReferencedContainer = "container:Drugs!.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F061445E256F0D5900883FBE"
-               BuildableName = "SampleTest.xctest"
-               BlueprintName = "SampleTest"
-               ReferencedContainer = "container:Drugs!.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F0614473256F0DF700883FBE"
-               BuildableName = "Target-MainUnitTests.xctest"
-               BlueprintName = "Target-MainUnitTests"
-               ReferencedContainer = "container:Drugs!.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
