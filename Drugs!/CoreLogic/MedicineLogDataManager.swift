@@ -54,7 +54,15 @@ protocol PersistenceManager {
 }
 
 public class MedicineLogDataManager: ObservableObject {
-    private let persistenceManager: PersistenceManager
+    private var persistenceManager: PersistenceManager
+//	
+//	lazy var sharedEntryPipe: AnyPublisher<[MedicineEntry], Never> = {
+//		PassthroughSubject()
+//	} ()
+//	
+//	lazy var sharedDrugListPipe: AnyPublisher<[MedicineEntry], Never> = {
+//		PassthroughSubject()
+//	} ()
 
     lazy var sharedEntryStream: AnyPublisher<[MedicineEntry], Never> = {
         persistenceManager

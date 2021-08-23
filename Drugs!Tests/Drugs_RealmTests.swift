@@ -19,6 +19,7 @@ class Drugs_RealmTests: XCTestCase {
 	var flatFilePersistenceManager: FilePersistenceManager!
 	
 	// - Realm
+	var appLogManager: AppEventLogRealmManager!
     var manager: EntryLogRealmManager!
     var defaultLogRealm: Realm!
 	
@@ -29,6 +30,7 @@ class Drugs_RealmTests: XCTestCase {
 		flatFileStore = EntryListFileStore()
 		flatFilePersistenceManager = FilePersistenceManager(store: flatFileStore)
 		
+		appLogManager = DefaultAppEventRealmManager.shared
         manager = TestingRealmManager()
         defaultLogRealm = try manager.loadEntryLogRealm()
     }
@@ -155,6 +157,19 @@ class Drugs_RealmTests: XCTestCase {
         
         wait(for: [notAnnotatedInitial, annotatedInitial], timeout: 1.0)
     }
+	
+	func testLogs() throws {
+		try clearDefaultRealmData()
+		
+		let toCreateCount = 1000
+		for count in 0..<toCreateCount {
+			log { Event("Testing global logs \(count)", Bool.random() ? .info : .error) }
+		}
+		RealmAppEventLogger.shared.manager.withRealm { realm in
+			let allEvents = realm.objects(PersistableEvent.self)
+			XCTAssertEqual(allEvents.count, toCreateCount)
+		}
+	}
     
     func addTestDataToRealm() throws -> ApplicationData {
         let legacyAppData = try flatFilePersistenceManager.loadFromFileStoreImmediately()
@@ -180,5 +195,10 @@ class Drugs_RealmTests: XCTestCase {
         try defaultLogRealm.write {
             defaultLogRealm.deleteAll()
         }
+		appLogManager.withRealm { realm in
+			try realm.write {
+				realm.deleteAll()
+			}
+		}
     }
 }

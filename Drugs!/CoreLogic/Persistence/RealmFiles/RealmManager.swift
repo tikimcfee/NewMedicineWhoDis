@@ -63,8 +63,10 @@ class RealmPersistenceStateTransformer {
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
+					log { Event("Initial entry list loaded", .info) }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
                 case let .update(results, _, _, _):
+					log { Event("Entry list updated", .info) }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
                 case let .error(error):
                     log { Event("Failed to observe, \(error.localizedDescription)", .error)}
@@ -74,11 +76,13 @@ class RealmPersistenceStateTransformer {
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
+					log { Event("Initial drug list loaded", .info) }
                     self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
                 case let .update(results, _, _, _):
+					log { Event("Drug list updated", .info) }
                     self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
                 case let .error(error):
-                    log { Event("Failed to observe, \(error.localizedDescription)", .error)}
+                    log { Event("Failed to observe, \(error.localizedDescription)", .error) }
                 }
             }
     }
