@@ -9,6 +9,7 @@
 import XCTest
 
 import RealmSwift
+import Combine
 @testable import Meds_
 
 class Drugs_RealmTests: XCTestCase {
@@ -65,7 +66,7 @@ class Drugs_RealmTests: XCTestCase {
     
     func testMigration() throws {
         try clearTestData()
-        let (files, legacyAppData) = try addTestDataToRealm()
+        let (_, legacyAppData) = try addTestDataToRealm()
         
         let legacyLookup = legacyAppData.mainEntryList.reduce(
             into: [String: MedicineEntry]()
@@ -107,6 +108,41 @@ class Drugs_RealmTests: XCTestCase {
             let fromFiles = files.getEntry(with: testEntry.id)
             XCTAssertEqual(fromRealm, fromFiles, "Loaded entries do not match")
         }
+    }
+    
+    func testCombine() throws {
+        class Test {
+            @Published var name: String = "initial"
+        }
+        
+        class TestObs: ObservableObject {
+            @Published var name: String = "initial-obs"
+        }
+        
+        let notAnnotatedInitial = expectation(description: "Did not get value from non-annotated")
+        notAnnotatedInitial.expectedFulfillmentCount = 2
+        
+        let annotatedInitial = expectation(description: "Did not get value from annotated")
+        annotatedInitial.expectedFulfillmentCount = 2
+        
+        var bag = Set<AnyCancellable>()
+        let test = Test()
+        let testObs = TestObs()
+        
+        test.$name.sink { value in
+            print(value)
+            notAnnotatedInitial.fulfill()
+        }.store(in: &bag)
+        
+        testObs.$name.sink { value in
+            print(value)
+            annotatedInitial.fulfill()
+        }.store(in: &bag)
+        
+        test.name = "Second"
+        testObs.name = "Second-OBS"
+        
+        wait(for: [notAnnotatedInitial, annotatedInitial], timeout: 1.0)
     }
     
     func addTestDataToRealm() throws -> (FilePersistenceManager, ApplicationData) {

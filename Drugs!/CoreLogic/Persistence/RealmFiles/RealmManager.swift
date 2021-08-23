@@ -40,18 +40,62 @@ enum RealmPersistenceError: Error {
     case invalidIndex(Int)
 }
 
+class RealmPersistenceStateTransformer {
+    @Published var appData: ApplicationData = ApplicationData()
+    
+    private let manager: EntryLogRealmManager
+    private var entriesToken: NotificationToken?
+    private var drugsToken: NotificationToken?
+    
+    init(manager: EntryLogRealmManager) {
+        self.manager = manager
+        try? setupObservations()
+    }
+    
+    deinit {
+        entriesToken?.invalidate()
+        drugsToken?.invalidate()
+    }
+    
+    func setupObservations() throws {
+        let realm = try manager.loadEntryLogRealm()
+        entriesToken = realm.objects(RLM_MedicineEntry.self)
+            .observe { [weak self] change in
+                switch change {
+                case let .initial(results):
+                    self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
+                case let .update(results, _, _, _):
+                    self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
+                case let .error(error):
+                    log { Event("Failed to observe, \(error.localizedDescription)", .error)}
+                }
+            }
+        drugsToken = realm.objects(RLM_Drug.self)
+            .observe { [weak self] change in
+                switch change {
+                case let .initial(results):
+                    self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
+                case let .update(results, _, _, _):
+                    self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
+                case let .error(error):
+                    log { Event("Failed to observe, \(error.localizedDescription)", .error)}
+                }
+            }
+    }
+}
+
 class RealmPersistenceManager: ObservableObject, PersistenceManager {
     private let manager: EntryLogRealmManager
+    private let tranformer: RealmPersistenceStateTransformer
     private let migrater = V1Migrator()
     
     init(manager: EntryLogRealmManager = DefaultRealmManager()) {
         self.manager = manager
+        self.tranformer = RealmPersistenceStateTransformer(manager: manager)
     }
     
-    @Published var appData: ApplicationData = ApplicationData()
-    
     var appDataStream: AnyPublisher<ApplicationData, Never> {
-        $appData.eraseToAnyPublisher()
+        tranformer.$appData.eraseToAnyPublisher()
     }
     
     func getEntry(with id: String) -> MedicineEntry? {
@@ -105,7 +149,9 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     func updateDrug(originalDrug: Drug, updatedDrug: Drug, _ handler: @escaping ManagerCallback) {
         (try? manager.loadEntryLogRealm()).map { realm in
             do {
-                let drugToUpdate = realm.objects(RLM_Drug.self).first(where: { $0.id == updatedDrug.id })
+                
+                let drugToUpdate = realm.objects(RLM_Drug.self)
+                    .first(where: { $0.id == updatedDrug.id })
                 try realm.write {
                     drugToUpdate?.hourlyDoseTime = updatedDrug.hourlyDoseTime
                     drugToUpdate?.ingredients.removeAll()
@@ -145,6 +191,4 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
             }
         }
     }
-    
-    
 }
