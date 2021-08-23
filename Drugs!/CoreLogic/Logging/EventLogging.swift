@@ -47,6 +47,8 @@ public class AppEvents: ObservableObject {
     }
 
 	static func add(_ event: Event) {
+		// TODO: potential threading problem here with combine
+		// Maybe... make a logging realm? Just buy in whole hog?
         shared.appEvents.append(event)
         shared.logFileStore.appendText(event.description)
         shared.logFileStore.appendText("\n")
