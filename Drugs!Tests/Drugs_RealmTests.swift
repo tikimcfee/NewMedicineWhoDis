@@ -20,23 +20,28 @@ class Drugs_RealmTests: XCTestCase {
 	
 	// - Realm
 	var appLogManager: AppEventLogRealmManager!
-    var manager: EntryLogRealmManager!
-    var defaultLogRealm: Realm!
+    var entryLogRealmManager: EntryLogRealmManager!
+	
+	var tokens: [NotificationToken]!
 	
 	// - Migration
 	let migrator = V1Migrator()
 
     override func setUpWithError() throws {
+		tokens = []
+		
 		flatFileStore = EntryListFileStore()
 		flatFilePersistenceManager = FilePersistenceManager(store: flatFileStore)
 		
+		
 		appLogManager = DefaultAppEventRealmManager.shared
-        manager = TestingRealmManager()
-        defaultLogRealm = try manager.loadEntryLogRealm()
+        entryLogRealmManager = TestingRealmManager()
     }
 
     override func tearDownWithError() throws {
-        try clearDefaultRealmData()
+		tokens.forEach { $0.invalidate() }
+		tokens = []
+		try clearDefaultRealmData()
     }
 
     func testExample() throws {
@@ -61,20 +66,24 @@ class Drugs_RealmTests: XCTestCase {
         entry.drugsTaken = someSelections
         
         // Try a write
-        try defaultLogRealm.write {
-            defaultLogRealm.add(entry)
+        entryLogRealmManager.access { realm in
+			try realm.write {
+				realm.add(entry)	
+			}
         }
         
         // Try a read
-        let rereadEntry = try XCTUnwrap(defaultLogRealm.object(
-            ofType: RLM_MedicineEntry.self,
-            forPrimaryKey: entry.id
-        ), "Did not find expected entry")
-        
-        // Hope
-        XCTAssertEqual(entry.date, rereadEntry.date)
-        XCTAssertEqual(newDrug.id, entry.drugsTaken.first?.drug?.id)
-        XCTAssertEqual(entry.drugsTaken.first?.count, 5.0)
+		entryLogRealmManager.access { realm in
+			let rereadEntry = try XCTUnwrap(realm.object(
+				ofType: RLM_MedicineEntry.self,
+				forPrimaryKey: entry.id
+			), "Did not find expected entry")
+			
+			// Hope
+			XCTAssertEqual(entry.date, rereadEntry.date)
+			XCTAssertEqual(newDrug.id, entry.drugsTaken.first?.drug?.id)
+			XCTAssertEqual(entry.drugsTaken.first?.count, 5.0)
+		}
     }
     
     func testMigration() throws {
@@ -84,7 +93,12 @@ class Drugs_RealmTests: XCTestCase {
         let legacyLookup = legacyAppData.mainEntryList.reduce(
             into: [String: MedicineEntry]()
         ) { lookup, value in lookup[value.id] = value }
-        let fetchedObjects = defaultLogRealm.objects(RLM_MedicineEntry.self)
+		
+		let fetchedObjects = try XCTUnwrap(
+			entryLogRealmManager.accessImmediate { $0.objects(RLM_MedicineEntry.self) },
+			"Failed to fetch entry list"
+		)
+		
         try fetchedObjects.enumerated().forEach { index, object in
             let matchingLegacy = try XCTUnwrap(legacyLookup[object.id], "Did not find a matching entry")
             XCTAssertEqual(matchingLegacy.date, object.date, "Dates were not migrated correctly")
@@ -98,7 +112,11 @@ class Drugs_RealmTests: XCTestCase {
             XCTAssertEqual(oldNames, drugNames, "Mismatched drug names")
         }
         
-        let fetchedAvailable = defaultLogRealm.objects(RLM_AvailableDrugList.self)
+		let fetchedAvailable = try XCTUnwrap(
+			entryLogRealmManager.accessImmediate { $0.objects(RLM_AvailableDrugList.self) },
+			"Failed to drug list"
+		)
+		
         XCTAssert(fetchedAvailable.count == 1, "Should only ever have one of these")
         let realmList = fetchedAvailable.first!
         let realmNames = realmList.drugs.reduce(into: Set<String>()) { set, drug in
@@ -113,7 +131,7 @@ class Drugs_RealmTests: XCTestCase {
     func testPersistenceManagerProtocol() throws {
         try clearDefaultRealmData()
         
-        let realm = RealmPersistenceManager(manager: manager)
+        let realm = RealmPersistenceManager(manager: entryLogRealmManager)
         let oldData = try addTestDataToRealm()
         
         oldData.mainEntryList.forEach { testEntry in
@@ -122,6 +140,58 @@ class Drugs_RealmTests: XCTestCase {
             XCTAssertEqual(fromRealm, fromFiles, "Loaded entries do not match")
         }
     }
+	
+	func testUpdates() throws {
+		try clearDefaultRealmData()
+		
+		var fetchListAsSingle: RLM_AvailableDrugList? {
+			entryLogRealmManager.accessImmediate { RLM_AvailableDrugList.defaultFrom($0) }
+		}
+		
+		if fetchListAsSingle == nil {
+			let newList = RLM_AvailableDrugList.makeFrom(AvailableDrugList.defaultList)
+			entryLogRealmManager.access { realm in
+				try realm.write {
+					realm.add(newList)
+				}
+			}
+		}
+		
+		let existingDefault = try XCTUnwrap(fetchListAsSingle, "Insertion / query did not succeed")
+		let secondToLastItem = existingDefault.drugs[existingDefault.drugs.count - 2]
+		
+		let expectedNotifications = expectation(description: "Observations on DrugList failed")
+		expectedNotifications.expectedFulfillmentCount = 2
+		let token = entryLogRealmManager
+			.accessImmediate { realm in 
+				RLM_AvailableDrugList.defaultListFrom(realm)
+			}!
+			.observe { change in 
+				switch change {
+					case let .initial(results):
+						XCTAssertEqual(results.first!, fetchListAsSingle)
+						expectedNotifications.fulfill()
+						
+					case let .error(error):
+						XCTFail(error.localizedDescription)
+						
+					case let .update(results, deletions, insertions, modifications):
+						XCTAssert(deletions.isEmpty, "Unexpected deletions")
+						XCTAssert(insertions.isEmpty, "Unexpected insertions")
+						XCTAssert(modifications.count == 1, "Single modification not received")
+						let updatedList = results[modifications[0]]
+						XCTAssertEqual(secondToLastItem, updatedList.drugs.last)
+						expectedNotifications.fulfill()
+				}
+			}
+		tokens.append(token)
+		entryLogRealmManager.access { realm in 
+			try realm.write {
+				existingDefault.drugs.removeLast()
+			}
+		}
+		wait(for: [expectedNotifications], timeout: 1.0)
+	}
     
     func testCombine() throws {
         class Test {
@@ -181,20 +251,21 @@ class Drugs_RealmTests: XCTestCase {
         XCTAssertEqual(newRLMModels.count, legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
         XCTAssertEqual(newRLMList.drugs.count, legacyAppData.availableDrugList.drugs.count, "Did not end up with same entry counts")
         
-        try defaultLogRealm.write {
-            newRLMModels.forEach {
-                defaultLogRealm.add($0)
-            }
-            defaultLogRealm.add(newRLMList)
-        }
-        
+		entryLogRealmManager.access { realm in 
+			try realm.write {
+				newRLMModels.forEach { realm.add($0) }
+				realm.add(newRLMList)
+			}
+		}
         return legacyAppData
     }
     
     func clearDefaultRealmData() throws {
-        try defaultLogRealm.write {
-            defaultLogRealm.deleteAll()
-        }
+		entryLogRealmManager.access { realm in
+			try realm.write {
+				realm.deleteAll()
+			}
+		}
 		appLogManager.withRealm { realm in
 			try realm.write {
 				realm.deleteAll()

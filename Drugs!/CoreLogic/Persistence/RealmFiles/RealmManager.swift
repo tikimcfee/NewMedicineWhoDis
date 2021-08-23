@@ -13,6 +13,22 @@ import RealmSwift
 //MARK: - Realm Helper
 public protocol EntryLogRealmManager {
     func loadEntryLogRealm() throws -> Realm
+	func access(_ onLoad: (Realm) throws -> Void)
+}
+
+extension EntryLogRealmManager {
+	func access(_ onLoad: (Realm) throws -> Void) {
+		if let realm = try? loadEntryLogRealm() {
+			try? onLoad(realm)
+		}
+	}
+	
+	func accessImmediate<T>(_ onLoad: (Realm) throws -> T?) -> T? {
+		guard let realm = try? loadEntryLogRealm() else { 
+			return nil
+		}
+		return try? onLoad(realm)
+	}
 }
 
 class DefaultRealmManager: EntryLogRealmManager {
@@ -32,7 +48,7 @@ class TestingRealmManager: EntryLogRealmManager {
         config.fileURL = AppFiles.Testing__entryLogRealm
         let realm = try Realm(configuration: config)
         return realm
-    }
+	}
 }
 #endif
 
@@ -72,15 +88,20 @@ class RealmPersistenceStateTransformer {
                     log { Event("Failed to observe, \(error.localizedDescription)", .error)}
                 }
             }
-        drugsToken = realm.objects(RLM_Drug.self)
+		drugsToken = RLM_AvailableDrugList
+			.defaultListFrom(realm)
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
 					log { Event("Initial drug list loaded", .info) }
-                    self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
+					if let first = results.first {
+						self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)	
+					}
                 case let .update(results, _, _, _):
 					log { Event("Drug list updated", .info) }
-                    self?.appData.availableDrugList = AvailableDrugList(results.map { V1Migrator().toV1Drug($0) })
+					if let first = results.first {
+						self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)	
+					}
                 case let .error(error):
                     log { Event("Failed to observe, \(error.localizedDescription)", .error) }
                 }
@@ -195,4 +216,15 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
             }
         }
     }
+	
+	#if DEBUG
+	func removeAllData() {
+		(try? manager.loadEntryLogRealm()).map { realm in 
+			try? realm.write { 
+				let all = realm.objects(RLM_MedicineEntry.self)
+				realm.delete(all)
+			}
+		}
+	}
+	#endif
 }

@@ -12,6 +12,16 @@ import RealmSwift
 public class V1Migrator {
     private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
+	
+	public func migrate(data: ApplicationData, into realm: Realm) throws {
+		assert(!realm.isInWriteTransaction, "Migration should never start while in write transation")
+		let migratedEntries = migrateEntriesToRealmObjects(data.mainEntryList)
+		let migratedDrugList = migrateAvailableToRealmObjects(data.availableDrugList)
+		try realm.write {
+			realm.add(migratedEntries)
+			realm.add(migratedDrugList)
+		}
+	}
     
     public func migrateEntriesToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {
         return oldList.map(fromV1Entry)
@@ -44,6 +54,10 @@ public class V1Migrator {
             entry.hourlyDoseTime
         )
     }
+	
+	func toV1DrugList(_ list: RLM_AvailableDrugList) -> AvailableDrugList {
+		return AvailableDrugList(list.drugs.map(toV1Drug))
+	}
     
     func fromV1Entry(_ entry: MedicineEntry) -> RLM_MedicineEntry {
         let newEntry = RLM_MedicineEntry()

@@ -22,24 +22,15 @@ class Drugs_Tests: XCTestCase {
     private var rootScreenState: AddEntryViewState!
 
     override func setUp() {
-        // Remove test data
-        let lock = DispatchSemaphore(value: 1)
-        medicineStore = FilePersistenceManager(store: EntryListFileStore())
-        medicineStore.save() { _ in lock.signal() }
-        lock.wait()
-
-        dataManager = MedicineLogDataManager(
-            persistenceManager: medicineStore
-        )
+		dataManager = MedicineLogDataManager(supportedManager: .flatFile)
+		dataManager.removeAllData()
         notificationState = NotificationInfoViewState(dataManager)
         rootScreenState = AddEntryViewState(dataManager, NotificationScheduler(notificationState: notificationState))
     }
 
     override func tearDown() {
         // Remove test data
-        let lock = DispatchSemaphore(value: 1)
-        medicineStore.save() { _ in lock.signal() }
-        lock.wait()
+		dataManager.removeAllData()
     }
     
     func testAppStateCodable() {
@@ -87,27 +78,27 @@ class Drugs_Tests: XCTestCase {
         print(string)
     }
 
-    func testClockWords() {
-        let dates = [
-            Date() - TimeInterval(60 * 60 * 3),
-            Date() - TimeInterval(60 * 60 * 2),
-            Date() - TimeInterval(60 * 60),
-            Date(),
-            Date() + TimeInterval(60 * 20),
-            Date() + TimeInterval(60 * 60),
-            Date() + TimeInterval(60 * 20 * 2),
-            Date() + TimeInterval(60 * 60 * 2),
-            Date() + TimeInterval(60 * 20 * 4),
-            Date() + TimeInterval(60 * 60 * 3),
-            Date() + TimeInterval(60 * 20 * 6),
-            Date() + TimeInterval(60 * 60 * 4),
-            Date() + TimeInterval(60 * 20 * 8),
-            Date() + TimeInterval(60 * 60 * 5),
-        ]
-
-        for date in dates {
-            ClockWords.clockFor(date)
-        }
-    }
+//    func testClockWords() {
+//        let dates = [
+//            Date() - TimeInterval(60 * 60 * 3),
+//            Date() - TimeInterval(60 * 60 * 2),
+//            Date() - TimeInterval(60 * 60),
+//            Date(),
+//            Date() + TimeInterval(60 * 20),
+//            Date() + TimeInterval(60 * 60),
+//            Date() + TimeInterval(60 * 20 * 2),
+//            Date() + TimeInterval(60 * 60 * 2),
+//            Date() + TimeInterval(60 * 20 * 4),
+//            Date() + TimeInterval(60 * 60 * 3),
+//            Date() + TimeInterval(60 * 20 * 6),
+//            Date() + TimeInterval(60 * 60 * 4),
+//            Date() + TimeInterval(60 * 20 * 8),
+//            Date() + TimeInterval(60 * 60 * 5),
+//        ]
+//
+//        for date in dates {
+//            ClockWords.clockFor(date)
+//        }
+//    }
 
 }

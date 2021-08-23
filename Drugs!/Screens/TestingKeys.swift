@@ -3,6 +3,7 @@ public enum AppTestArguments: String {
     case clearEntriesOnLaunch
     case disableAnimations
     case launchingForUnitTests
+	case insertDefaultIntoRealm
     
     var isSet: Bool { CommandLine.arguments.contains(rawValue) }
 }

@@ -146,7 +146,12 @@ public class FilePersistenceManager: PersistenceManager {
         }
         save(handler)
     }
-
+	
+	#if DEBUG
+	func removeAllData() {
+		clearMainEntryList()
+	}
+	#endif
 }
 
 //MARK: - Tests

@@ -118,10 +118,7 @@ public final class TestData {
 }
 
 public func makeTestMedicineOperator() -> MedicineLogDataManager {
-    let medicineStore = EntryListFileStore()
-    return MedicineLogDataManager(
-        persistenceManager: FilePersistenceManager(store: medicineStore)
-    )
+    return MedicineLogDataManager(supportedManager: .flatFile)
 }
 
 func randomNameString(length: Int = 7)->String{

@@ -5,16 +5,6 @@ import Combine
 typealias PersistenceCallback = (Result<Void, Error>) -> Void
 typealias ManagerCallback = (Result<Void, Error>) -> Void
 
-enum PersistenceOperation {
-    case addEntry(MedicineEntry)
-    case removeEntry(String)
-    case updateEntry(MedicineEntry)
-
-    case updateDrug(originalDrug: Drug, updatedDrug: Drug)
-    case addDrug(Drug)
-    case removeDrug(Drug)
-}
-
 protocol PersistenceManager {
     var appDataStream: AnyPublisher<ApplicationData, Never> { get }
 
@@ -51,38 +41,77 @@ protocol PersistenceManager {
         drugToRemove: Drug,
         _ handler: @escaping ManagerCallback
     )
+	
+	#if DEBUG
+	func removeAllData()
+	#endif
+}
+
+public class DataManagerPersistenceSelector {
+	public enum Supported {
+		case flatFile, realm
+	}
+	
+	func getFlatFile() -> FilePersistenceManager {
+		let fileStore = EntryListFileStore()
+		let manager = FilePersistenceManager(store: fileStore)
+		return manager
+	}
+	
+	func getRealm() -> RealmPersistenceManager {
+		let realmManager = DefaultRealmManager()
+		let persistenceManager = RealmPersistenceManager(manager: realmManager)
+		return persistenceManager
+	}
+	
+	func get(for supported: Supported) -> PersistenceManager {
+		switch supported {
+			case .flatFile:
+				return getFlatFile()
+			case .realm:
+				return getRealm()
+		}
+	}
 }
 
 public class MedicineLogDataManager: ObservableObject {
-    private var persistenceManager: PersistenceManager
-//	
-//	lazy var sharedEntryPipe: AnyPublisher<[MedicineEntry], Never> = {
-//		PassthroughSubject()
-//	} ()
-//	
-//	lazy var sharedDrugListPipe: AnyPublisher<[MedicineEntry], Never> = {
-//		PassthroughSubject()
-//	} ()
-
+	private let selector = DataManagerPersistenceSelector()
+	private var persistenceManager: PersistenceManager
+    
+	private lazy var sharedEntryPipe = CurrentValueSubject<[MedicineEntry], Never>([])
+	private lazy var sharedDrugListPipe = CurrentValueSubject<AvailableDrugList, Never>(AvailableDrugList.empty)
+	private var cancellables = Set<AnyCancellable>()
+	
     lazy var sharedEntryStream: AnyPublisher<[MedicineEntry], Never> = {
-        persistenceManager
-            .appDataStream
-            .map { $0.mainEntryList }
-            .eraseToAnyPublisher()
+		sharedEntryPipe.eraseToAnyPublisher()
     }()
 
     lazy var sharedDrugListStream: AnyPublisher<AvailableDrugList, Never> = {
-        persistenceManager
-            .appDataStream
-            .map{ $0.availableDrugList }
-            .eraseToAnyPublisher()
+		sharedDrugListPipe.eraseToAnyPublisher()
     }()
 
-    init(
-        persistenceManager: PersistenceManager
-    ) {
-        self.persistenceManager = persistenceManager
+    init(supportedManager: DataManagerPersistenceSelector.Supported) {
+		self.persistenceManager = selector.get(for: supportedManager)
+		rebuildPipe()
     }
+	
+	func setManager(_ supported: DataManagerPersistenceSelector.Supported) {
+		log { Event("Setting persistence layer to \(supported)") }
+		persistenceManager = selector.get(for: supported)
+		cancellables = Set()
+		rebuildPipe()
+	}
+	
+	private func rebuildPipe() {
+		persistenceManager.appDataStream.sink {
+			self.sharedEntryPipe.send($0.mainEntryList)
+			self.sharedDrugListPipe.send($0.availableDrugList)
+		}.store(in: &cancellables)
+	}
+	
+	#if DEBUG
+	var exposedManager: PersistenceManager { persistenceManager }
+	#endif
 }
 
 //MARK: - Operations
@@ -131,6 +160,12 @@ extension MedicineLogDataManager {
     ) {
         persistenceManager.removeDrug(drugToRemove: drugToRemove, handler)
     }
+	
+	#if DEBUG
+	func removeAllData() {
+		persistenceManager.removeAllData()
+	}
+	#endif
 }
 
 //MARK: - Live Changes
@@ -190,12 +225,3 @@ extension MedicineLogDataManager {
         }.eraseToAnyPublisher()
     }
 }
-
-//MARK: - Tests
-#if DEBUG
-extension MedicineLogDataManager {
-    func clearAllEntries() {
-        (self.persistenceManager as! FilePersistenceManager).clearMainEntryList()
-    }
-}
-#endif

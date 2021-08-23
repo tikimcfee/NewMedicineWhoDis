@@ -120,7 +120,7 @@ class Drugs_UITests: XCTestCase {
         app.launchArguments = [
             AppTestArguments.enableTestConfiguration.rawValue,
             AppTestArguments.clearEntriesOnLaunch.rawValue,
-            AppTestArguments.disableAnimations.rawValue
+            AppTestArguments.disableAnimations.rawValue,
         ]
         app.launch()
 

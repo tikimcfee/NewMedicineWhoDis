@@ -20,7 +20,6 @@ public extension Result where Success == ApplicationData, Failure == Error {
 }
 
 public class MasterEnvironmentContainer: ObservableObject {
-    let fileStore: EntryListFileStore
     let dataManager: MedicineLogDataManager
 
     let notificationState: NotificationInfoViewState
@@ -29,10 +28,7 @@ public class MasterEnvironmentContainer: ObservableObject {
     let rootScreenState: AddEntryViewState
 
     init() {
-        self.fileStore = EntryListFileStore()
-        self.dataManager = MedicineLogDataManager(
-            persistenceManager: FilePersistenceManager(store: fileStore)
-        )
+        self.dataManager = MedicineLogDataManager(supportedManager: .realm)
         self.notificationState = NotificationInfoViewState(dataManager)
         self.notificationScheduler = NotificationScheduler(notificationState: notificationState)
         self.rootScreenState = AddEntryViewState(dataManager, notificationScheduler)
@@ -83,9 +79,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func configureForTests(_ container: MasterEnvironmentContainer) {
         guard AppTestArguments.enableTestConfiguration.isSet else { return }
         log { Event("Enabling test configuration. Ye have been warned.", .warning) }
-
-        if AppTestArguments.clearEntriesOnLaunch.isSet {
-            container.dataManager.clearAllEntries()
+		
+		if AppTestArguments.clearEntriesOnLaunch.isSet {
+            container.dataManager.removeAllData()
         }
 
         if AppTestArguments.disableAnimations.isSet {
