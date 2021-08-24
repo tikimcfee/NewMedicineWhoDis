@@ -138,7 +138,7 @@ class Drugs_UITests: XCTestCase {
         ]
 
         // Fill list with entries
-        let expectedCellCount = 128 // Keep even to avoid rounding
+        let expectedCellCount = 64 // Keep even to avoid rounding
         for _ in (0..<expectedCellCount / 2) {
             make(entryTypeOne)
             make(entryTypeTwo)

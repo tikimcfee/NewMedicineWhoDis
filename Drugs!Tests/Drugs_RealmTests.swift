@@ -241,6 +241,29 @@ class Drugs_RealmTests: XCTestCase {
 		}
 	}
     
+    func testRealmSorting() throws {
+        try clearDefaultRealmData()
+        let testData = try addTestDataToRealm()
+        
+        let sortFunction = FilePersistenceManager.defaultSortFunction
+        let expectedSortedEntries = testData.mainEntryList.sorted(by: sortFunction)
+        
+        // Pull the realm out of closure to guarantee the XCT assertion is hit
+        var realm: Realm?
+        entryLogRealmManager.access { realm = $0 }
+        
+        let entries = try XCTUnwrap(realm).objects(RLM_MedicineEntry.self)
+        let sorted = entries.sorted(by: \.date, ascending: false)
+        
+        XCTAssertEqual(
+            sorted.map { migrator.toV1Entry($0) },
+            expectedSortedEntries,
+            "Entries do not match"
+        )
+    }
+}
+
+extension Drugs_RealmTests {
     func addTestDataToRealm() throws -> ApplicationData {
         let legacyAppData = try flatFilePersistenceManager.loadFromFileStoreImmediately()
         let startCount = legacyAppData.mainEntryList.count
@@ -251,25 +274,25 @@ class Drugs_RealmTests: XCTestCase {
         XCTAssertEqual(newRLMModels.count, legacyAppData.mainEntryList.count, "Did not end up with same entry counts")
         XCTAssertEqual(newRLMList.drugs.count, legacyAppData.availableDrugList.drugs.count, "Did not end up with same entry counts")
         
-		entryLogRealmManager.access { realm in 
-			try realm.write {
-				newRLMModels.forEach { realm.add($0) }
-				realm.add(newRLMList)
-			}
-		}
+        entryLogRealmManager.access { realm in
+            try realm.write {
+                newRLMModels.forEach { realm.add($0) }
+                realm.add(newRLMList)
+            }
+        }
         return legacyAppData
     }
     
     func clearDefaultRealmData() throws {
-		entryLogRealmManager.access { realm in
-			try realm.write {
-				realm.deleteAll()
-			}
-		}
-		appLogManager.withRealm { realm in
-			try realm.write {
-				realm.deleteAll()
-			}
-		}
+        entryLogRealmManager.access { realm in
+            try realm.write {
+                realm.deleteAll()
+            }
+        }
+        appLogManager.withRealm { realm in
+            try realm.write {
+                realm.deleteAll()
+            }
+        }
     }
 }

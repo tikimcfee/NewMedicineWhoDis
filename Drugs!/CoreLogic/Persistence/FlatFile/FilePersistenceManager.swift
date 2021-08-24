@@ -1,6 +1,12 @@
 import Foundation
 import Combine
 
+extension FilePersistenceManager {
+    public static let defaultSortFunction: (MedicineEntry, MedicineEntry) -> Bool = {
+        $0.date > $1.date
+    }
+}
+
 public class FilePersistenceManager: PersistenceManager {
     // Dependencies
     private let medicineStore: EntryListFileStore
@@ -91,14 +97,9 @@ public class FilePersistenceManager: PersistenceManager {
             return
         }
 
-        // Default on-save-sorting. This might be a terrible idea.
-        func sortEntriesNewestOnTop(left: MedicineEntry, right: MedicineEntry) -> Bool {
-            left.date > right.date
-        }
-
         appData.updateEntryList{ list in
             list[index] = updatedEntry
-            list.sort(by: sortEntriesNewestOnTop)
+            list.sort(by: Self.defaultSortFunction)
         }
         save(handler)
     }
