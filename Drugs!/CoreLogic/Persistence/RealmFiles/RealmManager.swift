@@ -83,6 +83,7 @@ class RealmPersistenceStateTransformer {
         let realm = try manager.loadEntryLogRealm()
         entriesToken = realm
             .objects(RLM_MedicineEntry.self)
+            .sorted(by: \.date, ascending: false)
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
