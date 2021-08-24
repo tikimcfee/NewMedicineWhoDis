@@ -23,6 +23,7 @@ public final class ExistingEntryEditorState: ObservableObject {
             .store(in: &cancellables)
 
         dataManager.sharedDrugListStream
+            .map { list in list.drugs.map { $0.asSelectableDrug } }
             .sink { [weak self] in self?.selectionModel.availableDrugs = $0 }
             .store(in: &cancellables)
     }

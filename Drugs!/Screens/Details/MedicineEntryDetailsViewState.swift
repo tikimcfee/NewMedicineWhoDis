@@ -72,8 +72,8 @@ public final class MedicineEntryDetailsViewState: ObservableObject {
 private extension MedicineEntry {
     func toDetailEntryModels(_ info: AvailabilityInfo) -> [DetailEntryModel] {
         return timesDrugsAreNextAvailable.map { (drug, calculatedDate) in
-            let canTakeAgain = info[drug]?.canTake == true
-            let formattedDate = DateFormatting.DefaultDateShortTime.string(from: info[drug]?.when ?? calculatedDate)
+            let canTakeAgain = info[drug.id]?.canTake == true
+            let formattedDate = DateFormatting.DefaultDateShortTime.string(from: info[drug.id]?.when ?? calculatedDate)
             let ingredientList = drug.ingredientList
 
             let text: String

@@ -73,10 +73,10 @@ extension AvailableDrugList {
     ]
 }
 
-public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
+public typealias AvailabilityInfo = [DrugId: (canTake: Bool, when: Date)]
 
 extension AvailabilityInfo {
-    func canTake(_ drug: Drug) -> Bool {
+    func canTake(_ drug: DrugId) -> Bool {
         return self[drug]?.canTake == true
     }
 }
@@ -107,7 +107,7 @@ class AvailabilityInfoCalculator {
         }
 
         return drugDates.reduce(into: AvailabilityInfo()) { result, entry in
-            result[entry.key] = (entry.value <= startDate, entry.value)
+            result[entry.key.id] = (entry.value <= startDate, entry.value)
         }
     }
 }

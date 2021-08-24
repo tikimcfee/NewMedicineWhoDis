@@ -31,6 +31,7 @@
 		45DA2BC1232532E500649270 /* AppStateError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* AppStateError.swift */; };
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
+		B7881B1826D4912D00B7BBA6 /* InProgressEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1726D4912D00B7BBA6 /* InProgressEntry.swift */; };
 		B7FC9EA026D1D3310027E032 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9E9F26D1D3310027E032 /* RealmSwift */; };
 		B7FC9EA226D1D3310027E032 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9EA126D1D3310027E032 /* Realm */; };
 		B7FC9EA426D1D3A90027E032 /* Drugs_RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */; };
@@ -51,7 +52,6 @@
 		F0456CDD247061450017B04E /* DrugEntryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0456CDC247061450017B04E /* DrugEntryCell.swift */; };
 		F051DACD24EBC20200D095C9 /* slow-spring-board.caf in Resources */ = {isa = PBXBuildFile; fileRef = F051DACC24EBC20200D095C9 /* slow-spring-board.caf */; };
 		F066BB4F258EF98B00B1654B /* FilePersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F066BB4E258EF98B00B1654B /* FilePersistenceManager.swift */; };
-		F066BB54258EFC5700B1654B /* ApplicationData+Mutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F066BB53258EFC5700B1654B /* ApplicationData+Mutation.swift */; };
 		F06CE02C2477A7E50005441E /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
 		F06CE02D2477A7E60005441E /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459679FA2337204B001DCBA1 /* Formatting.swift */; };
 		F075605D24EC5A4F00E81463 /* GlobalUtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F075605C24EC5A4F00E81463 /* GlobalUtilityFunctions.swift */; };
@@ -118,6 +118,7 @@
 		45DA2BC0232532E500649270 /* AppStateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateError.swift; sourceTree = "<group>"; };
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
+		B7881B1726D4912D00B7BBA6 /* InProgressEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InProgressEntry.swift; sourceTree = "<group>"; };
 		B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_RealmTests.swift; sourceTree = "<group>"; };
 		B7FC9EA626D1FC020027E032 /* RealmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmManager.swift; sourceTree = "<group>"; };
 		B7FC9EA826D1FD210027E032 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
@@ -135,7 +136,6 @@
 		F0456CDC247061450017B04E /* DrugEntryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugEntryCell.swift; sourceTree = "<group>"; };
 		F051DACC24EBC20200D095C9 /* slow-spring-board.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "slow-spring-board.caf"; sourceTree = "<group>"; };
 		F066BB4E258EF98B00B1654B /* FilePersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePersistenceManager.swift; sourceTree = "<group>"; };
-		F066BB53258EFC5700B1654B /* ApplicationData+Mutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ApplicationData+Mutation.swift"; sourceTree = "<group>"; };
 		F075605C24EC5A4F00E81463 /* GlobalUtilityFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalUtilityFunctions.swift; sourceTree = "<group>"; };
 		F07E207D24E9CBFF004DFB8C /* AddEntryViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEntryViewState.swift; sourceTree = "<group>"; };
 		F07E207F24E9CC2B004DFB8C /* DrugListEditState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugListEditState.swift; sourceTree = "<group>"; };
@@ -312,6 +312,15 @@
 			path = AddNewEntry;
 			sourceTree = "<group>";
 		};
+		B7881B1626D4911800B7BBA6 /* DrugSelectionModels */ = {
+			isa = PBXGroup;
+			children = (
+				F0E25B6B258ED11A001EE2A7 /* DrugSelectionModels.swift */,
+				B7881B1726D4912D00B7BBA6 /* InProgressEntry.swift */,
+			);
+			path = DrugSelectionModels;
+			sourceTree = "<group>";
+		};
 		B7FC9EA526D1FBA90027E032 /* RealmFiles */ = {
 			isa = PBXGroup;
 			children = (
@@ -364,7 +373,6 @@
 			children = (
 				45DA2BC0232532E500649270 /* AppStateError.swift */,
 				F09E36ED248216220011C8BD /* ApplicationData.swift */,
-				F066BB53258EFC5700B1654B /* ApplicationData+Mutation.swift */,
 			);
 			path = AppState;
 			sourceTree = "<group>";
@@ -383,11 +391,11 @@
 		F02892F124EB88C7005A40D9 /* Selection */ = {
 			isa = PBXGroup;
 			children = (
+				B7881B1626D4911800B7BBA6 /* DrugSelectionModels */,
 				45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */,
 				F0456CCF24705D630017B04E /* DrugSelectionListView.swift */,
 				45CE91C123CBFB55007E0580 /* DrugEntryNumberPad.swift */,
 				F0456CDC247061450017B04E /* DrugEntryCell.swift */,
-				F0E25B6B258ED11A001EE2A7 /* DrugSelectionModels.swift */,
 			);
 			path = Selection;
 			sourceTree = "<group>";
@@ -623,13 +631,13 @@
 				B7FC9EA726D1FC020027E032 /* RealmManager.swift in Sources */,
 				45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */,
 				45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */,
+				B7881B1826D4912D00B7BBA6 /* InProgressEntry.swift in Sources */,
 				459679F923371772001DCBA1 /* MedicineEntryDetailsView.swift in Sources */,
 				F0D35309256F176C00AAC99E /* ExistingEntryEditorState.swift in Sources */,
 				F02892F524EBA28A005A40D9 /* NotificationInfoView.swift in Sources */,
 				F02262532471AA8C00F31141 /* Components.swift in Sources */,
 				45CE91C223CBFB55007E0580 /* DrugEntryNumberPad.swift in Sources */,
 				F07E207E24E9CBFF004DFB8C /* AddEntryViewState.swift in Sources */,
-				F066BB54258EFC5700B1654B /* ApplicationData+Mutation.swift in Sources */,
 				F0456CD024705D630017B04E /* DrugSelectionListView.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,

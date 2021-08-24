@@ -33,6 +33,7 @@ public final class AddEntryViewState: ObservableObject {
 
         dataManager.sharedDrugListStream
             .receive(on: RunLoop.main)
+            .map { list in list.drugs.map { $0.asSelectableDrug} }
             .sink { [weak self] in
                 self?.drugSelectionModel.availableDrugs = $0
             }
@@ -48,20 +49,23 @@ public final class AddEntryViewState: ObservableObject {
             return
         }
 
-        let convertedMap: DrugCountMap
-        do {
-            convertedMap = try drugSelectionModel.inProgressEntry.drugMap(
-                in: drugSelectionModel.availableDrugs
-            )
-        } catch InProgressEntryError.mappingBackToDrugs {
-            log { Event("Missing drug from known available map during creation", .error) }
-            return
-        } catch {
-            log { Event("Unknown error during creation: \(error.localizedDescription)", .error) }
-            return
-        }
+//        let convertedMap: DrugCountMap
+//        do {
+//            drugSelectionModel.inProgressEntry.entryMap.forEach { id, count in
+//
+//            }
+////            convertedMap = try drugSelectionModel.inProgressEntry.drugMap(
+////                in: drugSelectionModel.availableDrugs
+////            )
+//        } catch InProgressEntryError.mappingBackToDrugs {
+//            log { Event("Missing drug from known available map during creation", .error) }
+//            return
+//        } catch {
+//            log { Event("Unknown error during creation: \(error.localizedDescription)", .error) }
+//            return
+//        }
 
-        let newEntry = createNewEntry(with: convertedMap)
+//        let newEntry = createNewEntry(with: convertedMap)
         dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
             switch result {
             case .success:

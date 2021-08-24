@@ -15,7 +15,7 @@ public class RLM_Ingredient: Object {
 }
 
 public class RLM_Drug: Object {
-    @Persisted(primaryKey: true) public var id: String = UUID().uuidString
+    @Persisted(primaryKey: true) public var id: DrugId = UUID().uuidString
     @Persisted public var name: String = ""
     @Persisted public var ingredients: List<RLM_Ingredient> = List()
     @Persisted public var hourlyDoseTime: Double = 0.0

@@ -9,6 +9,11 @@
 import Foundation
 
 extension ApplicationData: EquatableFileStorable {
+    public enum CodingKeys: CodingKey {
+        case listState
+        case availableDrugList
+    }
+    
     public init(from decoder: Decoder) throws {
         let codedKeys = try decoder.container(keyedBy: ApplicationData.CodingKeys.self)
         self.mainEntryList = codedKeys.decodedEntryList

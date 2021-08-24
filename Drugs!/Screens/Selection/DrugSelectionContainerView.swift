@@ -8,6 +8,7 @@ struct DrugSelectionContainerView: View {
         VStack(alignment: .center, spacing: 4) {
             DrugSelectionListView(model: listModel)
                 .boringBorder
+
             DrugEntryNumberPad(model: numberPadModel)
         }.padding(4.0)
     }
@@ -19,18 +20,17 @@ struct DrugSelectionContainerView: View {
             model.currentSelectedDrug = newOrToggledSelection
         }
 
-        let drugModels = model.availableDrugs.drugs.map { drug -> DrugSelectionListRowModel in
-            let selectableDrug = SelectableDrug(drugName: drug.drugName, drugId: drug.id)
-            let canTake = model.info.canTake(drug)
-            let message = model.info.nextDateMessage(drug)
+        let drugModels = model.availableDrugs.map { drug -> DrugSelectionListRowModel in
+            let canTake = model.info.canTake(drug.drugId)
+            let message = model.info.nextDateMessage(drug.drugId)
             return DrugSelectionListRowModel(
-                drug: selectableDrug,
-                count: model.count(for: selectableDrug),
+                drug: drug,
+                count: model.count(for: drug),
                 canTake: canTake,
                 timingMessage: message.message,
                 timingIcon: message.icon,
-                isSelected: model.currentSelectedDrug == selectableDrug,
-                didSelect: { didSelect(selectableDrug) }
+                isSelected: model.currentSelectedDrug == drug,
+                didSelect: { didSelect(drug) }
             )
         }
 
@@ -71,8 +71,8 @@ struct DrugSelectionContainerView: View {
 }
 
 private extension AvailabilityInfo {
-    func nextDateMessage(_ drug: Drug) -> (message: String, icon: String) {
-        if let date = self[drug]?.when {
+    func nextDateMessage(_ drugId: DrugId) -> (message: String, icon: String) {
+        if let date = self[drugId]?.when {
             if date < Date() {
                 return ("", "")
             } else {
@@ -81,7 +81,7 @@ private extension AvailabilityInfo {
                 return (message, "timer")
             }
         } else {
-            log { Event("Missing drug date in info for: \(drug)") }
+            log { Event("Missing drug date in info for: \(drugId)") }
             return ("<missing time>", "xmark.circle")
         }
     }
@@ -120,12 +120,12 @@ class ClockWords {
 struct DrugEntryView_Preview: PreviewProvider {
     static var wrapper = WrappedBinding({ () -> DrugSelectionContainerModel in
         var model = DrugSelectionContainerModel()
-        model.availableDrugs = AvailableDrugList.defaultList
-        model.availableDrugs.drugs.forEach {
+        model.availableDrugs = AvailableDrugList.defaultList.drugs.map { $0.asSelectableDrug }
+        model.availableDrugs.forEach {
             let now = Date()
             let date = now + TimeInterval(Int.random(in: -36000...36000))
             let canTake = date < now
-            model.info[$0] = (canTake, date)
+            model.info[$0.drugId] = (canTake, date)
         }
         return model
     }())
