@@ -18,16 +18,22 @@ public protocol EntryLogRealmManager {
 
 extension EntryLogRealmManager {
 	func access(_ onLoad: (Realm) throws -> Void) {
-		if let realm = try? loadEntryLogRealm() {
-			try? onLoad(realm)
-		}
+        do {
+            let realm = try loadEntryLogRealm()
+            try onLoad(realm)
+        } catch {
+            log { Event("Failed to load realm: \(error.localizedDescription)", .error) }
+        }
 	}
 	
 	func accessImmediate<T>(_ onLoad: (Realm) throws -> T?) -> T? {
-		guard let realm = try? loadEntryLogRealm() else { 
-			return nil
-		}
-		return try? onLoad(realm)
+        do {
+            let realm = try loadEntryLogRealm()
+            return try onLoad(realm)
+        } catch {
+            log { Event("Failed to load realm: \(error.localizedDescription)", .error) }
+            return nil
+        }
 	}
 }
 
@@ -130,7 +136,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func addEntry(medicineEntry: MedicineEntry, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 try realm.write {
                     realm.add(migrater.fromV1Entry(medicineEntry))
@@ -143,7 +149,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func removeEntry(index: Int, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 let objects = realm.objects(RLM_MedicineEntry.self)
                 guard objects.count > index else { throw RealmPersistenceError.invalidIndex(index) }
@@ -159,7 +165,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func updateEntry(updatedEntry: MedicineEntry, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 try realm.write {
                     realm.add(migrater.fromV1Entry(updatedEntry), update: .modified)
@@ -172,7 +178,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func updateDrug(originalDrug: Drug, updatedDrug: Drug, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 
                 let drugToUpdate = realm.objects(RLM_Drug.self)
@@ -190,7 +196,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func addDrug(newDrug: Drug, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 let newRealmDrug = migrater.fromV1drug(newDrug)
                 try realm.write {
@@ -204,7 +210,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     }
     
     func removeDrug(drugToRemove: Drug, _ handler: @escaping ManagerCallback) {
-        (try? manager.loadEntryLogRealm()).map { realm in
+        manager.access { realm in
             do {
                 try realm.write {
                     let toDelete = realm.object(ofType: RLM_Drug.self, forPrimaryKey: drugToRemove.id)
@@ -219,12 +225,12 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
 	
 	#if DEBUG
 	func removeAllData() {
-		(try? manager.loadEntryLogRealm()).map { realm in 
-			try? realm.write { 
-				let all = realm.objects(RLM_MedicineEntry.self)
-				realm.delete(all)
-			}
-		}
+        manager.access { realm in
+            try? realm.write {
+                let all = realm.objects(RLM_MedicineEntry.self)
+                realm.delete(all)
+            }
+        }
 	}
 	#endif
 }
