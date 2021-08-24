@@ -154,6 +154,18 @@ public class FilePersistenceManager: PersistenceManager {
 	#endif
 }
 
+private extension ApplicationData {
+    mutating func updateEntryList(_ handler: (inout [MedicineEntry]) -> Void) {
+        log { Event("MedicineEntry list updating") }
+        handler(&mainEntryList)
+    }
+    
+    mutating func updateDrugList(_ handler: (inout AvailableDrugList) -> Void) {
+        log { Event("AvailableDrugList updating") }
+        handler(&availableDrugList)
+    }
+}
+
 //MARK: - Tests
 #if DEBUG
 extension FilePersistenceManager {

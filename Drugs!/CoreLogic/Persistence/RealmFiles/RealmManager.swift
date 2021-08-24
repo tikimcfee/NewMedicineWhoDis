@@ -81,14 +81,15 @@ class RealmPersistenceStateTransformer {
     
     func setupObservations() throws {
         let realm = try manager.loadEntryLogRealm()
-        entriesToken = realm.objects(RLM_MedicineEntry.self)
+        entriesToken = realm
+            .objects(RLM_MedicineEntry.self)
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
-					log { Event("Initial entry list loaded", .info) }
+					log { Event("Initial entry list loaded") }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
                 case let .update(results, _, _, _):
-					log { Event("Entry list updated", .info) }
+					log { Event("Entry list updated") }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
                 case let .error(error):
                     log { Event("Failed to observe, \(error.localizedDescription)", .error)}
@@ -99,12 +100,12 @@ class RealmPersistenceStateTransformer {
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):
-					log { Event("Initial drug list loaded", .info) }
+					log { Event("Initial drug list loaded") }
 					if let first = results.first {
 						self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)	
 					}
                 case let .update(results, _, _, _):
-					log { Event("Drug list updated", .info) }
+					log { Event("Drug list updated") }
 					if let first = results.first {
 						self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)	
 					}
