@@ -42,6 +42,10 @@ class Drugs_RealmTests: XCTestCase {
 		tokens = []
 		try clearDefaultRealmData()
     }
+    
+    func test__FillFlatFiles() throws {
+        try addTestDataToFlatFileManager()
+    }
 
     func testExample() throws {
         try clearDefaultRealmData()
@@ -86,7 +90,8 @@ class Drugs_RealmTests: XCTestCase {
     }
     
     func testV1MigratorChecks() throws {
-        addTestDataToFlatFileManager(100)
+        flatFilePersistenceManager.removeAllData()
+        try addTestDataToFlatFileManager(100)
         try clearDefaultRealmData()
         
         entryLogRealmManager.access { realm in
@@ -97,7 +102,8 @@ class Drugs_RealmTests: XCTestCase {
     }
     
     func testV1Migrator() throws {
-        addTestDataToFlatFileManager()
+        flatFilePersistenceManager.removeAllData()
+        try addTestDataToFlatFileManager()
         try clearDefaultRealmData()
         
         entryLogRealmManager.access { realm in
@@ -313,7 +319,8 @@ class Drugs_RealmTests: XCTestCase {
 }
 
 extension Drugs_RealmTests {
-    func addTestDataToFlatFileManager(_ count: Int = 1000) {
+    func addTestDataToFlatFileManager(_ count: Int = 1000) throws {
+        _ = try flatFilePersistenceManager.loadFromFileStoreImmediately()
         guard flatFilePersistenceManager.getAppData().mainEntryList.isEmpty else {
             print("Entry list already contains test data")
             return
@@ -345,7 +352,7 @@ extension Drugs_RealmTests {
     }
     
     func addTestDataToRealm() throws -> ApplicationData {
-        addTestDataToFlatFileManager()
+        try addTestDataToFlatFileManager()
         let legacyAppData = try flatFilePersistenceManager.loadFromFileStoreImmediately()
         let startCount = legacyAppData.mainEntryList.count
         XCTAssert(startCount > 0, "Legacy data did not have at least one entry")
