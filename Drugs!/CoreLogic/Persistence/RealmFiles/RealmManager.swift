@@ -79,6 +79,12 @@ class RealmPersistenceStateTransformer {
         drugsToken?.invalidate()
     }
     
+    func doMigrations() throws {
+        manager.access { realm in
+            
+        }
+    }
+    
     func setupObservations() throws {
         let realm = try manager.loadEntryLogRealm()
         entriesToken = realm
@@ -129,6 +135,12 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     
     var appDataStream: AnyPublisher<ApplicationData, Never> {
         tranformer.$appData.eraseToAnyPublisher()
+    }
+    
+    func checkAndCompleteMigrations(_ sourceFlatFile: FilePersistenceManager) throws {
+        manager.access { realm in
+            try migrater.migrate(manager: sourceFlatFile, into: realm)
+        }
     }
     
     func getEntry(with id: String) -> MedicineEntry? {

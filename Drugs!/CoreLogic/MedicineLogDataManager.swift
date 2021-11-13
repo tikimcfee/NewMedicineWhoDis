@@ -61,6 +61,14 @@ public class DataManagerPersistenceSelector {
 	func getRealm() -> RealmPersistenceManager {
 		let realmManager = DefaultRealmManager()
 		let persistenceManager = RealmPersistenceManager(manager: realmManager)
+        
+        let flatFileMigrationSource = getFlatFile()
+        do {
+            try persistenceManager.checkAndCompleteMigrations(flatFileMigrationSource)
+        } catch {
+            log { Event("Migration failed. I hate when this happens. :: \(error)", .error) }
+        }
+
 		return persistenceManager
 	}
 	

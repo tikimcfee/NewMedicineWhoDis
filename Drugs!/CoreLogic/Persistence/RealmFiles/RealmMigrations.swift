@@ -12,14 +12,28 @@ import RealmSwift
 public class V1Migrator {
     private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
-	
-	public func migrate(data: ApplicationData, into realm: Realm) throws {
-		assert(!realm.isInWriteTransaction, "Migration should never start while in write transation")
-		let migratedEntries = migrateEntriesToRealmObjects(data.mainEntryList)
-		let migratedDrugList = migrateAvailableToRealmObjects(data.availableDrugList)
+    
+    public func migrate(manager: FilePersistenceManager, into realm: Realm) throws {
+        assert(!realm.isInWriteTransaction, "Migration should never start while in write transation")
+        
+        let migrationData = RLM_AppMigrationData.from(realm) ?? RLM_AppMigrationData()
+        guard !migrationData.flatFileMigrationComplete else {
+            log { Event("Skipping migration; already noted as complete.", .info) }
+            return
+        }
+        
+        log { Event("Starting initial migration. Here we go.", .info) }
+        
+        let sourceMigrationData = try manager.loadFromFileStoreImmediately()
+        
+        let migratedEntries = migrateEntriesToRealmObjects(sourceMigrationData.mainEntryList)
+		let migratedDrugList = migrateAvailableToRealmObjects(sourceMigrationData.availableDrugList)
 		try realm.write {
 			realm.add(migratedEntries)
 			realm.add(migratedDrugList)
+            
+            migrationData.flatFileMigrationComplete = true
+            realm.add(migrationData, update: .modified)
 		}
 	}
     

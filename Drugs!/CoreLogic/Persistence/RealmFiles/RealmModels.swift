@@ -9,6 +9,22 @@
 import Foundation
 import RealmSwift
 
+public class RLM_AppMigrationData: Object {
+    private static let AppMigrationDataId = "RLM_AppMigrationData_AppMigrationDataId"
+    @Persisted(primaryKey: true) public var id: String = AppMigrationDataId
+    @Persisted var flatFileMigrationComplete: Bool = false
+    
+    public static func from(_ realm: Realm) -> RLM_AppMigrationData? {
+        guard let migrationObject = realm.object(
+            ofType: RLM_AppMigrationData.self, forPrimaryKey: AppMigrationDataId)
+        else {
+            return nil
+        }
+        
+        return migrationObject
+    }
+}
+
 public class RLM_Ingredient: Object {
     @Persisted(primaryKey: true) public var id: String = UUID().uuidString
     @Persisted var ingredientName: String = ""

@@ -85,12 +85,23 @@ class Drugs_RealmTests: XCTestCase {
 		}
     }
     
+    func testV1MigratorChecks() throws {
+        addTestDataToFlatFileManager(100)
+        try clearDefaultRealmData()
+        
+        entryLogRealmManager.access { realm in
+            try migrator.migrate(manager: flatFilePersistenceManager, into: realm)
+            try migrator.migrate(manager: flatFilePersistenceManager, into: realm)
+            try migrator.migrate(manager: flatFilePersistenceManager, into: realm)
+        }
+    }
+    
     func testV1Migrator() throws {
         addTestDataToFlatFileManager()
         try clearDefaultRealmData()
         
         entryLogRealmManager.access { realm in
-            try migrator.migrate(data: flatFilePersistenceManager.getAppData(), into: realm)
+            try migrator.migrate(manager: flatFilePersistenceManager, into: realm)
         }
         
         // Create persistence manager after so the initial load can be taken care of by the
@@ -302,14 +313,14 @@ class Drugs_RealmTests: XCTestCase {
 }
 
 extension Drugs_RealmTests {
-    func addTestDataToFlatFileManager() {
+    func addTestDataToFlatFileManager(_ count: Int = 1000) {
         guard flatFilePersistenceManager.getAppData().mainEntryList.isEmpty else {
             print("Entry list already contains test data")
             return
         }
         
         let testData = TestData.shared
-        let entriesToCreate = 1000
+        let entriesToCreate = count
         let testEntries = (0..<entriesToCreate).map { entryIndex in
             testData.randomEntry()
         }
