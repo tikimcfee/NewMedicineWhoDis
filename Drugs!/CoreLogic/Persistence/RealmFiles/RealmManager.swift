@@ -234,5 +234,9 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
             }
         }
 	}
+    
+    func __internalAppData() -> ApplicationData {
+        return tranformer.appData
+    }
 	#endif
 }

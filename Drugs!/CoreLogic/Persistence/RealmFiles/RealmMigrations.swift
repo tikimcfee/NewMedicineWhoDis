@@ -44,7 +44,6 @@ public class V1Migrator {
         )
     }
     
-    
     func toV1Drug(_ entry: RLM_Drug) -> Drug {
         Drug(
             entry.name,

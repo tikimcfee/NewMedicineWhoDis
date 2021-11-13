@@ -32,8 +32,7 @@ class Drugs_RealmTests: XCTestCase {
 		
 		flatFileStore = EntryListFileStore()
 		flatFilePersistenceManager = FilePersistenceManager(store: flatFileStore)
-		
-		
+        
 		appLogManager = DefaultAppEventRealmManager.shared
         entryLogRealmManager = TestingRealmManager()
     }
@@ -84,6 +83,45 @@ class Drugs_RealmTests: XCTestCase {
 			XCTAssertEqual(newDrug.id, entry.drugsTaken.first?.drug?.id)
 			XCTAssertEqual(entry.drugsTaken.first?.count, 5.0)
 		}
+    }
+    
+    func testV1Migrator() throws {
+        addTestDataToFlatFileManager()
+        try clearDefaultRealmData()
+        
+        entryLogRealmManager.access { realm in
+            try migrator.migrate(data: flatFilePersistenceManager.getAppData(), into: realm)
+        }
+        
+        // Create persistence manager after so the initial load can be taken care of by the
+        // observation. We'll still have to wait.
+        let realmPersistence = RealmPersistenceManager(manager: entryLogRealmManager)
+        let loadExpectation = expectation(description: "Initial data must load implicitly via observation")
+        loadExpectation.assertForOverFulfill = false
+        var streamData: ApplicationData?
+        var dispose = Set<AnyCancellable>()
+        realmPersistence.appDataStream
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { loaded in
+                print("Sink received value...")
+                streamData = loaded
+                guard !loaded.mainEntryList.isEmpty,
+                      !loaded.availableDrugList.drugs.isEmpty else {
+                    print("Empty entry list in receive")
+                    return
+                }
+                loadExpectation.fulfill()
+            } )
+            .store(in: &dispose)
+        wait(for: [loadExpectation], timeout: 10.0)
+        
+        let loadedData = try XCTUnwrap(streamData, "Stream completed but data is nil... I don't even Swift folks")
+        let persistenceData = realmPersistence.__internalAppData()
+        var originalFlatData = flatFilePersistenceManager.getAppData()
+        originalFlatData.mainEntryList = originalFlatData.mainEntryList.sorted(by: { $0.date > $1.date} )
+        
+        XCTAssertEqual(loadedData, persistenceData)
+        XCTAssertEqual(persistenceData, originalFlatData, "End migrated state must match original data")
     }
     
     func testMigration() throws {
@@ -264,7 +302,39 @@ class Drugs_RealmTests: XCTestCase {
 }
 
 extension Drugs_RealmTests {
+    func addTestDataToFlatFileManager() {
+        guard flatFilePersistenceManager.getAppData().mainEntryList.isEmpty else {
+            print("Entry list already contains test data")
+            return
+        }
+        
+        let testData = TestData.shared
+        let entriesToCreate = 1000
+        let testEntries = (0..<entriesToCreate).map { entryIndex in
+            testData.randomEntry()
+        }
+        
+        let allAdded = expectation(description: "All entries must save corectly")
+        allAdded.expectedFulfillmentCount = entriesToCreate
+        
+        var failedAdditions = [MedicineEntry]()
+        testEntries.forEach { entry in
+            flatFilePersistenceManager.addEntry(medicineEntry: entry) { result in
+                switch result {
+                case .success:
+                    allAdded.fulfill()
+                case .failure(let error):
+                    print("Failed to save entry:\n||||||\(entry)||||||\(error)||||||")
+                    failedAdditions.append(entry)
+                }
+            }
+        }
+        
+        wait(for: [allAdded], timeout: 5.0)
+    }
+    
     func addTestDataToRealm() throws -> ApplicationData {
+        addTestDataToFlatFileManager()
         let legacyAppData = try flatFilePersistenceManager.loadFromFileStoreImmediately()
         let startCount = legacyAppData.mainEntryList.count
         XCTAssert(startCount > 0, "Legacy data did not have at least one entry")

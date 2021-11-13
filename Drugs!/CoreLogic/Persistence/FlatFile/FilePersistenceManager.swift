@@ -152,6 +152,10 @@ public class FilePersistenceManager: PersistenceManager {
 	func removeAllData() {
 		clearMainEntryList()
 	}
+    
+    func getAppData() -> ApplicationData {
+        return appData
+    }
 	#endif
 }
 

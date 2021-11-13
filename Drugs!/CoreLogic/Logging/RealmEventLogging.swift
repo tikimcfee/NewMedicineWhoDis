@@ -10,8 +10,8 @@ import Foundation
 import RealmSwift
 
 public protocol AppEventLogRealmManager {
-	typealias Actor = (Realm) throws -> Void
-	func withRealm(_ actor: Actor)
+	typealias RealmReceiver = (Realm) throws -> Void
+	func withRealm(_ actor: RealmReceiver)
 }
 
 public class DefaultAppEventRealmManager: AppEventLogRealmManager {
@@ -28,7 +28,7 @@ public class DefaultAppEventRealmManager: AppEventLogRealmManager {
 		return realm
 	}
 	
-	public func withRealm(_ actor: Actor) {
+	public func withRealm(_ actor: RealmReceiver) {
 		guard let realm = internalRealm else { return }
 		do {
 			try actor(realm)
@@ -43,12 +43,15 @@ public class RealmAppEventLogger {
 	public let manager = DefaultAppEventRealmManager.shared
 	
 	public static func add(_ event: Event) {
-		shared.manager.withRealm { realm in
-			let persistable = event.realmPersistable
-			try realm.write {
-				realm.add(persistable)
-			} 
-		}
+        let manager = shared.manager
+        DispatchQueue.main.async {
+            manager.withRealm { realm in
+                let persistable = event.realmPersistable
+                try realm.write {
+                    realm.add(persistable)
+                }
+            }
+        }
 	}
 }
 

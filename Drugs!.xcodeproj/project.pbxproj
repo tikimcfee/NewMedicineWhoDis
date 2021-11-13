@@ -826,7 +826,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_ASSET_PATHS = "\"Drugs!/Preview Content\"";
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
@@ -837,7 +837,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.11.0;
+				MARKETING_VERSION = 1.11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -854,7 +854,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Drugs!/Meds!.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_ASSET_PATHS = "\"Drugs!/Preview Content\"";
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
@@ -865,7 +865,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.11.0;
+				MARKETING_VERSION = 1.11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thelugoswriteapps.whendidi;
 				PRODUCT_NAME = "Meds!";
 				PROVISIONING_PROFILE_SPECIFIER = "";
