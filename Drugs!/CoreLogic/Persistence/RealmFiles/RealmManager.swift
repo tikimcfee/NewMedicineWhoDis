@@ -200,6 +200,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
         var updated: Drug
         var reason = "undefined"
     }
+    
     func updateDrug(originalDrug: Drug, updatedDrug: Drug, _ handler: @escaping ManagerCallback) {
         manager.access { realm in
             do {
@@ -225,12 +226,23 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
         }
     }
     
+    struct AddError: Error {
+        var new: Drug
+        var reason = "undefined"
+    }
+    
     func addDrug(newDrug: Drug, _ handler: @escaping ManagerCallback) {
         manager.access { realm in
             do {
+                guard let availableDrugList = RLM_AvailableDrugList.defaultFrom(realm) else {
+                    throw AddError(new: newDrug, reason: "Missing root drug list")
+                }
+                guard availableDrugList.drugs.first(where: { $0.id == newDrug.id} ) == nil else {
+                    throw AddError(new: newDrug, reason: "ID already exists")
+                }
                 let newRealmDrug = migrater.fromV1drug(newDrug)
                 try realm.write {
-                    realm.add(newRealmDrug)
+                    availableDrugList.drugs.append(newRealmDrug)
                     handler(.success(()))
                 }
             } catch {
@@ -239,12 +251,22 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
         }
     }
     
+    struct RemoveError: Error {
+        var remove: Drug
+        var reason = "undefined"
+    }
+    
     func removeDrug(drugToRemove: Drug, _ handler: @escaping ManagerCallback) {
         manager.access { realm in
             do {
+                guard let availableDrugList = RLM_AvailableDrugList.defaultFrom(realm) else {
+                    throw RemoveError(remove: drugToRemove, reason: "Missing root drug list")
+                }
+                guard let index = availableDrugList.drugs.firstIndex(where: { $0.id == drugToRemove.id} ) else {
+                    throw RemoveError(remove: drugToRemove, reason: "ID missing")
+                }
                 try realm.write {
-                    let toDelete = realm.object(ofType: RLM_Drug.self, forPrimaryKey: drugToRemove.id)
-                    realm.delete(toDelete!)
+                    availableDrugList.drugs.remove(at: index)
                     handler(.success(()))
                 }
             } catch {
