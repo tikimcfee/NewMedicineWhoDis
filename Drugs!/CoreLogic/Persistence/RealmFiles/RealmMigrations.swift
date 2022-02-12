@@ -64,7 +64,8 @@ public class V1Migrator {
             entry.ingredients.reduce(into: [Ingredient]()) { acc, entry in
                 acc.append(Ingredient(entry.ingredientName))
             },
-            entry.hourlyDoseTime
+            entry.hourlyDoseTime,
+            id: entry.id
         )
     }
 	
@@ -90,6 +91,7 @@ public class V1Migrator {
     func fromV1drug(_ drug: Drug) -> RLM_Drug {
         if let cached = cachedMigratedDrugNames[drug.id] { return cached }
         let newDrug = RLM_Drug()
+        newDrug.id = drug.id
         newDrug.name = drug.drugName
         newDrug.hourlyDoseTime = drug.hourlyDoseTime
         newDrug.ingredients.append(

@@ -33,7 +33,7 @@ public class DefaultAppEventRealmManager: AppEventLogRealmManager {
 		do {
 			try actor(realm)
 		} catch {
-            log { Event("\(error)", .error) }
+            debugPrint(Event("\(error)", .error))
 		}
 	}
 }

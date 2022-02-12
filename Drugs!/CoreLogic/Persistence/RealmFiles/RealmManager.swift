@@ -41,6 +41,10 @@ class DefaultRealmManager: EntryLogRealmManager {
     public func loadEntryLogRealm() throws -> Realm {
         var config = Realm.Configuration.defaultConfiguration
         config.fileURL = AppFiles.entryLogRealm
+//        config.migrationBlock = { migration, flag in
+//            log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
+//            log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }
+//        }
         let realm = try Realm(configuration: config)
         return realm
     }
@@ -191,19 +195,31 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
         }
     }
     
+    struct UpdateError: Error {
+        var original: Drug
+        var updated: Drug
+        var reason = "undefined"
+    }
     func updateDrug(originalDrug: Drug, updatedDrug: Drug, _ handler: @escaping ManagerCallback) {
         manager.access { realm in
             do {
-                
-                let drugToUpdate = realm.objects(RLM_Drug.self)
-                    .first(where: { $0.id == updatedDrug.id })
+                guard let availableDrugList = RLM_AvailableDrugList.defaultFrom(realm) else {
+                    throw UpdateError(original: originalDrug, updated: updatedDrug, reason: "Missing root drug list")
+                }
+                guard let drugToUpdate = availableDrugList.drugs.first(where: { $0.id == updatedDrug.id }) else {
+                    throw UpdateError(original: originalDrug, updated: updatedDrug, reason: "Missing drug in realm list")
+                }
                 try realm.write {
-                    drugToUpdate?.hourlyDoseTime = updatedDrug.hourlyDoseTime
-                    drugToUpdate?.ingredients.removeAll()
-                    drugToUpdate?.ingredients.append(objectsIn: updatedDrug.ingredients.map(migrater.fromV1Ingredient))
+                    drugToUpdate.hourlyDoseTime = updatedDrug.hourlyDoseTime
+                    drugToUpdate.ingredients.removeAll()
+                    drugToUpdate.ingredients.append(objectsIn: updatedDrug.ingredients.map(migrater.fromV1Ingredient))
                     handler(.success(()))
                 }
+            } catch let error as UpdateError {
+                log { Event(error.reason, .error) }
+                handler(.failure(error))
             } catch {
+                log { Event("\(error)", .error) }
                 handler(.failure(error))
             }
         }

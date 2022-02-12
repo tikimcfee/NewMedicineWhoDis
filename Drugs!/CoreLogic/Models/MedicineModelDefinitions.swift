@@ -15,14 +15,16 @@ public struct Drug: EquatableFileStorable, Comparable, Identifiable {
     public var drugName: String
     public var ingredients: [Ingredient]
     public var hourlyDoseTime: Double
-    public var id: DrugId { drugName } // Here there be dragons
+    public var id: DrugId
 
     public init(_ drugName: String = "",
                 _ ingredients: [Ingredient] = [],
-                _ hourlyDoseTime: Double = 6) {
+                _ hourlyDoseTime: Double = 6,
+                id: DrugId = UUID().uuidString) {
         self.drugName = drugName
         self.ingredients = ingredients
         self.hourlyDoseTime = hourlyDoseTime
+        self.id = id
     }
 
     public static func < (lhs: Drug, rhs: Drug) -> Bool {

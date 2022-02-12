@@ -4,7 +4,7 @@ import Foundation
 public struct InProgressDrugEdit {
     private var didMakeDrugSelection = false
     private(set) var targetDrug: Drug?
-    private var updatedDrug: Drug = Drug()
+    private var updatedDrug: Drug = Drug(id: UUID().uuidString)
     
     var drugName: String {
         get { updatedDrug.drugName }
@@ -34,12 +34,13 @@ public struct InProgressDrugEdit {
         updatedDrug = Drug(
             drug.drugName,
             drug.ingredients,
-            drug.hourlyDoseTime
+            drug.hourlyDoseTime,
+            id: drug.id
         )
     }
 
     mutating func startEditingNewDrug() {
-        setTarget(drug: Drug())
+        setTarget(drug: Drug(id: UUID().uuidString))
     }
 }
 
@@ -78,8 +79,10 @@ public final class DrugListEditorViewState: ObservableObject {
 
     func saveAsEdit() {
         guard inProgressEdit.isEditSaveEnabled,
-            let original = inProgressEdit.targetDrug
-            else { return }
+              let original = inProgressEdit.targetDrug else {
+                log { Event("Edit save halted", .info) }
+                return
+            }
         let update = inProgressEdit.currentUpdatesAsNewDrug
         dataManager.updateDrug(originalDrug: original, updatedDrug: update) { [weak self] result in
             switch result {
@@ -93,7 +96,10 @@ public final class DrugListEditorViewState: ObservableObject {
     }
 
     func saveAsNew() {
-        guard inProgressEdit.isEditSaveEnabled else { return }
+        guard inProgressEdit.isEditSaveEnabled else {
+            log { Event("New save halted", .info) }
+            return
+        }
         let newDrug = inProgressEdit.currentUpdatesAsNewDrug
         dataManager.addDrug(newDrug: newDrug) { [weak self] result in
             switch result {

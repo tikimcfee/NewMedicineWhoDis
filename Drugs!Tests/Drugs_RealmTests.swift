@@ -159,7 +159,7 @@ class Drugs_RealmTests: XCTestCase {
             XCTAssertEqual(matchingLegacy.date, object.date, "Dates were not migrated correctly")
             
             let oldNames = matchingLegacy.drugsTaken.reduce(into: Set<String>()) { acc, tuple in
-                acc.insert(tuple.key.id)
+                acc.insert(tuple.key.drugName)
             }
             let drugNames = object.drugsTaken.reduce(into: Set<String>()) { acc, tuple in
                 acc.insert(tuple.drug?.name)
@@ -290,10 +290,15 @@ class Drugs_RealmTests: XCTestCase {
 		for count in 0..<toCreateCount {
 			log { Event("Testing global logs \(count)", Bool.random() ? .info : .error) }
 		}
-		RealmAppEventLogger.shared.manager.withRealm { realm in
-			let allEvents = realm.objects(PersistableEvent.self)
-			XCTAssertEqual(allEvents.count, toCreateCount)
-		}
+        let expect = expectation(description: "Finished load")
+        DispatchQueue.main.async {
+            RealmAppEventLogger.shared.manager.withRealm { realm in
+                let allEvents = realm.objects(PersistableEvent.self)
+                XCTAssertEqual(allEvents.count, toCreateCount)
+                expect.fulfill()
+            }
+        }
+        wait(for: [expect], timeout: 3.0)
 	}
     
     func testRealmSorting() throws {

@@ -90,7 +90,7 @@ public struct NotificationInfoView: View {
         VStack(spacing: 2) {
             if self.viewState.permissionsGranted {
                 Components.fullWidthButton("Schedule default notification test") {
-                    self.viewState.scheduleForDrug(Drug.init("TestDrug", [], 0.1))
+                    self.viewState.scheduleForDrug(Drug.init("TestDrug", [], 0.1, id: "TestDrug"))
                 }
 
                 Components.fullWidthButton("Clear pending notifications") {
