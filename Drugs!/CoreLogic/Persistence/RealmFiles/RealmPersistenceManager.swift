@@ -107,6 +107,7 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
                     throw UpdateError(original: originalDrug, updated: updatedDrug, reason: "Missing drug in realm list")
                 }
                 try realm.write {
+                    drugToUpdate.name = updatedDrug.drugName
                     drugToUpdate.hourlyDoseTime = updatedDrug.hourlyDoseTime
                     drugToUpdate.ingredients.removeAll()
                     drugToUpdate.ingredients.append(objectsIn: updatedDrug.ingredients.map(migrater.fromV1Ingredient))
