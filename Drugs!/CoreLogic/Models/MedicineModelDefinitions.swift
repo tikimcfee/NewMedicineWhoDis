@@ -100,3 +100,13 @@ fileprivate func jsonDescription<C: Codable>(of codable: C) -> String {
 //extension AvailableDrugList: CustomStringConvertible {
 //    public var description: String { jsonDescription(of: self) }
 //}
+
+protocol Changeable { }
+
+extension Changeable {
+    func update<T>(_ path: WritableKeyPath<Self, T>, to value: T) -> Self {
+        var clone = self
+        clone[keyPath: path] = value
+        return clone
+    }
+}
