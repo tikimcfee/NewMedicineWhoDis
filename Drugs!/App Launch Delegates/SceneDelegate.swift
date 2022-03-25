@@ -62,7 +62,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         configureForTests(environmentContainer)
         #endif
 
-        let contentView = RootAppStartupView()
+        var contentView = RootAppStartupView()
             .environmentObject(environmentContainer)
             .environmentObject(environmentContainer.dataManager)
             .environmentObject(environmentContainer.rootScreenState)

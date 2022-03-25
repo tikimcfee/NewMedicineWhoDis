@@ -9,9 +9,11 @@
 import Foundation
 import Realm
 import Combine
+import SwiftUI
 
 enum RealmPersistenceError: Error {
     case invalidRemovalId(String)
+    case invalidMigrationCall
 }
 
 class RealmPersistenceManager: ObservableObject, PersistenceManager {
@@ -26,6 +28,15 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     
     var appDataStream: AnyPublisher<ApplicationData, Never> {
         tranformer.$appData.eraseToAnyPublisher()
+    }
+    
+    var isMigrationNeeded: Bool {
+        return manager.accessImmediate { realm in
+            return self.migrater.isMigrationNeeded(into: realm)
+        } ?? {
+            log { Event("nil manager access, realm may be inaccessible!", .error) }
+            return true
+        }()
     }
     
     func checkAndCompleteMigrations(_ sourceFlatFile: FilePersistenceManager) throws {

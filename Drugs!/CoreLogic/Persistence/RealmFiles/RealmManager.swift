@@ -11,6 +11,10 @@ import Foundation
 import RealmSwift
 
 //MARK: - Realm Helper
+enum RealmManagerError: Error {
+    case onLoadError(internalError: Error)
+}
+
 public protocol EntryLogRealmManager {
     func loadEntryLogRealm() throws -> Realm
 	func access(_ onLoad: (Realm) throws -> Void)
@@ -21,8 +25,10 @@ extension EntryLogRealmManager {
         do {
             let realm = try loadEntryLogRealm()
             try onLoad(realm)
+        } catch let RealmManagerError.onLoadError(internalError) {
+            log { Event("Failed to load realm: \(internalError.localizedDescription)", .error) }
         } catch {
-            log { Event("Failed to load realm: \(error.localizedDescription)", .error) }
+            log { Event("Error during realm modification: \(error.localizedDescription)", .error) }
         }
 	}
 	
@@ -30,10 +36,12 @@ extension EntryLogRealmManager {
         do {
             let realm = try loadEntryLogRealm()
             return try onLoad(realm)
+        } catch let RealmManagerError.onLoadError(internalError) {
+            log { Event("Failed to load realm: \(internalError.localizedDescription)", .error) }
         } catch {
-            log { Event("Failed to load realm: \(error.localizedDescription)", .error) }
-            return nil
+            log { Event("Error during realm modification: \(error.localizedDescription)", .error) }
         }
+        return nil
 	}
 }
 
@@ -45,8 +53,12 @@ class DefaultRealmManager: EntryLogRealmManager {
             log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
             log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }
         }
-        let realm = try Realm(configuration: config)
-        return realm
+        
+        do {
+            return try Realm(configuration: config)
+        } catch {
+            throw RealmManagerError.onLoadError(internalError: error)
+        }
     }
 }
 

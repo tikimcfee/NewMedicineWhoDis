@@ -13,16 +13,29 @@ public class V1Migrator {
     private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
     
-    public func migrate(manager: FilePersistenceManager, into realm: Realm) throws {
-        assert(!realm.isInWriteTransaction, "Migration should never start while in write transation")
-        
-        let migrationData = RLM_AppMigrationData.from(realm) ?? RLM_AppMigrationData()
-        guard !migrationData.flatFileMigrationComplete else {
-            log { Event("Skipping migration; already noted as complete.", .info) }
-            return
+    public func isMigrationNeeded(into realm: Realm) -> Bool {
+        guard let migrationData = RLM_AppMigrationData.from(realm) else {
+            log { Event("No migration data found; assuming no migration has been run.", .info) }
+            return true
         }
         
+        let migrationsComplete = migrationData.flatFileMigrationComplete
+        let shouldMigrade = !migrationsComplete
+        
+        log { Event("""
+Migration state query:
+[migrationComplete: \(migrationsComplete)]
+-> shouldMigrate = \(shouldMigrade)
+""", .info) }
+        
+        return shouldMigrade
+    }
+    
+    public func migrate(manager: FilePersistenceManager, into realm: Realm) throws {
+        assert(!realm.isInWriteTransaction, "Migration should never start while in write transation")
         log { Event("Starting initial migration. Here we go.", .info) }
+        
+        guard isMigrationNeeded(into: realm) else { throw RealmPersistenceError.invalidMigrationCall }
         
         let sourceMigrationData = try manager.loadFromFileStoreImmediately()
         
@@ -32,6 +45,10 @@ public class V1Migrator {
 			realm.add(migratedEntries)
 			realm.add(migratedDrugList)
             
+            let migrationData = RLM_AppMigrationData.from(realm) ?? {
+                log { Event("No migration data found; returning new", .info) }
+                return RLM_AppMigrationData()
+            }()
             migrationData.flatFileMigrationComplete = true
             realm.add(migrationData, update: .modified)
 		}

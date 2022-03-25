@@ -62,11 +62,13 @@ public class DataManagerPersistenceSelector {
 		let realmManager = DefaultRealmManager()
 		let persistenceManager = RealmPersistenceManager(manager: realmManager)
         
-        do {
-            let flatFileMigrationSource = getFlatFile()
-            try persistenceManager.checkAndCompleteMigrations(flatFileMigrationSource)
-        } catch {
-            log { Event("Migration failed. I hate when this happens. :: \(error)", .error) }
+        if persistenceManager.isMigrationNeeded {
+            do {
+                let flatFileMigrationSource = getFlatFile()
+                try persistenceManager.checkAndCompleteMigrations(flatFileMigrationSource)
+            } catch {
+                log { Event("Migration failed. I hate when this happens. :: \(error)", .error) }
+            }
         }
 
 		return persistenceManager
