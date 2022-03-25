@@ -41,10 +41,10 @@ class DefaultRealmManager: EntryLogRealmManager {
     public func loadEntryLogRealm() throws -> Realm {
         var config = Realm.Configuration.defaultConfiguration
         config.fileURL = AppFiles.entryLogRealm
-//        config.migrationBlock = { migration, flag in
-//            log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
-//            log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }
-//        }
+        config.migrationBlock = { migration, flag in
+            log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
+            log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }
+        }
         let realm = try Realm(configuration: config)
         return realm
     }

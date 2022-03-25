@@ -71,15 +71,15 @@ public class FilePersistenceManager: PersistenceManager {
     }
 
     func removeEntry(
-        index: Int,
+        with id: String,
         _ handler: @escaping ManagerCallback
     ) {
-        guard index < appData.mainEntryList.count else {
-            handler(.failure(AppStateError.generic(message: "Invalid delete index: \(index)")))
+        guard let firstMatchingId = appData.mainEntryList.firstIndex(where: { $0.id == id }) else {
+            handler(.failure(AppStateError.generic(message: "Invalid delete id: \(id)")))
             return
         }
         appData.updateEntryList{ list in
-            let removed = list.remove(at: index)
+            let removed = list.remove(at: firstMatchingId)
             log { Event("Removed medicine entry \(removed)") }
         }
         save(handler)

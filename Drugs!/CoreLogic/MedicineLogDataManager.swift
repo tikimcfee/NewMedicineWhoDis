@@ -18,7 +18,7 @@ protocol PersistenceManager {
     )
 
     func removeEntry(
-        index: Int,
+        with id: MedicineEntry.ID,
         _ handler: @escaping ManagerCallback
     )
 
@@ -132,10 +132,10 @@ extension MedicineLogDataManager {
     }
 
     func removeEntry(
-        index: Int,
+        with id: MedicineEntry.ID,
         _ handler: @escaping ManagerCallback
     ) {
-        persistenceManager.removeEntry(index: index, handler)
+        persistenceManager.removeEntry(with: id, handler)
     }
 
     func updateEntry(

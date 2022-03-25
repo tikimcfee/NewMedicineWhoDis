@@ -75,8 +75,14 @@ struct EntryListView: View {
                 }
                 entryForEdit = entry
             },
-            didDeleteRow: {
-                dataManager.removeEntry(index: $0) { result in
+            didDeleteRow: { index in
+                guard let model = model,
+                      model.rowModels.indices.contains(index) else {
+                    log { Event("Delete error; invalid index", .error) }
+                    return
+                }
+                let idToRemove = model.rowModels[index].entryId
+                dataManager.removeEntry(with: idToRemove) { result in
                     log { Event("Delete result: \(result)", .info) }
                 }
             }

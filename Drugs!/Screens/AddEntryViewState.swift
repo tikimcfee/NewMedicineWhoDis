@@ -81,8 +81,9 @@ public final class AddEntryViewState: ObservableObject {
     }
 
     func deleteEntry(at index: Int) {
-        guard index < currentEntries.count else { return }
-        dataManager.removeEntry(index: index) { result in
+        guard currentEntries.indices.contains(index) else { return }
+        let id = currentEntries[index].id
+        dataManager.removeEntry(with: id) { result in
             switch result {
             case .success:
                 log { Event("Deleted entry at \(index)") }

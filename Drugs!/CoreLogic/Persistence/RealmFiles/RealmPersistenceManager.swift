@@ -11,7 +11,7 @@ import Realm
 import Combine
 
 enum RealmPersistenceError: Error {
-    case invalidIndex(Int)
+    case invalidRemovalId(String)
 }
 
 class RealmPersistenceManager: ObservableObject, PersistenceManager {
@@ -53,14 +53,14 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
         }
     }
     
-    func removeEntry(index: Int, _ handler: @escaping ManagerCallback) {
+    func removeEntry(with id: MedicineEntry.ID, _ handler: @escaping ManagerCallback) {
         manager.access { realm in
             do {
-                let objects = realm.objects(RLM_MedicineEntry.self)
-                guard objects.count > index else { throw RealmPersistenceError.invalidIndex(index) }
-                let toRemove = objects[index]
+                guard let object = realm.object(ofType: RLM_MedicineEntry.self, forPrimaryKey: id) else {
+                    throw RealmPersistenceError.invalidRemovalId(id)
+                }
                 try realm.write {
-                    realm.delete(toRemove)
+                    realm.delete(object)
                     handler(.success(()))
                 }
             } catch {
