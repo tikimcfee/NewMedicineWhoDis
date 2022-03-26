@@ -7,13 +7,20 @@
 //
 
 import Foundation
-import Realm
+import RealmSwift
 import Combine
 import SwiftUI
 
 enum RealmPersistenceError: Error {
     case invalidRemovalId(String)
     case invalidMigrationCall
+}
+
+struct RealmPersistenceManagerEnvironment: ViewModifier {
+    let sourceRealm: Realm
+    func body(content: Content) -> some View {
+        return content.environment(\.realm, sourceRealm)
+    }
 }
 
 class RealmPersistenceManager: ObservableObject, PersistenceManager {
@@ -24,6 +31,13 @@ class RealmPersistenceManager: ObservableObject, PersistenceManager {
     init(manager: EntryLogRealmManager = DefaultRealmManager()) {
         self.manager = manager
         self.tranformer = RealmPersistenceStateTransformer(manager: manager)
+    }
+    
+    var makeEnvironmentModifier: RealmPersistenceManagerEnvironment? {
+        manager.accessImmediate {
+            log { Event("Attaching realm root environment modifier") }
+            return RealmPersistenceManagerEnvironment(sourceRealm: $0)
+        }
     }
     
     var appDataStream: AnyPublisher<ApplicationData, Never> {

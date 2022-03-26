@@ -62,11 +62,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         configureForTests(environmentContainer)
         #endif
 
-        var contentView = RootAppStartupView()
+        let contentView = RootAppStartupView()
+            // attach data manager to give internals a chance to attach environment stuff
+            .modifier(environmentContainer.dataManager.asModifier)
+            
+            // these will go away eventually, likely interaction directly with storage
             .environmentObject(environmentContainer)
             .environmentObject(environmentContainer.dataManager)
             .environmentObject(environmentContainer.rootScreenState)
             .environmentObject(environmentContainer.notificationState)
+        
+            // root view is a good place to attach 'initial presentation' work
             .onAppear {
                 environmentContainer.notificationState.requestPermissions()
             }

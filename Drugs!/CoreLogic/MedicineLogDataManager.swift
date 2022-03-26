@@ -84,7 +84,21 @@ public class DataManagerPersistenceSelector {
 	}
 }
 
-public class MedicineLogDataManager: ObservableObject {
+struct MedicineLogDataManagerModifer: ViewModifier {
+    let persistenceManager: PersistenceManager
+    
+    @ViewBuilder
+    public func body(content: Content) -> some View {
+        if let realm = persistenceManager as? RealmPersistenceManager,
+           let environmentModifier = realm.makeEnvironmentModifier {
+            content.modifier(environmentModifier)
+        } else {
+            content
+        }
+    }
+}
+
+final public class MedicineLogDataManager: ObservableObject {
 	private let selector = DataManagerPersistenceSelector()
 	private var persistenceManager: PersistenceManager
     
@@ -111,6 +125,10 @@ public class MedicineLogDataManager: ObservableObject {
 		cancellables = Set()
 		rebuildPipe()
 	}
+    
+    var asModifier: some ViewModifier {
+        return MedicineLogDataManagerModifer(persistenceManager: persistenceManager)
+    }
 	
 	private func rebuildPipe() {
 		persistenceManager.appDataStream.sink {
