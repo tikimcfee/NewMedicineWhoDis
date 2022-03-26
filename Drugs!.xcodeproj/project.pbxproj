@@ -31,6 +31,7 @@
 		45DA2BC1232532E500649270 /* AppStateError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* AppStateError.swift */; };
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
+		B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */; };
 		B7FC2CB027B741BC002C950E /* RealmPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */; };
 		B7FC2CB227B7420B002C950E /* RealmPersistenceStateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CB127B7420B002C950E /* RealmPersistenceStateTransformer.swift */; };
 		B7FC9EA026D1D3310027E032 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9E9F26D1D3310027E032 /* RealmSwift */; };
@@ -120,6 +121,7 @@
 		45DA2BC0232532E500649270 /* AppStateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateError.swift; sourceTree = "<group>"; };
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
+		B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListViewState.swift; sourceTree = "<group>"; };
 		B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceManager.swift; sourceTree = "<group>"; };
 		B7FC2CB127B7420B002C950E /* RealmPersistenceStateTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceStateTransformer.swift; sourceTree = "<group>"; };
 		B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_RealmTests.swift; sourceTree = "<group>"; };
@@ -454,6 +456,7 @@
 			isa = PBXGroup;
 			children = (
 				F0E25B73258ED25F001EE2A7 /* EntryListView.swift */,
+				B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */,
 			);
 			path = EntryList;
 			sourceTree = "<group>";
@@ -651,6 +654,7 @@
 				4593B4B6231AFBD000787D91 /* AddNewEntryView.swift in Sources */,
 				F01BBBB4246F939600BBC3A3 /* EntryListFileStore.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* MedicineLogDataManager.swift in Sources */,
+				B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -762,7 +766,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -817,7 +821,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -839,7 +843,7 @@
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Drugs!/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(SRCROOT)",
 					"$(inherited)",
@@ -867,7 +871,7 @@
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Drugs!/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(SRCROOT)",
 					"$(inherited)",
@@ -891,7 +895,7 @@
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				GENERATE_PKGINFO_FILE = NO;
 				INFOPLIST_FILE = "Drugs!Tests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -913,7 +917,7 @@
 				DEVELOPMENT_TEAM = XR2HQNSZ68;
 				GENERATE_PKGINFO_FILE = NO;
 				INFOPLIST_FILE = "Drugs!Tests/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1014,7 +1018,7 @@
 			repositoryURL = "https://github.com/realm/realm-cocoa.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 10.12.0;
+				minimumVersion = 10.24.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

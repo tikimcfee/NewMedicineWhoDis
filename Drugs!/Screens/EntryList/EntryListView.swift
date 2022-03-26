@@ -1,92 +1,44 @@
 import Foundation
 import SwiftUI
-
-struct EntryListViewModel {
-    let rowModels: [EntryListViewRowModel]
-
-    let didSelectRow: (EntryListViewRowModel) -> Void
-    let didDeleteRow: (Int) -> Void
-}
-
-struct EntryListViewRowModel {
-    let listOfDrugs: String // entry.drugList
-    let dateTaken: String //
-    let entryId: String
-}
+import RealmSwift
 
 struct EntryListView: View {
-
-    @EnvironmentObject var dataManager: MedicineLogDataManager
-    @State var model: EntryListViewModel?
-
-    @State var entryForEdit: MedicineEntry?
-    // TODO: refactor to a model when the data layer has a better API
+    
+    @ObservedResults(RLM_MedicineEntry.self) var allEntries
+    @StateObject var model: EntryListViewModel = EntryListViewModel()
 
     var body: some View {
-        Group {
-            if let model = model {
-                List {
-                    ForEach(model.rowModels, id: \.entryId) { rowModel in
-                        Button(action: { model.didSelectRow(rowModel) }) {
-                            EntryListInfoCell(
-                                listOfDrugs: rowModel.listOfDrugs,
-                                dateTaken: rowModel.dateTaken
-                            ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
-                        }
-                        .foregroundColor(.primary)
-                        .accessibility(identifier: MedicineLogScreen.entryCellButton.rawValue)
-                    }
-                    .onDelete(perform: { indexSet in
-                        guard let removedIndex = indexSet.first else { return }
-                        model.didDeleteRow(removedIndex)
-                    })
-                }
-                .listStyle(PlainListStyle())
-                .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
+        List {
+            ForEach(allEntries.map(model.createRowModel), id: \.entryId) { rowModel in
+                makeEntryRow(rowModel)
             }
+            .onDelete(perform: { indexSet in
+                model.didDeleteRow(indexSet.first!, in: allEntries)
+            })
         }
-        .onReceive(dataManager.sharedEntryStream, perform: mapEntriesToModel)
-        .sheet(item: $entryForEdit, content: { entry in
-            ExistingEntryEditorView()
-                .environmentObject(ExistingEntryEditorState(
-                    dataManager: dataManager,
-                    sourceEntry: entry
-                ))
-                .environmentObject(dataManager)
+        .listStyle(PlainListStyle())
+        .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
+        .sheet(item: $model.entryForEdit, content: { entry in
+//            ExistingEntryEditorView()
+//                .environmentObject(ExistingEntryEditorState(
+//                    dataManager: dataManager,
+//                    sourceEntry: entry
+//                ))
+//                .environmentObject(dataManager)
+            EmptyView()
         })
     }
-
-    // TODO: This belongs somewhere else, but I don't have (know?) a way to do this kind of mapping without a direct stream or model
-    func mapEntriesToModel(_ entries: [MedicineEntry]) {
-        log { Event("Receive new list to map, count == \(entries.count)", .info) }
-
-        model = EntryListViewModel(
-            rowModels: entries.map {
-                EntryListViewRowModel(
-                    listOfDrugs: $0.drugList,
-                    dateTaken: DateFormatting.LongDateShortTime.string(from: $0.date),
-                    entryId: $0.id
-                )
-            },
-            didSelectRow: { row in
-                guard let entry = dataManager.medicineEntry(with: row.entryId) else {
-                    log { Event("Failed to retrieve entry for edit: \(row)") }
-                    return
-                }
-                entryForEdit = entry
-            },
-            didDeleteRow: { index in
-                guard let model = model,
-                      model.rowModels.indices.contains(index) else {
-                    log { Event("Delete error; invalid index", .error) }
-                    return
-                }
-                let idToRemove = model.rowModels[index].entryId
-                dataManager.removeEntry(with: idToRemove) { result in
-                    log { Event("Delete result: \(result)", .info) }
-                }
-            }
-        )   
+    
+    @ViewBuilder
+    func makeEntryRow(_ rowModel: EntryListViewRowModel) -> some View {
+        Button(action: { model.didSelectRow(rowModel, in: allEntries) }) {
+            EntryListInfoCell(
+                listOfDrugs: rowModel.listOfDrugs,
+                dateTaken: rowModel.dateTaken
+            ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
+        }
+        .foregroundColor(.primary)
+        .accessibility(identifier: MedicineLogScreen.entryCellButton.rawValue)
     }
 }
 

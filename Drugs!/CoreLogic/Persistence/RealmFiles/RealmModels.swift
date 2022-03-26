@@ -42,7 +42,7 @@ public class RLM_DrugSelection: Object {
     @Persisted public var count: Double = 0.0
 }
 
-public class RLM_MedicineEntry: Object {
+public class RLM_MedicineEntry: Object, ObjectKeyIdentifiable {
     @Persisted(primaryKey: true) public var id: String = UUID().uuidString
     @Persisted public var date: Date = Date()
     @Persisted public var drugsTaken: List<RLM_DrugSelection> = List()
