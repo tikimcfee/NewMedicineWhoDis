@@ -32,6 +32,7 @@
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
 		B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */; };
+		B7F47D9027EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */; };
 		B7FC2CB027B741BC002C950E /* RealmPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */; };
 		B7FC2CB227B7420B002C950E /* RealmPersistenceStateTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CB127B7420B002C950E /* RealmPersistenceStateTransformer.swift */; };
 		B7FC9EA026D1D3310027E032 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B7FC9E9F26D1D3310027E032 /* RealmSwift */; };
@@ -122,6 +123,7 @@
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
 		B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListViewState.swift; sourceTree = "<group>"; };
+		B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityInfoCalculator.swift; sourceTree = "<group>"; };
 		B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceManager.swift; sourceTree = "<group>"; };
 		B7FC2CB127B7420B002C950E /* RealmPersistenceStateTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceStateTransformer.swift; sourceTree = "<group>"; };
 		B7FC9EA326D1D3A90027E032 /* Drugs_RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Drugs_RealmTests.swift; sourceTree = "<group>"; };
@@ -431,6 +433,7 @@
 			children = (
 				45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */,
 				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
+				B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -632,6 +635,7 @@
 				B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */,
 				B7FC9EA726D1FC020027E032 /* RealmManager.swift in Sources */,
 				45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */,
+				B7F47D9027EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift in Sources */,
 				45135962239A2C0B00EB2D31 /* MedicineModelExtensions.swift in Sources */,
 				B7FC2CB227B7420B002C950E /* RealmPersistenceStateTransformer.swift in Sources */,
 				459679F923371772001DCBA1 /* MedicineEntryDetailsView.swift in Sources */,

@@ -7,6 +7,7 @@ enum AppStateError: Error {
     case updateError
     case saveError(cause: Error)
     case removError(cause: Error)
+    case notImplemented(_ file: String = #file, _ function: String = #function)
 
     public var localizedDescription: String {
         switch self {
@@ -17,6 +18,8 @@ enum AppStateError: Error {
             return "List update error: \(cause)"
         case .generic(let message):
             return message
+        case let .notImplemented(file, function):
+            return "Method not implemented: \(URL(fileURLWithPath: file).lastPathComponent):\(function)"
         }
     }
 }

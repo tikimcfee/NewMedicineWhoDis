@@ -1,15 +1,22 @@
 import Combine
 import SwiftUI
+import RealmSwift
 
 struct ExistingEntryEditorView: View {
+    
+    // Internal / SwiftUI
+    @StateObject var editorState: ExistingEntryEditorState
+    @Environment(\.presentationMode) private var presentationMode
+    
+    private static var calls: UInt64 = 0
+    private var LOG_COUNT: Void {
+        Self.calls += 1
+        log("Body calls == \(Self.calls)")
+    }
 
-    @EnvironmentObject private var editorState: ExistingEntryEditorState
-	@State var selectedDate: Date = Date()
-
-    @Environment(\.presentationMode) var presentationMode
-	
 	var body: some View {
-		VStack(spacing: 0) {
+        LOG_COUNT
+		return VStack(spacing: 0) {
             containerView
             timeSection
             HStack(spacing: 0) {
@@ -17,8 +24,7 @@ struct ExistingEntryEditorView: View {
                 cancelButton
             }
 		}
-        .onDisappear(perform: { self.editorState.editorIsVisible = false })
-        .alert(item: self.$editorState.editorError) { error in
+        .alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
                 message: Text(error.localizedDescription),
@@ -27,6 +33,7 @@ struct ExistingEntryEditorView: View {
 		}
 	}
 
+    @ViewBuilder
     private var containerView: some View {
         DrugSelectionContainerView(
             model: $editorState.selectionModel
@@ -74,7 +81,7 @@ struct ExistingEntryEditorView: View {
 	
 	private var updatedDifferenceView: some View {
         return HStack(alignment: .bottom) {
-            Text("Was \(editorState.sourceEntry.date, formatter: DateFormatting.ShortDateShortTime)")
+            Text("Was \(editorState.selectionModel.inProgressEntry.date, formatter: DateFormatting.ShortDateShortTime)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
             Spacer()
@@ -119,12 +126,8 @@ struct ExistingEntryEditorView: View {
 
 // Data
 extension ExistingEntryEditorView {
-    var errorBinding: Binding<AppStateError?> {
-        return $editorState.editorError
-    }
-
     var distance: String {
-        let originalDate = editorState.sourceEntry.date
+        let originalDate = editorState.targetModel.date
         let newDate = editorState.selectionModel.inProgressEntry.date
         return originalDate.distanceString(newDate)
     }
@@ -173,14 +176,11 @@ extension View {
 #if DEBUG
 struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
-        let op = makeTestMedicineOperator()
-		return ExistingEntryEditorView()
-            .environmentObject(
-                ExistingEntryEditorState(
-                    dataManager: op,
-                    sourceEntry: MedicineEntry(Date(), [:])
-                )
+		return ExistingEntryEditorView(
+            editorState: ExistingEntryEditorState(
+                RLM_MedicineEntry()
             )
+        )
 	}
 }
 #endif

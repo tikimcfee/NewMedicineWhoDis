@@ -51,7 +51,7 @@ class RealmPersistenceStateTransformer {
                 }
             }
         drugsToken = RLM_AvailableDrugList
-            .defaultListFrom(realm)
+            .defeaultObservableListFrom(realm)
             .observe { [weak self] change in
                 switch change {
                 case let .initial(results):

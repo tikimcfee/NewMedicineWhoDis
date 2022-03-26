@@ -40,6 +40,9 @@ public struct Drug: EquatableFileStorable, Comparable, Identifiable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(ingredients)
+        hasher.combine(hourlyDoseTime)
+        hasher.combine(drugName)
     }
 }
 

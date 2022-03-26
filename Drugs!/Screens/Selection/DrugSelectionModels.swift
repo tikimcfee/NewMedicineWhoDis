@@ -64,7 +64,11 @@ extension InProgressEntry {
 // MARK: Container for list and number
 
 struct DrugSelectionContainerModel {
+    
+    var isInitial = true
     var inProgressEntry = InProgressEntry()
+        { didSet { isInitial = false }}
+    
     var currentSelectedDrug: SelectableDrug?
     var info = AvailabilityInfo()
     var availableDrugs = AvailableDrugList([Drug]())

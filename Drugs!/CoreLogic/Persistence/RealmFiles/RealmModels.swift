@@ -48,7 +48,7 @@ public class RLM_MedicineEntry: Object, ObjectKeyIdentifiable {
     @Persisted public var drugsTaken: List<RLM_DrugSelection> = List()
 }
 
-public class RLM_AvailableDrugList: Object {
+public class RLM_AvailableDrugList: Object, Identifiable {
 	@Persisted(primaryKey: true) public var id: String = RLM_AvailableDrugList.defaultDrugListKeyId
 	@Persisted public var drugs: List<RLM_Drug> = List()
 }
@@ -69,7 +69,7 @@ extension RLM_AvailableDrugList {
 		realm.object(ofType: RLM_AvailableDrugList.self, forPrimaryKey: Self.defaultDrugListKeyId)
 	}
 	
-	static func defaultListFrom(_ realm: Realm) -> Results<RLM_AvailableDrugList> {
+	static func defeaultObservableListFrom(_ realm: Realm) -> Results<RLM_AvailableDrugList> {
 		realm.objects(RLM_AvailableDrugList.self)
 			.filter(NSPredicate(format: "id == %@", Self.defaultDrugListKeyId))
 	}

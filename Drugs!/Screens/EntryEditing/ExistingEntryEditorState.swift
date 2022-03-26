@@ -1,64 +1,100 @@
 import Foundation
 import Combine
 import UserNotifications
+import RealmSwift
+import SwiftUI
+
+enum EditorError: String, Error {
+    case realmNotAvailable
+    case failedToCreateSelectionModel
+    case modelDeleted
+}
+
+extension ExistingEntryEditorState: InfoReceiver {
+    var selectionModelReceiver: ((inout DrugSelectionContainerModel) -> Void) -> () {
+        return { receiver in
+            receiver(&self.selectionModel)
+        }
+    }
+}
 
 public final class ExistingEntryEditorState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
-    private var cancellables = Set<AnyCancellable>()
-
-    @Published var editorIsVisible: Bool = false
     @Published var editorError: AppStateError? = nil
     @Published var selectionModel = DrugSelectionContainerModel()
-
-    var sourceEntry: MedicineEntry
-
-    public init(dataManager: MedicineLogDataManager,
-                sourceEntry: MedicineEntry) {
-        self.dataManager = dataManager
-        self.sourceEntry = sourceEntry
-        self.selectionModel.inProgressEntry = sourceEntry.editableEntry
-
-        dataManager.availabilityInfoStream
-            .sink { [weak self] in self?.selectionModel.info = $0 }
-            .store(in: &cancellables)
-
-        dataManager.sharedDrugListStream
-            .sink { [weak self] in self?.selectionModel.availableDrugs = $0 }
-            .store(in: &cancellables)
+    @ObservedRealmObject public var targetModel: RLM_MedicineEntry
+    
+    lazy var calculator = AvailabilityInfoCalculator(receiver: self)
+    private var bag = Set<AnyCancellable>()
+    private var tokens = Set<NotificationToken>()
+    
+    public init(_ unsafeTarget: RLM_MedicineEntry) {
+        self.targetModel = unsafeTarget
+        calculator.bindModel(unsafeTarget)
+        setInitialProgressEntry()
+    }
+    
+    private func setInitialProgressEntry() {
+        log("Setting initial entry: \(targetModel.id)")
+        selectionModel.inProgressEntry = Self.buildInitialEntry(targetModel)
+    }
+    
+    private static func buildInitialEntry(
+        _ entry: RLM_MedicineEntry
+    ) -> InProgressEntry {
+        return InProgressEntry(
+            entry.drugsTaken.reduce(into: InProgressDrugCountMap()) { result, selection in
+                guard let drug = selection.drug else { return }
+                let selectableDrug = SelectableDrug(
+                    drugName: drug.name,
+                    drugId: drug.id
+                )
+                result[selectableDrug] = selection.count
+            },
+            entry.date
+        )
     }
 
     func saveEdits(_ didComplete: @escaping Action) {
-        guard selectionModel.inProgressEntry != sourceEntry else { return }
-
-        var safeCopy = sourceEntry
-        safeCopy.date = selectionModel.inProgressEntry.date
-        do {
-            safeCopy.drugsTaken = try selectionModel.inProgressEntry.drugMap(
-                in: selectionModel.availableDrugs
-            )
-        } catch InProgressEntryError.mappingBackToDrugs {
-            log { Event("Missing drug from known available map", .error) }
-        } catch {
-            log { Event("Unexpected error during drug map: \(error.localizedDescription)", .error) }
+        editorError = AppStateError.notImplemented()
+        
+        guard
+            let thawedEntry = targetModel.thaw(),
+            let thawedRealm = targetModel.realm?.thaw()
+        else {
+            log("Unable to retrieve editing model to save changes")
+            return
         }
 
-        dataManager.updateEntry(updatedEntry: safeCopy) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-                case .success:
-                    self.sourceEntry = safeCopy
-                    self.editorIsVisible = false
-                    self.editorError = nil
-                    self.updateExistingNotifications(safeCopy)
-                    didComplete()
+        do {
+            let migrator = V1Migrator()
+            let newMap = try selectionModel.inProgressEntry
+                .drugMap(in: selectionModel.availableDrugs)
+            let newSelection = migrator.fromV1DrugMap(newMap)
 
-                case .failure(let error):
-                    self.editorError = error as? AppStateError ?? .updateError
+            try thawedRealm.write(withoutNotifying: Array(calculator.realmTokens)) {
+                newSelection.forEach { thawedRealm.add($0.drug!, update: .modified) }
+                thawedEntry.drugsTaken.removeAll()
+                thawedEntry.drugsTaken.insert(contentsOf: newSelection, at: 0)
+                thawedEntry.date = selectionModel.inProgressEntry.date
             }
+            
+            updateExistingNotifications(targetModel)
+            editorError = nil
+
+            didComplete()
+        } catch InProgressEntryError.mappingBackToDrugs {
+            let error = AppStateError.generic(message: "Missing drug during save mapping.")
+            log(error)
+            editorError = error
+        } catch {
+            log(error, "Failed to write entry updates")
+            editorError = error as? AppStateError ?? AppStateError.updateError
         }
     }
 
-    private func updateExistingNotifications(_ entry: MedicineEntry) {
+    private func updateExistingNotifications(_ source: RLM_MedicineEntry) {
+        let entry = V1Migrator().toV1Entry(source)
+        
         let notificationCenter = UNUserNotificationCenter.current()
         log { Event("Starting drug reminder update for: \(entry)") }
         notificationCenter.getPendingNotificationRequests { notifications in

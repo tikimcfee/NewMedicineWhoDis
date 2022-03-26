@@ -4,7 +4,11 @@ import RealmSwift
 
 struct EntryListView: View {
     
-    @ObservedResults(RLM_MedicineEntry.self) var allEntries
+    @ObservedResults(
+        RLM_MedicineEntry.self,
+        sortDescriptor: SortDescriptor(keyPath: \RLM_MedicineEntry.date, ascending: false)
+    ) var allEntries
+    
     @StateObject var model: EntryListViewModel = EntryListViewModel()
 
     var body: some View {
@@ -19,13 +23,7 @@ struct EntryListView: View {
         .listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
-//            ExistingEntryEditorView()
-//                .environmentObject(ExistingEntryEditorState(
-//                    dataManager: dataManager,
-//                    sourceEntry: entry
-//                ))
-//                .environmentObject(dataManager)
-            EmptyView()
+            ExistingEntryEditorView(editorState: ExistingEntryEditorState(entry))
         })
     }
     

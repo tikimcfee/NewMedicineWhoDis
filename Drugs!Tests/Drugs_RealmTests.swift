@@ -219,7 +219,7 @@ class Drugs_RealmTests: XCTestCase {
 		expectedNotifications.expectedFulfillmentCount = 2
 		let token = entryLogRealmManager
 			.accessImmediate { realm in 
-				RLM_AvailableDrugList.defaultListFrom(realm)
+				RLM_AvailableDrugList.defeaultObservableListFrom(realm)
 			}!
 			.observe { change in 
 				switch change {
