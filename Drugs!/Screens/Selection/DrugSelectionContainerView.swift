@@ -20,11 +20,14 @@ struct DrugSelectionContainerView: View {
             model.currentSelectedDrug = newOrToggledSelection
         }
 
+        let capturedAction = countAutoUpdate // must capture or context is captured from view
         let drugModels = model.availableDrugs.drugs.map { drug -> DrugSelectionListRowModel in
             let selectableDrug = SelectableDrug(
                 drugName: drug.drugName,
                 drugId: drug.id,
-                updateCount: { newCount in countAutoUpdate?(drug.id, newCount) }
+                selectedCountAutoUpdate: { newCount in
+                    capturedAction?(drug.id, newCount)
+                }
             )
             let canTake = model.info.canTake(drug)
             let message = model.info.nextDateMessage(drug)
@@ -60,21 +63,24 @@ struct DrugSelectionContainerView: View {
                 let countForSelection = model.count(for: selectedDrug)
                 let setOrToggleOff = countForSelection != number ? number : nil
                 model.updateCount(setOrToggleOff, for: selectedDrug)
-                selectedDrug.updateCount(setOrToggleOff)
+                log("Autoupdate disabled")
+//                selectedDrug.selectedCountAutoUpdate(setOrToggleOff)
             },
             didIncrementSelection: { incrementAmount in
                 guard let selectedDrug = model.currentSelectedDrug else { return }
                 let currentCount = model.count(for: selectedDrug)
                 let finalCount = currentCount + incrementAmount
                 model.updateCount(finalCount, for: selectedDrug)
-                selectedDrug.updateCount(finalCount)
+                log("Autoupdate disabled")
+//                selectedDrug.selectedCountAutoUpdate(finalCount)
             },
             didDecrementSelection: { decrementAmount in
                 guard let selectedDrug = model.currentSelectedDrug else { return }
                 let currentCount = model.count(for: selectedDrug)
                 let finalCount = currentCount - decrementAmount
                 model.updateCount(finalCount, for: selectedDrug)
-                selectedDrug.updateCount(finalCount)
+                log("Autoupdate disabled")
+//                selectedDrug.selectedCountAutoUpdate(finalCount)
             }
         )
     }

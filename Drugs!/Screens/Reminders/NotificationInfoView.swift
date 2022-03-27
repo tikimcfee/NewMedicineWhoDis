@@ -54,7 +54,7 @@ public struct NotificationInfoView: View {
                 }
                 Divider()
             }
-        }.animation(.default)
+        }
     }
 
     private func stackForModel(_ model: NotificationInfoViewModel) -> some View {

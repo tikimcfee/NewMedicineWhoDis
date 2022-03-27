@@ -39,7 +39,7 @@ public final class AddEntryViewState: ObservableObject {
     }
 
     func saveNewEntry() {
-        let drugMap = drugSelectionModel.inProgressEntry.entryMap
+        let drugMap = drugSelectionModel.entryMap
         let hasEntries = drugMap.count > 0
         let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
         guard hasEntries && hasNonZeroEntries else {
@@ -49,10 +49,10 @@ public final class AddEntryViewState: ObservableObject {
 
         let convertedMap: DrugCountMap
         do {
-            convertedMap = try drugSelectionModel.inProgressEntry.drugMap(
+            convertedMap = try drugSelectionModel.drugMap(
                 in: drugSelectionModel.availableDrugs
             )
-        } catch InProgressEntryError.mappingBackToDrugs {
+        } catch SelectionError.drugMappingError {
             log { Event("Missing drug from known available map during creation", .error) }
             return
         } catch {

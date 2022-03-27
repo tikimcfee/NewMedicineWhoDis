@@ -38,6 +38,6 @@ public struct Event: CustomStringConvertible, EquatableFileStorable {
 	}
 	
 	public var description: String {
-		return "[\(dateString) \(criticality.rawValue) \(file)] -> \(message)"
+        return "[\(dateString) \(criticality.rawValue) \(file):\(function)] -> \(message)"
 	}
 }

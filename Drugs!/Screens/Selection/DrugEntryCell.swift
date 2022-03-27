@@ -31,7 +31,6 @@ struct DrugEntryViewCell: View {
                 .font(.body)
                 .fontWeight(.regular)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .animation(.none)
 
         
         let formattedOrTruncatedCount = model.count == model.count.rounded()
@@ -88,7 +87,7 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
         Group {
             DrugEntryViewCell(
                 model: DrugSelectionListRowModel(
-                    drug: SelectableDrug(drugName: "A drug name", drugId: "12345", updateCount: { _ in }),
+                    drug: SelectableDrug(drugName: "A drug name", drugId: "12345", selectedCountAutoUpdate: { _ in }),
                     count: 9,
                     canTake: false,
                     timingMessage: "6:37 pm",

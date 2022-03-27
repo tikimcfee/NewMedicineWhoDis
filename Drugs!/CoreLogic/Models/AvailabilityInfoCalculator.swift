@@ -45,7 +45,9 @@ class AvailabilityInfoCalculator: ObservableObject {
     init(receiver: InfoReceiver) {
         bag = [
             combine
+                .receive(on: workQueue)
                 .compactMap { result in Self.updateInfo(entries: result.0, drugs: result.1) }
+                .receive(on: RunLoop.main)
                 .sink { [weak receiver] newInfo in
                     receiver?.selectionModelReceiver { toEdit in
                         log("Alert receiver of new info")
@@ -56,7 +58,15 @@ class AvailabilityInfoCalculator: ObservableObject {
         ]
     }
     
-    func bindModel(_ unsafeTarget: RLM_MedicineEntry) {
+    deinit {
+        log("Calculator state cleaning up")
+    }
+    
+    func bindModelSnapshot(_ unsafeTarget: RLM_MedicineEntry) {
+        self.bindModelSnapshotImpl(unsafeTarget)
+    }
+    
+    private func bindModelSnapshotImpl(_ unsafeTarget: RLM_MedicineEntry) {
         log("--- Start observing: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
         guard let thawedModel = unsafeTarget.thaw(),
               let realm = thawedModel.realm?.thaw()
@@ -70,9 +80,9 @@ class AvailabilityInfoCalculator: ObservableObject {
                 log("--- Observing entries: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
                 switch change {
                 case let .initial(results):
-                    entriesSubject?.send(results)
+                    entriesSubject?.send(results.freeze())
                 case let .update(results, _, _, _):
-                    entriesSubject?.send(results)
+                    entriesSubject?.send(results.freeze())
                 case let .error(error):
                     log(error)
                     break
@@ -82,9 +92,9 @@ class AvailabilityInfoCalculator: ObservableObject {
                 log("--- Observe drug list: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
                 switch change {
                 case let .initial(results):
-                    drugListSubject?.send(results)
+                    drugListSubject?.send(results.freeze())
                 case let .update(results, _, _, _):
-                    drugListSubject?.send(results)
+                    drugListSubject?.send(results.freeze())
                 case let .error(error):
                     log(error)
                     break

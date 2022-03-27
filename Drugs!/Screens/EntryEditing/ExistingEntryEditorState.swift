@@ -25,6 +25,7 @@ extension ExistingEntryEditorState: InfoReceiver {
 public final class ExistingEntryEditorState: ObservableObject {
     @Published var editorError: AppStateError? = nil
     @Published var selectionModel = DrugSelectionContainerModel()
+    @Published var selectedDate = Date()
     @ObservedRealmObject public var targetModel: RLM_MedicineEntry
     
     lazy var calculator = AvailabilityInfoCalculator(receiver: self)
@@ -33,30 +34,45 @@ public final class ExistingEntryEditorState: ObservableObject {
     
     public init(_ unsafeTarget: RLM_MedicineEntry) {
         self.targetModel = unsafeTarget
-        calculator.bindModel(unsafeTarget)
+        self.selectedDate = unsafeTarget.date
+        calculator.bindModelSnapshot(unsafeTarget)
         setInitialProgressEntry()
+    }
+    
+    deinit {
+        log("Editor state cleaning up for \(targetModel.id)")
     }
     
     private func setInitialProgressEntry() {
         log("Setting initial entry: \(targetModel.id)")
-        selectionModel.inProgressEntry = Self.buildInitialEntry(targetModel)
+        selectionModel.entryMap = buildInitialEntry(targetModel)
     }
     
-    private static func buildInitialEntry(_ entry: RLM_MedicineEntry) -> InProgressEntry {
-        InProgressEntry(
-            entry.drugsTaken.reduce(into: InProgressDrugCountMap()) { result, savedSelection in
-                guard let drug = savedSelection.drug else { return }
-                let selectableDrug = SelectableDrug(
-                    drugName: drug.name,
-                    drugId: drug.id,
-                    updateCount: { newCount in
-                        log("-- Intial entry auto update for \(drug.id)")
-                        entry.autoUpdateCount(on: drug.id, newCount) }
-                )
-                result[selectableDrug] = savedSelection.count
-            },
-            entry.date
-        )
+    private func buildInitialEntry(_ entry: RLM_MedicineEntry) -> [SelectableDrug: Double] {
+        return entry.drugsTaken.reduce(into: [:]) { result, savedSelection in
+            guard let drug = savedSelection.drug else { return }
+            let selectableDrug = SelectableDrug(
+                drugName: drug.name,
+                drugId: drug.id,
+                selectedCountAutoUpdate: { [weak self] newCount in
+                    self?.onAutoUpdate(on: drug.id, count: newCount)
+                }
+            )
+            result[selectableDrug] = savedSelection.count
+        }
+    }
+    
+    func onAutoUpdate(on drugId: Drug.ID, count: Double?) {
+        guard let entry = targetModel.thaw(), let realm = entry.realm?.thaw() else {
+            log(EditorError.autoUpdateCancelled)
+            return
+        }
+        log("Starting auto update")
+        entry.autoUpdateCount(on: drugId, in: realm, count)
+        let frozen = entry.freeze()
+        DispatchQueue.global().async {
+            self.updateExistingNotifications(frozen)
+        }
     }
 
     func saveEdits(_ didComplete: @escaping Action) {
@@ -72,22 +88,21 @@ public final class ExistingEntryEditorState: ObservableObject {
 
         do {
             let migrator = V1Migrator()
-            let newMap = try selectionModel.inProgressEntry
-                .drugMap(in: selectionModel.availableDrugs)
+            let newMap = try selectionModel.drugMap(in: selectionModel.availableDrugs)
             let newSelection = migrator.fromV1DrugMap(newMap)
 
             try thawedRealm.write(withoutNotifying: calculator.realmTokens) {
                 newSelection.forEach { thawedRealm.add($0.drug!, update: .modified) }
                 thawedEntry.drugsTaken.removeAll()
                 thawedEntry.drugsTaken.insert(contentsOf: newSelection, at: 0)
-                thawedEntry.date = selectionModel.inProgressEntry.date
+                thawedEntry.date = selectedDate
             }
             
             updateExistingNotifications(targetModel)
             editorError = nil
 
             didComplete()
-        } catch InProgressEntryError.mappingBackToDrugs {
+        } catch SelectionError.drugMappingError {
             let error = AppStateError.generic(message: "Missing drug during save mapping.")
             log(error)
             editorError = error
@@ -103,7 +118,7 @@ public final class ExistingEntryEditorState: ObservableObject {
         let notificationCenter = UNUserNotificationCenter.current()
         log { Event("Starting drug reminder update for: \(entry)") }
         notificationCenter.getPendingNotificationRequests { notifications in
-            log { Event("Fetched notifications for update: \(notifications.count)") }
+            log { Event("Fetched notifications for update: \(entry.drugsTaken.count)-:-\(notifications.count)") }
 
             let knownReminders: [
                 (info: DrugNotificationUserInfo, request: UNNotificationRequest)
@@ -134,15 +149,13 @@ public final class ExistingEntryEditorState: ObservableObject {
 extension RLM_MedicineEntry {
     func autoUpdateCount(
         on target: Drug.ID,
+        in realm: Realm,
         _ count: Double?,
         _ skip: [NotificationToken] = []
     ) {
         do {
-            guard let thawedRealm = realm?.thaw() else {
-                throw EditorError.realmNotAvailable
-            }
-            try thawedRealm.write(withoutNotifying: skip) {
-                try _autoUpdateCountInternal(realm: thawedRealm, target, count)
+            try realm.write(withoutNotifying: skip) {
+                try self._autoUpdateCountInternal(realm: realm, target, count)
             }
         } catch { log(error) }
     }

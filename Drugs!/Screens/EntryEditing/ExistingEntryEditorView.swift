@@ -28,9 +28,8 @@ struct ExistingEntryEditorView: View {
     private var containerView: some View {
         DrugSelectionContainerView(
             model: $editorState.selectionModel,
-            countAutoUpdate: { targetId, newCount in
-                log("Autoupdate start from container in existing edit")
-                editorState.targetModel.autoUpdateCount(on: targetId, newCount, editorState.calculator.realmTokens)
+            countAutoUpdate: { [weak editorState] targetId, newCount in
+                editorState?.onAutoUpdate(on: targetId, count: newCount)
             }
         )
         .boringBorder
@@ -75,7 +74,7 @@ struct ExistingEntryEditorView: View {
 	
 	private var updatedDifferenceView: some View {
         HStack(alignment: .bottom) {
-            Text("Was \(editorState.selectionModel.inProgressEntry.date, formatter: DateFormatting.ShortDateShortTime)")
+            Text("Was \(editorState.selectedDate, formatter: DateFormatting.ShortDateShortTime)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
             Spacer()
@@ -103,7 +102,7 @@ struct ExistingEntryEditorView: View {
 	
 	private var timePicker: some View {
         DatePicker(
-            selection: $editorState.selectionModel.inProgressEntry.date,
+            selection: $editorState.selectedDate,
             displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
             label: { Group { EmptyView() } }
         )
@@ -122,7 +121,7 @@ struct ExistingEntryEditorView: View {
 extension ExistingEntryEditorView {
     var distance: String {
         let originalDate = editorState.targetModel.date
-        let newDate = editorState.selectionModel.inProgressEntry.date
+        let newDate = editorState.selectedDate
         return originalDate.distanceString(newDate)
     }
 }
