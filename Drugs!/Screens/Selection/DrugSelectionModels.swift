@@ -3,6 +3,15 @@ import Foundation
 struct SelectableDrug: Hashable, Equatable {
     let drugName: String
     let drugId: DrugId
+    let updateCount: (Double?) -> Void
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(drugName)
+        hasher.combine(drugId)
+    }
+    static func == (lhs: SelectableDrug, rhs: SelectableDrug) -> Bool {
+        return lhs.drugId == rhs.drugId
+            && rhs.drugName == rhs.drugName
+    }
 }
 
 typealias InProgressDrugCountMap = [SelectableDrug: Double]

@@ -7,7 +7,10 @@ struct AddNewEntryView: View {
     var body: some View {
         return VStack(spacing: 0) {
             DrugSelectionContainerView(
-                model: $rootScreenState.drugSelectionModel
+                model: $rootScreenState.drugSelectionModel,
+                countAutoUpdate: { updateId, newCount in
+                    log(AppStateError.notImplemented())
+                }
             )
             
             Components.fullWidthButton(

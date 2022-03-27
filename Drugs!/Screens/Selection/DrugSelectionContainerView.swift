@@ -3,6 +3,7 @@ import Combine
 
 struct DrugSelectionContainerView: View {
     @Binding var model: DrugSelectionContainerModel
+    let countAutoUpdate: ((Drug.ID, Double?) -> Void)?
 
     var body: some View {
         VStack(alignment: .center, spacing: 4) {
@@ -20,7 +21,11 @@ struct DrugSelectionContainerView: View {
         }
 
         let drugModels = model.availableDrugs.drugs.map { drug -> DrugSelectionListRowModel in
-            let selectableDrug = SelectableDrug(drugName: drug.drugName, drugId: drug.id)
+            let selectableDrug = SelectableDrug(
+                drugName: drug.drugName,
+                drugId: drug.id,
+                updateCount: { newCount in countAutoUpdate?(drug.id, newCount) }
+            )
             let canTake = model.info.canTake(drug)
             let message = model.info.nextDateMessage(drug)
             return DrugSelectionListRowModel(
@@ -55,16 +60,21 @@ struct DrugSelectionContainerView: View {
                 let countForSelection = model.count(for: selectedDrug)
                 let setOrToggleOff = countForSelection != number ? number : nil
                 model.updateCount(setOrToggleOff, for: selectedDrug)
+                selectedDrug.updateCount(setOrToggleOff)
             },
             didIncrementSelection: { incrementAmount in
                 guard let selectedDrug = model.currentSelectedDrug else { return }
                 let currentCount = model.count(for: selectedDrug)
-                model.updateCount(currentCount + incrementAmount, for: selectedDrug)
+                let finalCount = currentCount + incrementAmount
+                model.updateCount(finalCount, for: selectedDrug)
+                selectedDrug.updateCount(finalCount)
             },
             didDecrementSelection: { decrementAmount in
                 guard let selectedDrug = model.currentSelectedDrug else { return }
                 let currentCount = model.count(for: selectedDrug)
-                model.updateCount(currentCount - decrementAmount, for: selectedDrug)
+                let finalCount = currentCount - decrementAmount
+                model.updateCount(finalCount, for: selectedDrug)
+                selectedDrug.updateCount(finalCount)
             }
         )
     }
@@ -131,7 +141,8 @@ struct DrugEntryView_Preview: PreviewProvider {
     }())
     static var previews: some View {
         DrugSelectionContainerView(
-            model: Self.wrapper.binding
+            model: Self.wrapper.binding,
+            countAutoUpdate: nil
         )
     }
 }

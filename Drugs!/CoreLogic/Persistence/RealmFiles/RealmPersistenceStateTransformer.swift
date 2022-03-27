@@ -43,7 +43,7 @@ class RealmPersistenceStateTransformer {
                 case let .initial(results):
                     log { Event("Initial entry list loaded") }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
-                case let .update(results, _, _, _):
+                case let .update(results, previousDeleted, newInserted, previousModified):
                     log { Event("Entry list updated") }
                     self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
                 case let .error(error):

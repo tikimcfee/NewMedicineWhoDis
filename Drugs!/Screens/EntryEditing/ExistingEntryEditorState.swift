@@ -8,6 +8,10 @@ enum EditorError: String, Error {
     case realmNotAvailable
     case failedToCreateSelectionModel
     case modelDeleted
+    case autoUpdateCancelled
+    case missingDrugThaw
+    case missingDrugDuringAutoUpdate
+    case noIndexNoCount
 }
 
 extension ExistingEntryEditorState: InfoReceiver {
@@ -38,17 +42,18 @@ public final class ExistingEntryEditorState: ObservableObject {
         selectionModel.inProgressEntry = Self.buildInitialEntry(targetModel)
     }
     
-    private static func buildInitialEntry(
-        _ entry: RLM_MedicineEntry
-    ) -> InProgressEntry {
-        return InProgressEntry(
-            entry.drugsTaken.reduce(into: InProgressDrugCountMap()) { result, selection in
-                guard let drug = selection.drug else { return }
+    private static func buildInitialEntry(_ entry: RLM_MedicineEntry) -> InProgressEntry {
+        InProgressEntry(
+            entry.drugsTaken.reduce(into: InProgressDrugCountMap()) { result, savedSelection in
+                guard let drug = savedSelection.drug else { return }
                 let selectableDrug = SelectableDrug(
                     drugName: drug.name,
-                    drugId: drug.id
+                    drugId: drug.id,
+                    updateCount: { newCount in
+                        log("-- Intial entry auto update for \(drug.id)")
+                        entry.autoUpdateCount(on: drug.id, newCount) }
                 )
-                result[selectableDrug] = selection.count
+                result[selectableDrug] = savedSelection.count
             },
             entry.date
         )
@@ -71,7 +76,7 @@ public final class ExistingEntryEditorState: ObservableObject {
                 .drugMap(in: selectionModel.availableDrugs)
             let newSelection = migrator.fromV1DrugMap(newMap)
 
-            try thawedRealm.write(withoutNotifying: Array(calculator.realmTokens)) {
+            try thawedRealm.write(withoutNotifying: calculator.realmTokens) {
                 newSelection.forEach { thawedRealm.add($0.drug!, update: .modified) }
                 thawedEntry.drugsTaken.removeAll()
                 thawedEntry.drugsTaken.insert(contentsOf: newSelection, at: 0)
@@ -122,6 +127,65 @@ public final class ExistingEntryEditorState: ObservableObject {
                     log { Event("Updated request: \(error?.localizedDescription ?? "success")") }
                 }
             }
+        }
+    }
+}
+
+extension RLM_MedicineEntry {
+    func autoUpdateCount(
+        on target: Drug.ID,
+        _ count: Double?,
+        _ skip: [NotificationToken] = []
+    ) {
+        do {
+            guard let thawedRealm = realm?.thaw() else {
+                throw EditorError.realmNotAvailable
+            }
+            try thawedRealm.write(withoutNotifying: skip) {
+                try _autoUpdateCountInternal(realm: thawedRealm, target, count)
+            }
+        } catch { log(error) }
+    }
+    
+    private func _autoUpdateCountInternal(
+        realm: Realm,
+        _ target: Drug.ID,
+        _ count: Double?
+    ) throws {
+        guard let drugsTaken = thaw()?.drugsTaken else {
+            throw EditorError.missingDrugThaw
+        }
+        
+        guard let drug = realm.object(ofType: RLM_Drug.self, forPrimaryKey: target) else {
+            throw EditorError.missingDrugDuringAutoUpdate
+        }
+        
+        let maybeExistingIndex = drugsTaken.firstIndex(where: { $0.drug?.id == target }) ?? -1
+        let maybeExistingSelection = drugsTaken.indices.contains(maybeExistingIndex)
+            ? drugsTaken[maybeExistingIndex].thaw()
+            : nil
+        
+        switch (maybeExistingSelection, count) {
+        case let (.some(existing), .some(updatedCount)):
+            // update case, have entry and new count
+            existing.count = updatedCount
+            
+        case (.some, .none):
+            // removal case, no count
+            drugsTaken.remove(at: maybeExistingIndex)
+            
+        case let (.none, .some(updatedCount)):
+            // new selection case, first count
+            let newSelection = RLM_DrugSelection()
+            newSelection.drug = drug
+            newSelection.count = updatedCount
+            drugsTaken.insert(newSelection, at: 0)
+            
+        case (.none, .none):
+            // no index and no count is essentially an error state;
+            // can't remove drugs that we don't know of
+            log(EditorError.noIndexNoCount)
+            break
         }
     }
 }

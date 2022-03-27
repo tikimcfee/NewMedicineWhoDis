@@ -137,7 +137,7 @@ func randomNameString(length: Int = 7)->String{
 public func makeTestDrugSelectionListModel() -> DrugSelectionListModel {
     let models = (0..<10).map { _ in
         DrugSelectionListRowModel(
-            drug: SelectableDrug(drugName: randomNameString(), drugId: randomNameString()),
+            drug: SelectableDrug(drugName: randomNameString(), drugId: randomNameString(), updateCount: { _ in }),
             count: Double.random(in: 0..<8),
             canTake: Bool.random(),
             timingMessage: "Next ready at 9:02 PM",

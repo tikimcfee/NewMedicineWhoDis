@@ -34,7 +34,7 @@ class AvailabilityInfoCalculator: ObservableObject {
     private lazy var id = UUID()
     lazy var workQueue = DispatchQueue(label: "CalculatorQueue-\(id)", qos: .userInteractive)
     private var bag = Set<AnyCancellable>()
-    var realmTokens = Set<NotificationToken>()
+    var realmTokens = [NotificationToken]()
     
     private let entriesSubject = PassthroughSubject<Results<RLM_MedicineEntry>, Never>()
     private let drugListSubject = PassthroughSubject<Results<RLM_AvailableDrugList>, Never>()
@@ -66,7 +66,7 @@ class AvailabilityInfoCalculator: ObservableObject {
         }
         
         realmTokens = [
-            realm.objects(RLM_MedicineEntry.self).observe { [weak  entriesSubject] change in
+            realm.objects(RLM_MedicineEntry.self).observe { [weak entriesSubject] change in
                 log("--- Observing entries: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
                 switch change {
                 case let .initial(results):

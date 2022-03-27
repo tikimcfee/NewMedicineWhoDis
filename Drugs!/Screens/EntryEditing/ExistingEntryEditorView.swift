@@ -4,19 +4,11 @@ import RealmSwift
 
 struct ExistingEntryEditorView: View {
     
-    // Internal / SwiftUI
     @StateObject var editorState: ExistingEntryEditorState
     @Environment(\.presentationMode) private var presentationMode
-    
-    private static var calls: UInt64 = 0
-    private var LOG_COUNT: Void {
-        Self.calls += 1
-        log("Body calls == \(Self.calls)")
-    }
 
 	var body: some View {
-        LOG_COUNT
-		return VStack(spacing: 0) {
+		VStack(spacing: 0) {
             containerView
             timeSection
             HStack(spacing: 0) {
@@ -33,10 +25,13 @@ struct ExistingEntryEditorView: View {
 		}
 	}
 
-    @ViewBuilder
     private var containerView: some View {
         DrugSelectionContainerView(
-            model: $editorState.selectionModel
+            model: $editorState.selectionModel,
+            countAutoUpdate: { targetId, newCount in
+                log("Autoupdate start from container in existing edit")
+                editorState.targetModel.autoUpdateCount(on: targetId, newCount, editorState.calculator.realmTokens)
+            }
         )
         .boringBorder
         .padding(8)
@@ -44,8 +39,7 @@ struct ExistingEntryEditorView: View {
 
     private var timeSection: some View {
         VStack(alignment: .center, spacing: 8) {
-            timePicker
-                .screenWide
+            timePicker.screenWide
             updatedDifferenceView
         }
         .screenWide
@@ -80,7 +74,7 @@ struct ExistingEntryEditorView: View {
     }
 	
 	private var updatedDifferenceView: some View {
-        return HStack(alignment: .bottom) {
+        HStack(alignment: .bottom) {
             Text("Was \(editorState.selectionModel.inProgressEntry.date, formatter: DateFormatting.ShortDateShortTime)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
@@ -95,7 +89,7 @@ struct ExistingEntryEditorView: View {
 	private func time(_ title: String,
                       _ date: Date,
                       _ label: String) -> some View {
-		return HStack(alignment: .firstTextBaseline) {
+		HStack(alignment: .firstTextBaseline) {
 			Text(title)
 				.font(.callout)
             Text("\(date, formatter: DateFormatting.ShortDateShortTime)")
@@ -120,8 +114,8 @@ struct ExistingEntryEditorView: View {
         .contentShape(Rectangle()) // Without this, DatePicker touch area overlaps surrounding views
         .clipped()
         .compositingGroup()
-        .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)	}
-	
+        .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)
+    }
 }
 
 // Data

@@ -24,19 +24,18 @@ public final class AddEntryViewState: ObservableObject {
         self.dataManager = dataManager
         self.notificationScheduler = notificationScheduler
 
-        dataManager.availabilityInfoStream
-            .receive(on: RunLoop.main)
-            .sink { [weak self] in
-                self?.drugSelectionModel.info = $0
-            }
-            .store(in: &cancellables)
-
-        dataManager.sharedDrugListStream
-            .receive(on: RunLoop.main)
-            .sink { [weak self] in
-                self?.drugSelectionModel.availableDrugs = $0
-            }
-            .store(in: &cancellables)
+        cancellables = [
+            dataManager.availabilityInfoStream
+                .receive(on: RunLoop.main)
+                .sink { [weak self] in
+                    self?.drugSelectionModel.info = $0
+                },
+            dataManager.sharedDrugListStream
+                .receive(on: RunLoop.main)
+                .sink { [weak self] in
+                    self?.drugSelectionModel.availableDrugs = $0
+                }
+        ]
     }
 
     func saveNewEntry() {

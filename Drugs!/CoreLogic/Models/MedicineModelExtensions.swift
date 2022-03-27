@@ -16,15 +16,6 @@ extension Drug {
 	}
 }
 
-extension Drug {
-    var asSelectableDrug: SelectableDrug {
-        SelectableDrug(
-            drugName: drugName,
-            drugId: id
-        )
-    }
-}
-
 extension MedicineEntry {
 	var drugList: String {
 		if drugsTaken.count == 0 {
@@ -44,15 +35,6 @@ extension MedicineEntry {
 		}
 		return result
 	}
-
-    var editableEntry: InProgressEntry {
-        return InProgressEntry(
-            drugsTaken.reduce(into: InProgressDrugCountMap()) { result, pair in
-                result[pair.key.asSelectableDrug] = pair.value
-            },
-            date
-        )
-    }
 }
 
 extension AvailableDrugList {

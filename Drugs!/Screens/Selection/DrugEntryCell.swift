@@ -88,7 +88,7 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
         Group {
             DrugEntryViewCell(
                 model: DrugSelectionListRowModel(
-                    drug: SelectableDrug(drugName: "A drug name", drugId: "12345"),
+                    drug: SelectableDrug(drugName: "A drug name", drugId: "12345", updateCount: { _ in }),
                     count: 9,
                     canTake: false,
                     timingMessage: "6:37 pm",
