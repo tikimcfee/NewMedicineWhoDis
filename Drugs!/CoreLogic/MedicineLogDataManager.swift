@@ -98,6 +98,26 @@ struct MedicineLogDataManagerModifer: ViewModifier {
     }
 }
 
+struct DefaultRealmModifer: ViewModifier {
+    let manager: DefaultRealmManager
+    
+    private var modifier: RealmPersistenceManagerEnvironment? {
+        manager.accessImmediate {
+            RealmPersistenceManagerEnvironment(sourceRealm: $0)
+        }
+    }
+    
+    @ViewBuilder
+    public func body(content: Content) -> some View {
+        if let modifier = modifier {
+            content.modifier(modifier)
+        } else {
+            content
+        }
+    }
+}
+
+
 final public class MedicineLogDataManager: ObservableObject {
 	private let selector = DataManagerPersistenceSelector()
 	private var persistenceManager: PersistenceManager

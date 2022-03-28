@@ -43,8 +43,8 @@ struct AddNewEntryView: View {
 struct ContentView_Previews: PreviewProvider {
     private static let data = makeTestMedicineOperator()
     static var previews: some View {
-        let dataManager = makeTestMedicineOperator()
-        let notificationState = NotificationInfoViewState(dataManager)
+        let dataManager = DefaultRealmManager()
+        let notificationState = NotificationInfoViewState()
         let scheduler = NotificationScheduler(notificationState: notificationState)
         let rootState = AddEntryViewState(dataManager, scheduler)
         return Group {

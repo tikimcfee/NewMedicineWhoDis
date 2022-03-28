@@ -114,7 +114,7 @@ struct NotificationInfoView_Previews: PreviewProvider {
     }
 
     static var previews: some View {
-        let state = NotificationInfoViewState(makeTestMedicineOperator())
+        let state = NotificationInfoViewState()
         state.notificationModels = testModels()
         return NotificationInfoView().environmentObject(state)
     }

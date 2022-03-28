@@ -46,6 +46,10 @@ extension EntryLogRealmManager {
 }
 
 class DefaultRealmManager: EntryLogRealmManager {
+    public func makeModifier() -> DefaultRealmModifer {
+        DefaultRealmModifer(manager: self)
+    }
+    
     public func loadEntryLogRealm() throws -> Realm {
         var config = Realm.Configuration.defaultConfiguration
         config.fileURL = AppFiles.entryLogRealm

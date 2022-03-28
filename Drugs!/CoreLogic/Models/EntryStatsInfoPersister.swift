@@ -15,7 +15,11 @@ class EntryStatsInfoPersister {
     var realmTokens = [NotificationToken]()
     
     private let worker = BackgroundWorker()
-    let manager = DefaultRealmManager()
+    let manager: DefaultRealmManager
+    
+    init(manager: DefaultRealmManager) {
+        self.manager = manager
+    }
     
     deinit {
         log("Info persister state cleaning up")

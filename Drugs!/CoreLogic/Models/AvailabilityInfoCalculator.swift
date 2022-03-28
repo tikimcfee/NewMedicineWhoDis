@@ -37,10 +37,10 @@ class AvailabilityInfoCalculator: ObservableObject {
     
     private var bag = Set<AnyCancellable>()
     var realmTokens = [NotificationToken]()
-    let entryStatsPersister = EntryStatsInfoPersister()
+    let entryStatsPersister: EntryStatsInfoPersister
     
-    init() {
-        
+    init(persister: EntryStatsInfoPersister) {
+        self.entryStatsPersister = persister
     }
     
     deinit {

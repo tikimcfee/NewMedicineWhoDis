@@ -2,7 +2,6 @@ import Combine
 import SwiftUI
 
 public final class NotificationInfoViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
     private var cancellables = Set<AnyCancellable>()
     private let manualUpdateSubject = {
         PassthroughSubject<Date, Never>()
@@ -11,10 +10,6 @@ public final class NotificationInfoViewState: ObservableObject {
     // View state
     @Published var notificationModels = [NotificationInfoViewModel]()
     @Published var permissionsGranted = false
-
-    init(_ dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-    }
 
     public func startPublishing() {
         stopPublishing()

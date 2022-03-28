@@ -20,18 +20,16 @@ public extension Result where Success == ApplicationData, Failure == Error {
 }
 
 public class MasterEnvironmentContainer: ObservableObject {
-    let dataManager: MedicineLogDataManager
-
     let notificationState: NotificationInfoViewState
     let notificationScheduler: NotificationScheduler
-
     let rootScreenState: AddEntryViewState
+    let manager: DefaultRealmManager
 
     init() {
-        self.dataManager = MedicineLogDataManager(supportedManager: .realm)
-        self.notificationState = NotificationInfoViewState(dataManager)
+        self.manager = DefaultRealmManager()
+        self.notificationState = NotificationInfoViewState()
         self.notificationScheduler = NotificationScheduler(notificationState: notificationState)
-        self.rootScreenState = AddEntryViewState(dataManager, notificationScheduler)
+        self.rootScreenState = AddEntryViewState(manager, notificationScheduler)
     }
 
     public func makeNewDrugEditorState() -> DrugListEditorViewState {
@@ -64,11 +62,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let contentView = RootAppStartupView()
             // attach data manager to give internals a chance to attach environment stuff
-            .modifier(environmentContainer.dataManager.asModifier)
+            .modifier(environmentContainer.manager.makeModifier())
             
             // these will go away eventually, likely interaction directly with storage
             .environmentObject(environmentContainer)
-            .environmentObject(environmentContainer.dataManager)
             .environmentObject(environmentContainer.rootScreenState)
             .environmentObject(environmentContainer.notificationState)
         
@@ -87,7 +84,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         log { Event("Enabling test configuration. Ye have been warned.", .warning) }
 		
 		if AppTestArguments.clearEntriesOnLaunch.isSet {
-            container.dataManager.removeAllData()
+            container.manager.access { realm in
+                try realm.write {
+                    realm.deleteAll()
+                }
+            }
         }
 
         if AppTestArguments.disableAnimations.isSet {

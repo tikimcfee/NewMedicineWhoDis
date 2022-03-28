@@ -27,10 +27,14 @@ public final class ExistingEntryEditorState: ObservableObject {
     public init(_ unsafeTarget: RLM_MedicineEntry) {
         self.targetModel = unsafeTarget
         self.selectedDate = unsafeTarget.date
-        self.calculator = AvailabilityInfoCalculator()
+        self.calculator = AvailabilityInfoCalculator(
+            persister: EntryStatsInfoPersister(
+                manager: DefaultRealmManager()
+            )
+        )
         
         setInitialProgressEntry()
-        calculator.start { [weak self] editor in 
+        calculator.start { [weak self] editor in
             guard let self = self else { return }
             editor(&self.selectionModel)
         }

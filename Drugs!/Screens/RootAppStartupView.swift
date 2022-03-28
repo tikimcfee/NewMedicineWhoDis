@@ -1,13 +1,22 @@
 import SwiftUI
 import Combine
 
+enum RootShare {
+    case none
+    case file(URL)
+}
+
+extension URL: Identifiable {
+    public var id: String { absoluteString }
+}
+
 struct RootAppStartupView: View {
 
     @EnvironmentObject var container: MasterEnvironmentContainer
     @State private var selectionTag: RootScreenTabTag = .addEntry
 
     @State private var showingActionSheet = false
-    @State private var showingShareSheet = false
+    @State private var showingShareSheetURL: URL?
     @State private var cleanAppLogsAlert = false
 
     var body: some View {
@@ -17,7 +26,7 @@ struct RootAppStartupView: View {
             notificationsView
             drugListEditorView
         }
-        .sheet(isPresented: $showingShareSheet, content: { activityViewShareSheet })
+        .sheet(item: $showingShareSheetURL) { activityViewShareSheet($0) }
         .actionSheet(isPresented: $showingActionSheet) { actionSheetHelpOptions }
         .alert(isPresented: $cleanAppLogsAlert) { alertViewClearAppLogsConfirm }
     }
@@ -29,7 +38,8 @@ struct RootAppStartupView: View {
         ActionSheet(title: Text("Help and Settings"),
                     message: Text("What would you like to do?"),
                     buttons: [
-                        .default(Text("Share app logs")) { didTapShowShareSheet() },
+                        .default(Text("Send app logs")) { self.showingShareSheetURL = AppEvents.shared.logFile },
+                        .default(Text("Backup data")) { self.showingShareSheetURL = AppFiles.entryLogRealm },
                         .default(Text("Delete app logs")) { didTapCleanAppLogs() },
                         .cancel()
                     ])
@@ -41,13 +51,9 @@ struct RootAppStartupView: View {
 
     // MARK: Share Sheet (ActivityView)
 
-    private func didTapShowShareSheet() {
-        showingShareSheet = true
-    }
-
-    private var activityViewShareSheet: some View {
-        let eventsFile = AppEvents.shared.logFile
-        return ActivityView(activityItems: [eventsFile] as [Any],
+    private func activityViewShareSheet(_ url: URL) -> some View {
+//        let eventsFile = AppEvents.shared.logFile
+        return ActivityView(activityItems: [url] as [Any],
                             applicationActivities: nil)
     }
 
@@ -169,12 +175,12 @@ extension View {
 #if DEBUG
 struct RootAppStartupView_Previews: PreviewProvider {
     static var previews: some View {
-        let dataManager = makeTestMedicineOperator()
-        let notificationState = NotificationInfoViewState(dataManager)
+        let dataManager = DefaultRealmManager()
+        let notificationState = NotificationInfoViewState()
         let scheduler = NotificationScheduler(notificationState: notificationState)
         let rootState = AddEntryViewState(dataManager, scheduler)
         return RootAppStartupView()
-            .environmentObject(dataManager)
+            .modifier(dataManager.makeModifier())
             .environmentObject(rootState)
     }
 }

@@ -8,34 +8,29 @@ protocol ACoolNameForAStartStopPublisher {
 }
 
 public final class AddEntryViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
+    private let manager: DefaultRealmManager
     private let notificationScheduler: NotificationScheduler
     private var cancellables = Set<AnyCancellable>()
 
+    private let calculator: AvailabilityInfoCalculator
+    private let worker = BackgroundWorker()
+
     // View models
     @Published var drugSelectionModel = DrugSelectionContainerModel()
-
-    // Output
-    @Published var currentEntries = [MedicineEntry]()
     @Published var saveError: AppStateError? = nil
 
-    init(_ dataManager: MedicineLogDataManager,
+    init(_ manager: DefaultRealmManager,
          _ notificationScheduler: NotificationScheduler) {
-        self.dataManager = dataManager
+        self.manager = manager
         self.notificationScheduler = notificationScheduler
-
-        cancellables = [
-            dataManager.availabilityInfoStream
-                .receive(on: RunLoop.main)
-                .sink { [weak self] in
-                    self?.drugSelectionModel.info = $0
-                },
-            dataManager.sharedDrugListStream
-                .receive(on: RunLoop.main)
-                .sink { [weak self] in
-                    self?.drugSelectionModel.availableDrugs = $0
-                }
-        ]
+        
+        let persister = EntryStatsInfoPersister(manager: manager)
+        self.calculator = AvailabilityInfoCalculator(persister: persister)
+        
+        calculator.start { [weak self] receiver in
+            guard let self = self else { return }
+            receiver(&self.drugSelectionModel)
+        }
     }
 
     func saveNewEntry() {
@@ -61,15 +56,18 @@ public final class AddEntryViewState: ObservableObject {
         }
 
         let newEntry = createNewEntry(with: convertedMap)
-        dataManager.addEntry(medicineEntry: newEntry) { [weak self] result in
-            switch result {
-            case .success:
+        let converted = V1Migrator().fromV1Entry(newEntry)
+        manager.access { [weak self] realm in
+            do {
+                try realm.write {
+                    realm.add(converted, update: .all)
+                }
                 self?.drugSelectionModel.resetEdits()
                 self?.notificationScheduler.scheduleLocalNotifications(
                     for: Array(convertedMap.keys)
                 )
-            case .failure(let saveError):
-                self?.saveError = .saveError(cause: saveError)
+            } catch {
+                self?.saveError = .saveError(cause: error)
             }
         }
     }
@@ -77,18 +75,5 @@ public final class AddEntryViewState: ObservableObject {
     func createNewEntry(with map: DrugCountMap) -> MedicineEntry {
         // NOTE: the date is set AT TIME of creation, NOT from the progress entry
         return MedicineEntry(Date(), map)
-    }
-
-    func deleteEntry(at index: Int) {
-        guard currentEntries.indices.contains(index) else { return }
-        let id = currentEntries[index].id
-        dataManager.removeEntry(with: id) { result in
-            switch result {
-            case .success:
-                log { Event("Deleted entry at \(index)") }
-            case .failure(let error):
-                log { Event("Deletion failed with error: \(error.localizedDescription)") }
-            }
-        }
     }
 }
