@@ -14,29 +14,26 @@ enum EditorError: String, Error {
     case noIndexNoCount
 }
 
-extension ExistingEntryEditorState: InfoReceiver {
-    var selectionModelReceiver: ((inout DrugSelectionContainerModel) -> Void) -> () {
-        return { receiver in
-            receiver(&self.selectionModel)
-        }
-    }
-}
-
 public final class ExistingEntryEditorState: ObservableObject {
     @Published var editorError: AppStateError? = nil
     @Published var selectionModel = DrugSelectionContainerModel()
     @Published var selectedDate = Date()
     @ObservedRealmObject public var targetModel: RLM_MedicineEntry
     
-    lazy var calculator = AvailabilityInfoCalculator(receiver: self)
+    let calculator: AvailabilityInfoCalculator
     private var bag = Set<AnyCancellable>()
     private var tokens = Set<NotificationToken>()
     
     public init(_ unsafeTarget: RLM_MedicineEntry) {
         self.targetModel = unsafeTarget
         self.selectedDate = unsafeTarget.date
-        calculator.bindModelSnapshot(unsafeTarget)
+        self.calculator = AvailabilityInfoCalculator()
+        
         setInitialProgressEntry()
+        calculator.start { [weak self] editor in 
+            guard let self = self else { return }
+            editor(&self.selectionModel)
+        }
     }
     
     deinit {

@@ -54,6 +54,19 @@ Migration state query:
 		}
 	}
     
+    public func migrateFromStatsContainer(
+        sourceList: RLM_AvailableDrugList,
+        into stats: RLM_AvailabilityInfoContainer
+    ) -> AvailabilityInfo {
+        return stats.allInfo?.reduce(into: AvailabilityInfo()) { results, stats in
+            guard let drug = sourceList.drugs.first(where: { $0.id == stats.key }) else {
+                log("No drug found in root list for: \(stats.key)")
+                return
+            }
+            results[toV1Drug(drug)] = (stats.value.canTake, stats.value.when)
+        } ?? AvailabilityInfo()
+    }
+    
     public func migrateEntriesToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {
         return oldList.map(fromV1Entry)
     }

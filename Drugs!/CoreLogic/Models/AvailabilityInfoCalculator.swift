@@ -14,8 +14,10 @@ import SwiftUI
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
 enum AvailabilityInfoError: Error {
+    case missingContainer
     case missingDrugList
     case missingBindTargetRealm
+    case missingDrug(String)
 }
 
 extension AvailabilityInfo {
@@ -26,102 +28,74 @@ extension AvailabilityInfo {
 
 // Receiver protocol must allow weak reference so state is not implicitly retained,
 // captured by the immediate usage in the sink call
-protocol InfoReceiver: AnyObject {
-    var selectionModelReceiver: ((inout DrugSelectionContainerModel) -> Void) -> () { get }
-}
+typealias ContainerReceiver = (inout DrugSelectionContainerModel) -> Void
+typealias ContainerReceiverGetter = (ContainerReceiver) -> Void
 
 class AvailabilityInfoCalculator: ObservableObject {
     private lazy var id = UUID()
     lazy var workQueue = DispatchQueue(label: "CalculatorQueue-\(id)", qos: .userInteractive)
+    
     private var bag = Set<AnyCancellable>()
     var realmTokens = [NotificationToken]()
+    let entryStatsPersister = EntryStatsInfoPersister()
     
-    private let entriesSubject = PassthroughSubject<Results<RLM_MedicineEntry>, Never>()
-    private let drugListSubject = PassthroughSubject<Results<RLM_AvailableDrugList>, Never>()
-    private lazy var combine = Publishers.CombineLatest(entriesSubject, drugListSubject)
-    
-    @Published var info: AvailabilityInfo = AvailabilityInfo()
-    
-    init(receiver: InfoReceiver) {
-        bag = [
-            combine
-                .receive(on: workQueue)
-                .compactMap { result in Self.updateInfo(entries: result.0, drugs: result.1) }
-                .receive(on: RunLoop.main)
-                .sink { [weak receiver] newInfo in
-                    receiver?.selectionModelReceiver { toEdit in
-                        log("Alert receiver of new info")
-                        toEdit.info = newInfo.0
-                        toEdit.availableDrugs = newInfo.1
-                    }
-                }
-        ]
+    init() {
+        
     }
     
     deinit {
         log("Calculator state cleaning up")
     }
     
-    func bindModelSnapshot(_ unsafeTarget: RLM_MedicineEntry) {
-        self.bindModelSnapshotImpl(unsafeTarget)
-    }
-    
-    private func bindModelSnapshotImpl(_ unsafeTarget: RLM_MedicineEntry) {
-        log("--- Start observing: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
-        guard let thawedModel = unsafeTarget.thaw(),
-              let realm = thawedModel.realm?.thaw()
-        else {
-            log(AvailabilityInfoError.missingBindTargetRealm)
-            return
+    func start(receiver: @escaping ContainerReceiverGetter) {
+        entryStatsPersister.start()
+        entryStatsPersister.manager.access { realm in
+            bag.insert(
+                Publishers.CombineLatest(
+                    RLM_AvailabilityInfoContainer.defeaultObservableListFrom(realm).collectionPublisher,
+                    RLM_AvailableDrugList.defeaultObservableListFrom(realm).collectionPublisher
+                )
+                .compactMap { result in return Self.makeUpdateInfo(container: result.0, drugs: result.1) }
+                .receive(on: RunLoop.main)
+                .sink(
+                    receiveCompletion: { state in
+                        switch state {
+                        case .finished: log("CombineLatest reported finished state")
+                        case let .failure(error): log(error)
+                        }
+                    },
+                    receiveValue: { newInfo in
+                        receiver { toEdit in
+                            log("Alert receiver of new info")
+                            toEdit.info = newInfo.0
+                            toEdit.availableDrugs = newInfo.1
+                        }
+                    }
+                )
+            )
         }
-        
-        realmTokens = [
-            realm.objects(RLM_MedicineEntry.self).observe { [weak entriesSubject] change in
-                log("--- Observing entries: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
-                switch change {
-                case let .initial(results):
-                    entriesSubject?.send(results.freeze())
-                case let .update(results, _, _, _):
-                    entriesSubject?.send(results.freeze())
-                case let .error(error):
-                    log(error)
-                    break
-                }
-            },
-            RLM_AvailableDrugList.defeaultObservableListFrom(realm).observe { [weak drugListSubject] change in
-                log("--- Observe drug list: \(unsafeTarget.id)::[\(String(describing: Thread.current))]")
-                switch change {
-                case let .initial(results):
-                    drugListSubject?.send(results.freeze())
-                case let .update(results, _, _, _):
-                    drugListSubject?.send(results.freeze())
-                case let .error(error):
-                    log(error)
-                    break
-                }
-            }
-        ]
     }
     
-    private static func updateInfo(
-        entries: Results<RLM_MedicineEntry>,
+    private static func makeUpdateInfo(
+        container: Results<RLM_AvailabilityInfoContainer>?,
         drugs: Results<RLM_AvailableDrugList>?
     ) -> (AvailabilityInfo, AvailableDrugList)? {
         log("Starting InfoCalculator update")
         
-        guard let drugs = drugs?.first else {
+        guard let drugs = drugs?.first,
+              let container = container?.first else {
             log(AvailabilityInfoError.missingDrugList)
             return nil
         }
-                
-        let migrator = V1Migrator()
-        let v1Entries = entries.map { migrator.toV1Entry($0) }
-        let v1Drugs = migrator.toV1DrugList(drugs)
-        let newInfo = Self.computeInfo(availableDrugs: v1Drugs, entries: Array(v1Entries))
         
-        return (newInfo, v1Drugs)
+        let migrator = V1Migrator()
+        let v1Info = migrator.migrateFromStatsContainer(sourceList: drugs, into: container)
+        let v1Drugs = migrator.toV1DrugList(drugs)
+        
+        return (v1Info, v1Drugs)
     }
-    
+
+        
     static func computeInfo(startDate: Date = Date(),
                             availableDrugs: AvailableDrugList,
                             entries: [MedicineEntry]) -> AvailabilityInfo {

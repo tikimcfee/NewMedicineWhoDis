@@ -30,7 +30,7 @@ public class RLM_Ingredient: Object {
     @Persisted var ingredientName: String = ""
 }
 
-public class RLM_Drug: Object {
+public class RLM_Drug: Object, ObjectKeyIdentifiable {
     @Persisted(primaryKey: true) public var id: String = UUID().uuidString
     @Persisted public var name: String = ""
     @Persisted public var ingredients: List<RLM_Ingredient> = List()
@@ -53,6 +53,41 @@ public class RLM_AvailableDrugList: Object, Identifiable {
 	@Persisted public var drugs: List<RLM_Drug> = List()
 }
 
+public class RLM_AvailabilityInfoContainer: Object, Identifiable {
+    @Persisted(primaryKey: true) public var id: String = RLM_AvailabilityInfoContainer.defaultInfoId
+    @Persisted public var allInfo: Map<Drug.ID, RLM_AvailabilityStats>?
+}
+
+extension Map: _PersistableInsideOptional where Key == Drug.ID, Value == RLM_AvailabilityStats {
+    public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: PropertyKey) -> Self? {
+        log("OptionalPersistable called for RLM_AvailabilityStats map; what is this even doing and why does it work?")
+        return _rlmGetProperty(obj, key)
+    }
+}
+
+public class RLM_AvailabilityStats: Object {
+    @Persisted public var canTake: Bool = false
+    @Persisted public var when: Date = Date()
+    convenience init(canTake: Bool, when: Date) {
+        self.init()
+        self.canTake = canTake
+        self.when = when
+    }
+}
+
+extension RLM_AvailabilityInfoContainer {
+    static let defaultInfoId = "defaultAvailabilityInfoId"
+    
+    static func defaultFrom(_ realm: Realm) -> RLM_AvailabilityInfoContainer? {
+        realm.object(ofType: RLM_AvailabilityInfoContainer.self, forPrimaryKey: Self.defaultInfoId)
+    }
+    
+    static func defeaultObservableListFrom(_ realm: Realm) -> Results<RLM_AvailabilityInfoContainer> {
+        realm.objects(RLM_AvailabilityInfoContainer.self)
+            .filter(NSPredicate(format: "id == %@", Self.defaultInfoId))
+    }
+}
+
 extension RLM_AvailableDrugList {
 	static let defaultDrugListKeyId = "defaultDrugListKeyId"
 	
@@ -73,4 +108,10 @@ extension RLM_AvailableDrugList {
 		realm.objects(RLM_AvailableDrugList.self)
 			.filter(NSPredicate(format: "id == %@", Self.defaultDrugListKeyId))
 	}
+}
+
+extension RLM_Drug {
+    var doseTimeInSeconds: Double {
+        return Double(hourlyDoseTime) * 60.0 * 60.0
+    }
 }

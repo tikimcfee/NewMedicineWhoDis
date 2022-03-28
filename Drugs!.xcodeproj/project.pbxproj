@@ -30,6 +30,8 @@
 		45DA2BC1232532E500649270 /* AppStateError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC0232532E500649270 /* AppStateError.swift */; };
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
+		B7DBE68927F111E2004AC4AF /* BackgroundWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */; };
+		B7DBE68B27F12A67004AC4AF /* EntryStatsInfoPersister.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DBE68A27F12A67004AC4AF /* EntryStatsInfoPersister.swift */; };
 		B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */; };
 		B7F47D9027EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */; };
 		B7FC2CB027B741BC002C950E /* RealmPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */; };
@@ -119,6 +121,8 @@
 		45DA2BC0232532E500649270 /* AppStateError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateError.swift; sourceTree = "<group>"; };
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
+		B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundWorker.swift; sourceTree = "<group>"; };
+		B7DBE68A27F12A67004AC4AF /* EntryStatsInfoPersister.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryStatsInfoPersister.swift; sourceTree = "<group>"; };
 		B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListViewState.swift; sourceTree = "<group>"; };
 		B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityInfoCalculator.swift; sourceTree = "<group>"; };
 		B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceManager.swift; sourceTree = "<group>"; };
@@ -420,6 +424,8 @@
 				45DA2BBC2324C1FD00649270 /* MedicineModelDefinitions.swift */,
 				45135961239A2C0B00EB2D31 /* MedicineModelExtensions.swift */,
 				B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */,
+				B7DBE68A27F12A67004AC4AF /* EntryStatsInfoPersister.swift */,
+				B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -630,6 +636,7 @@
 				F07E207E24E9CBFF004DFB8C /* AddEntryViewState.swift in Sources */,
 				F066BB54258EFC5700B1654B /* ApplicationData+Mutation.swift in Sources */,
 				F0456CD024705D630017B04E /* DrugSelectionListView.swift in Sources */,
+				B7DBE68927F111E2004AC4AF /* BackgroundWorker.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,
 				F022624F2471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
@@ -642,6 +649,7 @@
 				4593B4B6231AFBD000787D91 /* AddNewEntryView.swift in Sources */,
 				F01BBBB4246F939600BBC3A3 /* EntryListFileStore.swift in Sources */,
 				45DA2BBF2324C93E00649270 /* MedicineLogDataManager.swift in Sources */,
+				B7DBE68B27F12A67004AC4AF /* EntryStatsInfoPersister.swift in Sources */,
 				B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

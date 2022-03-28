@@ -14,8 +14,8 @@ class RealmPersistenceStateTransformer {
     @Published var appData: ApplicationData = ApplicationData()
     
     private let manager: EntryLogRealmManager
-    private var entriesToken: NotificationToken?
-    private var drugsToken: NotificationToken?
+    private var observationTokens = [NotificationToken]()
+    private var bag = Set<AnyCancellable>()
     
     init(manager: EntryLogRealmManager) {
         self.manager = manager
@@ -23,50 +23,60 @@ class RealmPersistenceStateTransformer {
     }
     
     deinit {
-        entriesToken?.invalidate()
-        drugsToken?.invalidate()
+        worker.stop()
     }
     
-    func doMigrations() throws {
-        manager.access { realm in
-            
-        }
-    }
+    let worker = BackgroundWorker()
     
     func setupObservations() throws {
-        let realm = try manager.loadEntryLogRealm()
-        entriesToken = realm
-            .objects(RLM_MedicineEntry.self)
-            .sorted(by: \.date, ascending: false)
-            .observe { [weak self] change in
-                switch change {
-                case let .initial(results):
-                    log { Event("Initial entry list loaded") }
-                    self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
-                case let .update(results, previousDeleted, newInserted, previousModified):
-                    log { Event("Entry list updated: d:\(previousDeleted), i:\(newInserted), m:\(previousModified)") }
-                    self?.appData.mainEntryList = results.map { V1Migrator().toV1Entry($0) }
-                case let .error(error):
-                    log { Event("Failed to observe, \(error.localizedDescription)", .error)}
+        worker.start()
+        worker.run { [weak self] runLoop in
+            guard let self = self else { return }
+            
+            func completion(_ state: Subscribers.Completion<Error>) {
+                switch state {
+                case .finished:
+                    log("Published reported finished state")
+                case let .failure(error):
+                    log(error)
                 }
             }
-        drugsToken = RLM_AvailableDrugList
-            .defeaultObservableListFrom(realm)
-            .observe { [weak self] change in
-                switch change {
-                case let .initial(results):
-                    log { Event("Initial drug list loaded") }
-                    if let first = results.first {
-                        self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)
-                    }
-                case let .update(results, _, _, _):
-                    log { Event("Drug list updated") }
-                    if let first = results.first {
-                        self?.appData.availableDrugList = V1Migrator().toV1DrugList(first)
-                    }
-                case let .error(error):
-                    log { Event("Failed to observe, \(error.localizedDescription)", .error) }
-                }
+            
+            self.manager.access { realm in
+                self.bag = [
+                    realm.objects(RLM_MedicineEntry.self)
+                        .sorted(by: \.date, ascending: false)
+                        .collectionPublisher
+                        .receive(on: runLoop)
+                        .compactMap { results in
+                            let migrator = V1Migrator()
+                            let mapped = results.map { migrator.toV1Entry($0) }
+                            return Array(mapped)
+                        }
+                        .receive(on: RunLoop.main)
+                        .sink(receiveCompletion: completion,
+                            receiveValue: { results in
+                                self.appData.mainEntryList = results
+                            }
+                        ),
+                    RLM_AvailableDrugList.defeaultObservableListFrom(realm)
+                        .collectionPublisher
+                        .receive(on: runLoop)
+                        .compactMap { results -> AvailableDrugList? in
+                            guard let first = results.first else { return nil }
+                            log("Drug list on \(Thread.current)")
+                            return V1Migrator().toV1DrugList(first)
+                        }
+                        .receive(on: RunLoop.main)
+                        .sink(
+                            receiveCompletion: completion,
+                            receiveValue: { results in
+                                log("Drug list send on \(Thread.current)")
+                                self.appData.availableDrugList = results
+                            }
+                        )
+                ]
             }
+        }
     }
 }
