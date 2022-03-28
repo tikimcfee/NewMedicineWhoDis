@@ -2,113 +2,59 @@ import Combine
 import Foundation
 
 public struct InProgressDrugEdit {
-    private var didMakeDrugSelection = false
-    private(set) var targetDrug: Drug?
-    private var updatedDrug: Drug = Drug(id: UUID().uuidString)
+    var targetDrug: RLM_Drug = RLM_Drug()
     
     var drugName: String {
-        get { updatedDrug.drugName }
-        set { updatedDrug.drugName = newValue }
+        get { targetDrug.name }
+        set { targetDrug.name = newValue }
     }
     
     var doseTime: Int {
-        get { Int(updatedDrug.hourlyDoseTime) }
-        set { updatedDrug.hourlyDoseTime = Double(newValue) }
-    }
-
-    var currentUpdatesAsNewDrug: Drug { updatedDrug }
-
-    var isEditSaveEnabled: Bool {
-        return didMakeDrugSelection
-            && targetDrug != updatedDrug
+        get { Int(targetDrug.hourlyDoseTime) }
+        set { targetDrug.hourlyDoseTime = Double(newValue) }
     }
 
     var isNewSaveEnabled: Bool {
-        return didMakeDrugSelection
-            && !updatedDrug.drugName.isEmpty
+        return !targetDrug.name.isEmpty
     }
     
-    mutating func setTarget(drug: Drug) {
+    var asV1Drug: Drug {
+        V1Migrator().toV1Drug(targetDrug)
+    }
+    
+    mutating func setTarget(drug: RLM_Drug) {
         targetDrug = drug
-        didMakeDrugSelection = targetDrug != nil
-        updatedDrug = Drug(
-            drug.drugName,
-            drug.ingredients,
-            drug.hourlyDoseTime,
-            id: drug.id
-        )
     }
 
     mutating func startEditingNewDrug() {
-        setTarget(drug: Drug(id: UUID().uuidString))
+        setTarget(drug: RLM_Drug())
     }
 }
 
 public final class DrugListEditorViewState: ObservableObject {
-    private let dataManager: MedicineLogDataManager
+    private let manager = DefaultRealmManager()
     private var cancellables = Set<AnyCancellable>()
 
     @Published var inProgressEdit = InProgressDrugEdit()
-    @Published var currentDrugList: AvailableDrugList = .empty
-    
     @Published var saveError: Error? = nil
-    var canSaveAsEdit: Bool { inProgressEdit.isEditSaveEnabled }
-    var canSaveAsNew: Bool { inProgressEdit.isNewSaveEnabled }
-
-    init(_ dataManager: MedicineLogDataManager) {
-        self.dataManager = dataManager
-
-        dataManager
-            .sharedDrugListStream
-            .sink { [weak self] in
-                self?.currentDrugList = $0
-            }
-            .store(in: &cancellables)
-    }
-
-    func deleteDrug(_ drug: Drug) {
-        dataManager.removeDrug(drugToRemove: drug) { [weak self] result in
-            switch result {
-            case .success:
-                self?.saveError = nil
-            case .failure(let error):
-                self?.saveError = error
-            }
-        }
-    }
-
-    func saveAsEdit() {
-        guard inProgressEdit.isEditSaveEnabled,
-              let original = inProgressEdit.targetDrug else {
-                log { Event("Edit save halted", .info) }
-                return
-            }
-        let update = inProgressEdit.currentUpdatesAsNewDrug
-        dataManager.updateDrug(originalDrug: original, updatedDrug: update) { [weak self] result in
-            switch result {
-            case .success:
-                self?.inProgressEdit.setTarget(drug: update)
-                self?.saveError = nil
-            case .failure(let error):
-                self?.saveError = error
-            }
-        }
+    @Published var deleteTargetItem: RLM_Drug? = nil
+    @Published var currentMode: EditMode = .edit {
+        didSet { inProgressEdit.startEditingNewDrug() }
     }
 
     func saveAsNew() {
-        guard inProgressEdit.isEditSaveEnabled else {
+        guard inProgressEdit.isNewSaveEnabled else {
             log { Event("New save halted", .info) }
             return
         }
-        let newDrug = inProgressEdit.currentUpdatesAsNewDrug
-        dataManager.addDrug(newDrug: newDrug) { [weak self] result in
-            switch result {
-            case .success:
-                self?.inProgressEdit.startEditingNewDrug()
-                self?.saveError = nil
-            case .failure(let error):
-                self?.saveError = error
+        
+        manager.access { [weak self] realm in
+            guard let self = self else { return }
+            guard let list = RLM_AvailableDrugList.defaultFrom(realm) else { return }
+            try realm.write {
+                list.drugs.append(inProgressEdit.targetDrug)
             }
+            self.inProgressEdit.startEditingNewDrug()
         }
     }
 }

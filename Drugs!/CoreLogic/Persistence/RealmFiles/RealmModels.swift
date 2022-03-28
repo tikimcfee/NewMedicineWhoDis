@@ -114,4 +114,14 @@ extension RLM_Drug {
     var doseTimeInSeconds: Double {
         return Double(hourlyDoseTime) * 60.0 * 60.0
     }
+    
+    private var onlyIngredientIsSelf: Bool {
+        return ingredients.count == 1
+        && ingredients.first?.ingredientName == name
+    }
+    
+    var ingredientList: String {
+        guard !onlyIngredientIsSelf else { return "" }
+        return ingredients.map { $0.ingredientName }.joined(separator: ", ")
+    }
 }

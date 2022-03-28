@@ -7,8 +7,9 @@
 //
 
 import SwiftUI
+import RealmSwift
 
-private enum EditMode: Int, CustomStringConvertible, CaseIterable {
+enum EditMode: Int, CustomStringConvertible, CaseIterable {
     case add, delete, edit
     var description: String {
         switch self {
@@ -38,13 +39,8 @@ private enum EditMode: Int, CustomStringConvertible, CaseIterable {
 
 struct DrugListEditorView: View {
 
+    @ObservedResults(RLM_AvailableDrugList.self) var results
     @EnvironmentObject var drugListEditorState: DrugListEditorViewState
-    @State private var currentMode: EditMode = .edit {
-        didSet {
-            drugListEditorState.inProgressEdit.startEditingNewDrug()
-        }
-    }
-    @State private var deleteTargetItem: Drug? = nil
 
     var body: some View {
         return VStack(spacing: 0) {
@@ -52,11 +48,22 @@ struct DrugListEditorView: View {
             subviewEditor
         }
         .navigationBarItems(trailing: modeSwitchControls)
-        .alert(item: $deleteTargetItem) { target in
+        .alert(item: $drugListEditorState.deleteTargetItem) { target in
             Alert(
-                title: Text("Delete '\(target.drugName)' from medicines?"),
+                title: Text("Delete '\(target.name)' from medicines?"),
                 primaryButton: .destructive(Text("Delete it")) {
-                    self.drugListEditorState.deleteDrug(target)
+                    guard let thawedTarget = target.thaw(),
+                          let thawedResults = results.first?.thaw(),
+                          let removalIndex = thawedResults.drugs.firstIndex(of: thawedTarget),
+                          let realm = thawedTarget.realm else {
+                        log(EditorError.missingDrugThaw)
+                        return
+                    }
+                    
+                    try? realm.write {
+                        thawedResults.drugs.remove(at: removalIndex)
+                        log("-- Removed drug from list")
+                    }
                 },
                 secondaryButton: .default(Text("Cancel"))
             )
@@ -68,14 +75,14 @@ struct DrugListEditorView: View {
             Spacer()
             ForEach(EditMode.allCases, id: \.rawValue) { mode in
                 self.buttonForMode(mode)
-                    .disabled(self.currentMode == mode)
+                    .disabled(self.drugListEditorState.currentMode == mode)
             }
         }
     }
 
     private func buttonForMode(_ mode: EditMode) -> some View {
         Button(action: { withAnimation {
-            self.currentMode = mode
+            self.drugListEditorState.currentMode = mode
         }}) {
             HStack {
                 mode.image.foregroundColor(mode.color)
@@ -85,48 +92,57 @@ struct DrugListEditorView: View {
         }
     }
 
+    @ViewBuilder
     private var subviewDrugList: some View {
-        return ScrollView {
-            VStack{
-                ForEach(drugList, id: \.self) { drug in
-                    HStack{
-                        self.textGroup(drug)
-                        HStack{ Divider() }
-                        if self.currentMode != .add {
-                            self.rowButtonForCurrentMode(drug)
+        if results.isEmpty {
+            EmptyView()
+        } else {
+            ForEach(results) { drugList in
+                ScrollView {
+                    VStack{
+                        ForEach(Array(drugList.drugs.sorted(by: \.name)), id: \.id) { drug in
+                            HStack{
+                                self.textGroup(drug)
+                                HStack{ Divider() }
+                                if self.drugListEditorState.currentMode != .add {
+                                    self.rowButtonForCurrentMode(drug)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44.0, alignment: .trailing)
+                            .padding(4)
+                            .boringBorder
+                            .padding(.horizontal, 8)
                         }
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44.0, alignment: .trailing)
-                    .padding(4)
-                    .boringBorder
-                    .padding(.horizontal, 8)
+                    }.padding(.vertical, 8.0)
                 }
-            }.padding(.vertical, 8.0)
+            }
         }
     }
 
-    func rowButtonForCurrentMode(_ drug: Drug) -> some View {
-        currentMode
-            .image.foregroundColor(currentMode.color)
+    func rowButtonForCurrentMode(_ drug: RLM_Drug) -> some View {
+        let mode = drugListEditorState.currentMode
+        return mode
+            .image
+            .foregroundColor(mode.color)
             .padding(8)
             .boringBorder
             .asButton { withAnimation(.easeInOut) {
-                switch self.currentMode {
+                switch mode {
                 case .add:
                     // Shouldn't see the add button here.. woot, bad architecture design!
                     break
                 case .edit:
-                    self.drugListEditorState.inProgressEdit.setTarget(drug: drug)
+                    drugListEditorState.inProgressEdit.setTarget(drug: drug)
                 case .delete:
-                    self.deleteTargetItem = drug
+                    drugListEditorState.deleteTargetItem = drug
                 }
             }}
     }
 
-    private func textGroup(_ drug: Drug) -> some View {
+    private func textGroup(_ drug: RLM_Drug) -> some View {
         return HStack(alignment: .center) {
             VStack(alignment: .leading) {
-                Text(drug.drugName)
+                Text(drug.name)
                 if drug.ingredientList != "" {
                     Text(drug.ingredientList)
                         .font(.footnote)
@@ -153,60 +169,53 @@ struct DrugListEditorView: View {
     }
 
     private var editModeView: some View {
-        return editingBottomView(currentDrugName, "Save Changes",
-                                 drugListEditorState.canSaveAsEdit) {
-            self.drugListEditorState.saveAsEdit()
-        }
+        return editingBox(currentDrugName)
     }
 
     private var addModeView: some View {
-        return editingBottomView("Enter new drug name", "Save",
-                                 drugListEditorState.canSaveAsNew) {
+        return editingBoxWithSave("Enter new drug name", "Save") {
             self.drugListEditorState.saveAsNew()
         }
     }
 
-    private func editingBottomView(_ initialText: String,
-                                   _ buttonTitle: String,
-                                   _ isEnabled: Bool,
-                                   _ action: @escaping () -> Void) -> some View {
-        return Group {
-            HStack {
-                TextField(
-                    initialText,
-                    text: inProgressEdit.drugName
-                )
-                    .padding()
-                    .frame(minHeight: 64, maxHeight: 64, alignment: .center)
-                    .boringBorder
-                Picker(selection: $drugListEditorState.inProgressEdit.doseTime, label: EmptyView()) {
-                    ForEach((0..<25)) { hour in
-                        Text("\("hour".simplePlural(hour, "Any time"))").tag(hour)
-                    }
-                }.frame(maxWidth: 128, maxHeight: 64).clipped().boringBorder
-            }
-
-            Components.fullWidthButton(buttonTitle) {
-                withAnimation { action() }
-            }
-            .disabled(!isEnabled)
-            .boringBorder
+    @ViewBuilder
+    private func editingBoxWithSave(_ initialText: String,
+                                    _ buttonTitle: String,
+                                    _ action: @escaping () -> Void) -> some View {
+        editingBox(initialText)
+        Components.fullWidthButton(buttonTitle) {
+            withAnimation { action() }
+        }
+        .disabled(!drugListEditorState.inProgressEdit.isNewSaveEnabled)
+        .boringBorder
+    }
+    
+    @ViewBuilder
+    private func editingBox(_ initialText: String) -> some View {
+        HStack {
+            TextField(
+                initialText,
+                text: $drugListEditorState.inProgressEdit.drugName
+            )
+                .padding()
+                .frame(minHeight: 64, maxHeight: 64, alignment: .center)
+                .boringBorder
+            Picker(selection: $drugListEditorState.inProgressEdit.doseTime, label: EmptyView()) {
+                ForEach((0..<25)) { hour in
+                    Text("\("hour".simplePlural(hour, "Any time"))").tag(hour)
+                }
+            }.frame(maxWidth: 128, maxHeight: 64).clipped().boringBorder
         }
     }
 }
 
 private extension DrugListEditorView {
     var currentDrugName: String {
-        return drugListEditorState.inProgressEdit.targetDrug?.drugName
-            ?? "Select a drug to edit"
+        return drugListEditorState.inProgressEdit.drugName
     }
-
-    var inProgressEdit: Binding<InProgressDrugEdit> {
-        return $drugListEditorState.inProgressEdit
-    }
-
-    var drugList: [Drug] {
-        return drugListEditorState.currentDrugList.drugs
+    
+    var currentMode: EditMode {
+        return drugListEditorState.currentMode
     }
 }
 
@@ -215,7 +224,7 @@ struct DrugListEditorView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             DrugListEditorView().environmentObject(
-                DrugListEditorViewState(makeTestMedicineOperator())
+                DrugListEditorViewState()
             ).navigationBarTitle(
                 Text("Test Navigation"),
                 displayMode: .inline

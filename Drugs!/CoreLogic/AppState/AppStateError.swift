@@ -34,3 +34,8 @@ extension AppStateError: Identifiable {
         }
     }
 }
+
+
+protocol AppStateMark {
+    
+}

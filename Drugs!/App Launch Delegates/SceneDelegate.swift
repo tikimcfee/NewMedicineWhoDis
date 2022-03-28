@@ -35,7 +35,7 @@ public class MasterEnvironmentContainer: ObservableObject {
     }
 
     public func makeNewDrugEditorState() -> DrugListEditorViewState {
-        return DrugListEditorViewState(dataManager)
+        return DrugListEditorViewState()
     }
 }
 
