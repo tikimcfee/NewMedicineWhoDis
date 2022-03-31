@@ -19,7 +19,9 @@ enum RealmPersistenceError: Error {
 struct RealmPersistenceManagerEnvironment: ViewModifier {
     let sourceRealm: Realm
     func body(content: Content) -> some View {
-        return content.environment(\.realm, sourceRealm)
+        return content
+            .environment(\.realm, sourceRealm)
+            .environment(\.realmConfiguration, sourceRealm.configuration)
     }
 }
 

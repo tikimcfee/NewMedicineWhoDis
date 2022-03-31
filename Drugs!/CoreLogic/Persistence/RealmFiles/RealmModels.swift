@@ -9,6 +9,8 @@
 import Foundation
 import RealmSwift
 
+let CURRENT_SCHEMA_VERSION: UInt64 = 2
+
 public class RLM_AppMigrationData: Object {
     private static let AppMigrationDataId = "RLM_AppMigrationData_AppMigrationDataId"
     @Persisted(primaryKey: true) public var id: String = AppMigrationDataId
@@ -51,6 +53,7 @@ public class RLM_MedicineEntry: Object, ObjectKeyIdentifiable {
 public class RLM_AvailableDrugList: Object, Identifiable {
 	@Persisted(primaryKey: true) public var id: String = RLM_AvailableDrugList.defaultDrugListKeyId
 	@Persisted public var drugs: List<RLM_Drug> = List()
+    @Persisted public var didSetDefaultList: Bool = false // Added: V.2
 }
 
 public class RLM_AvailabilityInfoContainer: Object, Identifiable {
@@ -75,6 +78,12 @@ public class RLM_AvailabilityStats: Object {
     }
 }
 
+extension RLM_MedicineEntry {
+    static func observableResults(_ realm: Realm) -> Results<RLM_MedicineEntry> {
+        realm.objects(RLM_MedicineEntry.self)
+    }
+}
+
 extension RLM_AvailabilityInfoContainer {
     static let defaultInfoId = "defaultAvailabilityInfoId"
     
@@ -82,31 +91,22 @@ extension RLM_AvailabilityInfoContainer {
         realm.object(ofType: RLM_AvailabilityInfoContainer.self, forPrimaryKey: Self.defaultInfoId)
     }
     
-    static func defeaultObservableListFrom(_ realm: Realm) -> Results<RLM_AvailabilityInfoContainer> {
+    static func observableResults(_ realm: Realm) -> Results<RLM_AvailabilityInfoContainer> {
         realm.objects(RLM_AvailabilityInfoContainer.self)
-            .filter(NSPredicate(format: "id == %@", Self.defaultInfoId))
+            .where { $0.id == Self.defaultInfoId }
     }
 }
 
 extension RLM_AvailableDrugList {
 	static let defaultDrugListKeyId = "defaultDrugListKeyId"
-	
-	static func makeFrom(_ list: AvailableDrugList) -> RLM_AvailableDrugList {
-		let migrator = V1Migrator()
-		let migratedDrugs = AvailableDrugList.defaultList.drugs.map(migrator.fromV1drug)
-		
-		let newList = RLM_AvailableDrugList()
-		newList.drugs.append(objectsIn: migratedDrugs)
-		return newList
-	}
-	
+
 	static func defaultFrom(_ realm: Realm) -> RLM_AvailableDrugList? {
 		realm.object(ofType: RLM_AvailableDrugList.self, forPrimaryKey: Self.defaultDrugListKeyId)
 	}
 	
-	static func defeaultObservableListFrom(_ realm: Realm) -> Results<RLM_AvailableDrugList> {
+	static func observableResults(_ realm: Realm) -> Results<RLM_AvailableDrugList> {
 		realm.objects(RLM_AvailableDrugList.self)
-			.filter(NSPredicate(format: "id == %@", Self.defaultDrugListKeyId))
+            .where { $0.id == Self.defaultDrugListKeyId }
 	}
 }
 

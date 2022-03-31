@@ -23,10 +23,7 @@ public final class AddEntryViewState: ObservableObject {
          _ notificationScheduler: NotificationScheduler) {
         self.manager = manager
         self.notificationScheduler = notificationScheduler
-        
-        let persister = EntryStatsInfoPersister(manager: manager)
-        self.calculator = AvailabilityInfoCalculator(persister: persister)
-        
+        self.calculator = AvailabilityInfoCalculator(manager: manager)
         calculator.start { [weak self] receiver in
             guard let self = self else { return }
             receiver(&self.drugSelectionModel)

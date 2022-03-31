@@ -11,49 +11,60 @@ import Combine
 import RealmSwift
 
 struct EntryListViewRowModel {
-    let listOfDrugs: String // entry.drugList
-    let dateTaken: String //
+    let listOfDrugs: String
+    let dateTaken: String
     let entryId: String
     
     let onSelect: Action
 }
 
+enum EntryListError: Error {
+    case missingResultForUndo
+}
+
 class EntryListViewModel: ObservableObject {
-    @Published var entryForEdit: RLM_MedicineEntry?
+    @Published var entryForEdit: Entry?
+    private let undoManager = UndoManager()
+
+    func undo() {
+        undoManager.undo()
+    }
     
-    func didSelectRow(
-        _ row: EntryListViewRowModel,
-        in results: Results<RLM_MedicineEntry>
-    ) {
-        guard let entry = results.first(where: { $0.id == row.entryId }) else {
-            log { Event("Failed to retrieve entry for edit: \(row)") }
-            return
+    func delete(_ set: IndexSet, from results: ObservedResults<Entry>) {
+        log("Deleting \(set)")
+        
+        undoManager.beginUndoGrouping()
+        let undoRemovals = set.compactMap { index -> Entry? in
+            guard results.wrappedValue.indices.contains(index) else {
+                log(EntryListError.missingResultForUndo)
+                return nil
+            }
+            return results.wrappedValue[index]
         }
+        undoManager.registerUndo(withTarget: self) { [realm = results.wrappedValue.realm] _ in
+            guard let realm = realm else {
+                log("No realm for undo, sorry there friend.")
+                return
+            }
+            do {
+                try realm.write {
+                    undoRemovals.forEach { realm.add($0, update: .all) }
+                }
+            } catch {
+                log(error, "Failed to undo delete")
+            }
+        }
+        undoManager.endUndoGrouping()
+        
+        results.remove(atOffsets: set)
+    }
+    
+    func didSelectRow(_ entry: Entry) {
+        log("Starting edit for \(entry.id)")
         entryForEdit = entry
     }
-    
-    func didDeleteRow(
-        _ index: Int,
-        in results: Results<RLM_MedicineEntry>
-    ){
-        guard results.indices.contains(index),
-            let entry = Optional(results[index])?.thaw(), // thaw at model level to unthaw up to realm (is unmanaged otherwise)
-            let realm = entry.realm
-        else {
-            log { Event("Failed to retrieve unthawed entry or realm for edit: \(index); \(String(describing: results.realm))") }
-            return
-        }
-        
-        do {
-            try realm.write {
-                realm.delete(entry)
-            }
-        } catch {
-            log { Event("Failed to delete roealm model: \(error)", .error ) }
-        }
-    }
-    
-    func createRowModel(_ entry: RLM_MedicineEntry) -> EntryListViewRowModel {
+
+    func createRowModel(_ entry: Entry) -> EntryListViewRowModel {
         EntryListViewRowModel(
             listOfDrugs: makeDrugList(entry),
             dateTaken: DateFormatting.LongDateShortTime.string(from: entry.date),
@@ -66,14 +77,10 @@ class EntryListViewModel: ObservableObject {
         if entry.drugsTaken.count == 0 {
             return "(Nothing taken)"
         } else {
-            return entry.drugsTaken.sorted {
-                switch($0.drug, $1.drug) {
-                case let(.some(left), .some(right)): return left.name < right.name
-                case (.some, .none): return true
-                default: return false
-                }}
-            .compactMap { $0.drug?.name }
-            .joined(separator: ", ")
+            return entry.drugsTaken.lazy
+                .compactMap { $0.drug?.name }
+                .sorted(by: <)
+                .joined(separator: ", ")
         }
     }
 }

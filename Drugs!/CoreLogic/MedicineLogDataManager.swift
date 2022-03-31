@@ -239,17 +239,8 @@ extension MedicineLogDataManager {
         let streamNumber = streamId
         var refreshCount = 0
         log { Event("Creating new availability stream: [\(streamNumber)]") }
-        return Publishers.CombineLatest
-            .init(refreshTimer, persistenceManager.appDataStream)
-            .map{ (updateInterval, appData) -> AvailabilityInfo in
-                refreshCount = refreshCount + 1
-                log { Event("availabilityInfoStream: refreshing [\(streamNumber)] (\(refreshCount)) ") }
-                return AvailabilityInfoCalculator.computeInfo(
-                    availableDrugs: appData.availableDrugList,
-                    entries: appData.mainEntryList
-                )
-            }
-            .eraseToAnyPublisher()
+        log { Event("----------- LIES I TURNED OFF THE LOG MANAGER!! -----------------") }
+        return Empty().eraseToAnyPublisher()
     }
 
     func medicineEntry(with id: String) -> MedicineEntry? {

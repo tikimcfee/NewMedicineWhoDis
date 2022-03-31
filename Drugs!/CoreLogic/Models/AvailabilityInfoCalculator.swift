@@ -14,6 +14,7 @@ import SwiftUI
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
 enum AvailabilityInfoError: Error {
+    case initialStateFailed
     case missingContainer
     case missingDrugList
     case missingBindTargetRealm
@@ -33,30 +34,89 @@ typealias ContainerReceiverGetter = (ContainerReceiver) -> Void
 
 class AvailabilityInfoCalculator: ObservableObject {
     private lazy var id = UUID()
-    lazy var workQueue = DispatchQueue(label: "CalculatorQueue-\(id)", qos: .userInteractive)
+    private lazy var workQueue = DispatchQueue(label: "CalculatorQueue-\(id)", qos: .userInteractive)
     
-    private var bag = Set<AnyCancellable>()
+    private let manager: DefaultRealmManager
+    
     var realmTokens = [NotificationToken]()
-    let entryStatsPersister: EntryStatsInfoPersister
+    private var bag = Set<AnyCancellable>()
     
-    init(persister: EntryStatsInfoPersister) {
-        self.entryStatsPersister = persister
+    init(manager: DefaultRealmManager) {
+        self.manager = manager
     }
     
     deinit {
-        log("Calculator state cleaning up")
+        log("Calculator deinit")
     }
     
     func start(receiver: @escaping ContainerReceiverGetter) {
-        entryStatsPersister.start()
-        entryStatsPersister.manager.access { realm in
+        manager.access { realm in
+            try ensureInitialRealmState(
+                RLM_MedicineEntry.observableResults(realm),
+                RLM_AvailabilityInfoContainer.observableResults(realm),
+                RLM_AvailableDrugList.observableResults(realm),
+                in: realm
+            )
+            
+            let drugListPublisher = RLM_AvailableDrugList
+                .observableResults(realm)
+                .changesetPublisher
+                .compactMap { change in
+                    switch change {
+                    case let .initial(list):
+                        return list.first
+                    case let .update(list, deletions, insertions, modifications):
+                        return list.first
+                    case let .error(error):
+                        log(error, "Failed to observe drug list")
+                        return nil
+                    }
+                }
+                .map { (list: RLM_AvailableDrugList) in list }
+            
+            let entryListPublisher = RLM_MedicineEntry
+                .observableResults(realm)
+                .changesetPublisher
+                .compactMap { change in
+                    switch change {
+                    case let .initial(list):
+                        return list
+                    case let .update(list, deletions, insertions, modifications):
+                        return list
+                    case let .error(error):
+                        log(error, "Failed to observe entry list")
+                        return nil
+                    }
+                }
+                .map { (list: Results<RLM_MedicineEntry>) in list }
+            
             bag.insert(
                 Publishers.CombineLatest(
-                    RLM_AvailabilityInfoContainer.defeaultObservableListFrom(realm).collectionPublisher,
-                    RLM_AvailableDrugList.defeaultObservableListFrom(realm).collectionPublisher
+                    entryListPublisher,
+                    drugListPublisher
                 )
-                .compactMap { result in return Self.makeUpdateInfo(container: result.0, drugs: result.1) }
-                .receive(on: RunLoop.main)
+                .compactMap { [weak self] (entries, drugList) -> (AvailabilityInfo, AvailableDrugList)? in
+                    // TODO: better way to grab the value and persist and return info
+                    // maybe just get finally get rid of old info
+                    let newMap = Self.buildNewStatesMap(entries: entries, drugList: drugList)
+                    let migrator = V1Migrator()
+                    let newInfo: AvailabilityInfo? = self?.manager.accessImmediate { realm in
+                        guard let container = RLM_AvailabilityInfoContainer.defaultFrom(realm) else {
+                            throw AvailabilityInfoError.missingDrugList
+                        }
+                        
+                        try realm.write {
+                            container.allInfo = newMap
+                        }
+                        
+                        return migrator.migrateFromRLMAvailability(
+                            container: container,
+                            sourceList: drugList
+                        )
+                    }
+                    guard let newInfo = newInfo else { return nil }
+                    return (newInfo, migrator.toV1DrugList(drugList))
+                }
                 .sink(
                     receiveCompletion: { state in
                         switch state {
@@ -75,27 +135,107 @@ class AvailabilityInfoCalculator: ObservableObject {
             )
         }
     }
-    
-    private static func makeUpdateInfo(
-        container: Results<RLM_AvailabilityInfoContainer>?,
-        drugs: Results<RLM_AvailableDrugList>?
-    ) -> (AvailabilityInfo, AvailableDrugList)? {
-        log("Starting InfoCalculator update")
+
+    private func ensureInitialRealmState(
+        _ entries: Results<RLM_MedicineEntry>,
+        _ container: Results<RLM_AvailabilityInfoContainer>?,
+        _ drugs: Results<RLM_AvailableDrugList>?,
+        in realm: Realm
+    ) throws {
+        log("Checking and setting initial state")
         
-        guard let drugs = drugs?.first,
-              let container = container?.first else {
-            log(AvailabilityInfoError.missingDrugList)
-            return nil
+        if let _ = container?.first,
+           let drugList = drugs?.first,
+           drugList.drugs.isEmpty || drugList.didSetDefaultList
+        {
+            log("Active state is already valid")
+            return
         }
         
-        let migrator = V1Migrator()
-        let v1Info = migrator.migrateFromStatsContainer(sourceList: drugs, into: container)
-        let v1Drugs = migrator.toV1DrugList(drugs)
+        // Create managed(?) instances to update initial state
+        let container = container?.first ?? {
+            log("Container missing from query, creating initial info container model")
+            return RLM_AvailabilityInfoContainer()
+        }()
         
-        return (v1Info, v1Drugs)
+        let drugList = drugs?.first ?? {
+            log("Drug list mising from query, creating intial drug list")
+            return RLM_AvailableDrugList()
+        }()
+        
+        try realm.write {
+            [
+                ("Adding container", {
+                    realm.add(container, update: .modified)
+                }),
+                ("Adding list", {
+                    if !drugList.didSetDefaultList && drugList.drugs.isEmpty {
+                        // assign directly to allow reduce to capture type from property
+                        log("Adding initial drugs to list")
+                        let migrator = V1Migrator()
+                        drugList.drugs = AvailableDrugList.defaultList.drugs
+                            .reduce(into: List()) { result, drug in
+                                result.append(migrator.fromV1drug(drug))
+                            }
+                        log("Added drugs: \(drugList.drugs.count)")
+                    }
+                    drugList.didSetDefaultList = true
+                    realm.add(drugList, update: .modified)
+                })
+            ].forEach { step, action in
+                log(step)
+                action()
+            }
+        }
     }
+}
 
+extension AvailabilityInfoCalculator {
+    static func buildNewStatesMap(
+        startDate: Date = Date(),
+        entries: Results<RLM_MedicineEntry>,
+        drugList: RLM_AvailableDrugList
+    ) -> Map<Drug.ID, RLM_AvailabilityStats> {
         
+        let drugStates = Map<Drug.ID, RLM_AvailabilityStats>()
+        drugList.drugs.forEach {
+            drugStates[$0.id] = RLM_AvailabilityStats(canTake: true, when: startDate)
+        }
+        
+        func listMatchOrDefault(_ drug: RLM_Drug) -> RLM_Drug {
+            drugList.drugs.first(where: { $0.id == drug.id }) ?? drug
+        }
+        
+        // Use the newest drug info if there is one.
+        // This is important so old entries don't step on new drugs.
+        entries.forEach { entry in
+            entry.drugsTaken.forEach { drugSelection in
+                guard let drug = drugSelection.drug else {
+                    log(AvailabilityInfoError.missingDrug("No drug from selection: \(entry.id), \(drugSelection.count)"))
+                    return
+                }
+                
+                let entryOrListDrug = listMatchOrDefault(drug)
+                let nextDoseTime = entry.date.advanced(by: entryOrListDrug.doseTimeInSeconds)
+                
+                switch drugStates[entryOrListDrug.id] {
+                case .some(let stats):
+                    stats.when = max(nextDoseTime, stats.when)
+                    stats.canTake = nextDoseTime <= startDate
+                case .none:
+                    let stats = RLM_AvailabilityStats()
+                    stats.when = nextDoseTime
+                    stats.canTake = nextDoseTime <= startDate
+                    drugStates[entryOrListDrug.id] = stats
+                }
+            }
+        }
+        
+        return drugStates
+    }
+}
+
+extension AvailableDrugList {
     static func computeInfo(startDate: Date = Date(),
                             availableDrugs: AvailableDrugList,
                             entries: [MedicineEntry]) -> AvailabilityInfo {

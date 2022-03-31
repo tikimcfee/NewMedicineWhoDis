@@ -51,18 +51,22 @@ class DefaultRealmManager: EntryLogRealmManager {
     }
     
     public func loadEntryLogRealm() throws -> Realm {
+        do {
+            return try Realm(configuration: Self.makeEntryLogConfiguration())
+        } catch {
+            throw RealmManagerError.onLoadError(internalError: error)
+        }
+    }
+    
+    public static func makeEntryLogConfiguration() -> Realm.Configuration {
         var config = Realm.Configuration.defaultConfiguration
+        config.schemaVersion = 2
         config.fileURL = AppFiles.entryLogRealm
         config.migrationBlock = { migration, flag in
             log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
             log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }
         }
-        
-        do {
-            return try Realm(configuration: config)
-        } catch {
-            throw RealmManagerError.onLoadError(internalError: error)
-        }
+        return config
     }
 }
 

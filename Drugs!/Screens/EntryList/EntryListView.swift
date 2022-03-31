@@ -5,21 +5,22 @@ import RealmSwift
 struct EntryListView: View {
     
     @ObservedResults(
-        RLM_MedicineEntry.self,
-        sortDescriptor: SortDescriptor(keyPath: \RLM_MedicineEntry.date, ascending: false)
+        Entry.self,
+        filter: nil,
+        keyPaths: ["date"], // individual rows observe their models, allowing lazier loading. this might work.
+        sortDescriptor: SortDescriptor(keyPath: \Entry.date, ascending: false)
     ) var allEntries
     
     @StateObject var model: EntryListViewModel = EntryListViewModel()
 
     var body: some View {
         List {
-            ForEach(allEntries.map(model.createRowModel), id: \.entryId) { rowModel in
-                makeEntryRow(rowModel)
+            ForEach(allEntries) { entry in
+                makeEntryRow(entry)
             }
-            .onDelete(perform: { indexSet in
-                model.didDeleteRow(indexSet.first!, in: allEntries)
-            })
+            .onDelete(perform: { model.delete($0, from: $allEntries) })
         }
+        .onLongPressGesture(perform: { model.undo() })
         .listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
@@ -28,11 +29,11 @@ struct EntryListView: View {
     }
     
     @ViewBuilder
-    func makeEntryRow(_ rowModel: EntryListViewRowModel) -> some View {
-        Button(action: { model.didSelectRow(rowModel, in: allEntries) }) {
+    func makeEntryRow(_ entry: Entry) -> some View {
+        Button(action: { model.didSelectRow(entry) }) {
             EntryListInfoCell(
-                listOfDrugs: rowModel.listOfDrugs,
-                dateTaken: rowModel.dateTaken
+                source: entry,
+                rowModelSource: model.createRowModel
             ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
         }
         .foregroundColor(.primary)
@@ -41,18 +42,29 @@ struct EntryListView: View {
 }
 
 struct EntryListInfoCell: View {
-    let listOfDrugs: String
-    let dateTaken: String
-
+    @ObservedObject var source: Entry
+    let rowModelSource: (Entry) -> EntryListViewRowModel
+    
+    @ViewBuilder
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(listOfDrugs)
-                .fontWeight(.semibold)
-                .accessibility(identifier: MedicineLogScreen.entryCellTitleText.rawValue)
-
-            Text(dateTaken)
-                .fontWeight(.ultraLight)
-                .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
+        buildWithState(rowModelSource(source)) { rowModel in
+            VStack(alignment: .leading) {
+                Text(rowModel.listOfDrugs)
+                    .fontWeight(.semibold)
+                    .accessibility(identifier: MedicineLogScreen.entryCellTitleText.rawValue)
+                
+                Text(rowModel.dateTaken)
+                    .fontWeight(.ultraLight)
+                    .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
+            }
         }
     }
+}
+
+@ViewBuilder
+func buildWithState<Arg1, Result: View>(
+    _ arg1: Arg1,
+    _ receiver: (Arg1) -> Result
+) -> Result {
+    receiver(arg1)
 }

@@ -204,7 +204,16 @@ class Drugs_RealmTests: XCTestCase {
 		}
 		
 		if fetchListAsSingle == nil {
-			let newList = RLM_AvailableDrugList.makeFrom(AvailableDrugList.defaultList)
+            func makeFrom(_ list: AvailableDrugList) -> RLM_AvailableDrugList {
+                let migrator = V1Migrator()
+                let migratedDrugs = AvailableDrugList.defaultList.drugs.map(migrator.fromV1drug)
+                
+                let newList = RLM_AvailableDrugList()
+                newList.drugs.append(objectsIn: migratedDrugs)
+                return newList
+            }
+            
+			let newList = makeFrom(AvailableDrugList.defaultList)
 			entryLogRealmManager.access { realm in
 				try realm.write {
 					realm.add(newList)
@@ -219,7 +228,7 @@ class Drugs_RealmTests: XCTestCase {
 		expectedNotifications.expectedFulfillmentCount = 2
 		let token = entryLogRealmManager
 			.accessImmediate { realm in 
-				RLM_AvailableDrugList.defeaultObservableListFrom(realm)
+				RLM_AvailableDrugList.observableResults(realm)
 			}!
 			.observe { change in 
 				switch change {

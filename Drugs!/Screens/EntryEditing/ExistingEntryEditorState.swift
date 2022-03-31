@@ -28,9 +28,7 @@ public final class ExistingEntryEditorState: ObservableObject {
         self.targetModel = unsafeTarget
         self.selectedDate = unsafeTarget.date
         self.calculator = AvailabilityInfoCalculator(
-            persister: EntryStatsInfoPersister(
-                manager: DefaultRealmManager()
-            )
+            manager: DefaultRealmManager()
         )
         
         setInitialProgressEntry()
