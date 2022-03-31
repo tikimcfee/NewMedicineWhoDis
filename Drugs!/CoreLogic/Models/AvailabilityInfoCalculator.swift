@@ -66,12 +66,12 @@ class AvailabilityInfoCalculator: ObservableObject {
                     entryListPublisher,
                     drugListPublisher
                 )
-                .receive(on: workQueue)
-                .removeDuplicates(by: { last, next in
-                    return last.0 == next.0
-                        && last.1 == next.1
-                })
-                .receive(on: RunLoop.main)
+//                .receive(on: workQueue)
+//                .removeDuplicates(by: { last, next in
+//                    return last.0 == next.0
+//                        && last.1 == next.1
+//                })
+//                .receive(on: RunLoop.main)
                 .compactMap { [weak self] (entries, drugList) -> (AvailabilityInfo, AvailableDrugList)? in
                     // TODO: better way to grab the value and persist and return info
                     // maybe just get finally get rid of old info

@@ -30,7 +30,7 @@ struct EntryListView: View {
     func makeEntryRow(_ entry: Entry) -> some View {
         Button(action: { model.didSelectRow(entry) }) {
             EntryListInfoCell(
-                source: entry.thaw()!,
+                source: entry,
                 rowModelSource: model.createRowModel(_:)
             ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
         }
@@ -40,7 +40,9 @@ struct EntryListView: View {
 }
 
 struct EntryListInfoCell: View {
-    @ObservedObject var source: Entry
+    // Don't make these @ObservedObject if you want to delete them.
+    // With code as of this commit, deletion causes an invalidated array error on internal row builder.
+    let source: Entry
     let rowModelSource: (Entry) -> EntryListViewRowModel
     
     var body: some View {
