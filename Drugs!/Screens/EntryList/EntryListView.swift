@@ -6,11 +6,9 @@ struct EntryListView: View {
     
     @ObservedResults(
         Entry.self,
-        filter: nil,
-        keyPaths: ["date"], // individual rows observe their models, allowing lazier loading. this might work.
         sortDescriptor: SortDescriptor(keyPath: \Entry.date, ascending: false)
     ) var allEntries
-    
+//
     @StateObject var model: EntryListViewModel = EntryListViewModel()
 
     var body: some View {
@@ -19,8 +17,8 @@ struct EntryListView: View {
                 makeEntryRow(entry)
             }
             .onDelete(perform: { model.delete($0, from: $allEntries) })
+//            .onLongPressGesture(perform: { model.undo() })
         }
-        .onLongPressGesture(perform: { model.undo() })
         .listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
@@ -32,8 +30,8 @@ struct EntryListView: View {
     func makeEntryRow(_ entry: Entry) -> some View {
         Button(action: { model.didSelectRow(entry) }) {
             EntryListInfoCell(
-                source: entry,
-                rowModelSource: model.createRowModel
+                source: entry.thaw()!,
+                rowModelSource: model.createRowModel(_:)
             ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
         }
         .foregroundColor(.primary)
@@ -45,18 +43,16 @@ struct EntryListInfoCell: View {
     @ObservedObject var source: Entry
     let rowModelSource: (Entry) -> EntryListViewRowModel
     
-    @ViewBuilder
     var body: some View {
-        buildWithState(rowModelSource(source)) { rowModel in
-            VStack(alignment: .leading) {
-                Text(rowModel.listOfDrugs)
-                    .fontWeight(.semibold)
-                    .accessibility(identifier: MedicineLogScreen.entryCellTitleText.rawValue)
-                
-                Text(rowModel.dateTaken)
-                    .fontWeight(.ultraLight)
-                    .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
-            }
+        let rowModel = rowModelSource(source)
+        return VStack(alignment: .leading) {
+            Text(rowModel.listOfDrugs)
+                .fontWeight(.semibold)
+                .accessibility(identifier: MedicineLogScreen.entryCellTitleText.rawValue)
+            
+            Text(rowModel.dateTaken)
+                .fontWeight(.ultraLight)
+                .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
         }
     }
 }

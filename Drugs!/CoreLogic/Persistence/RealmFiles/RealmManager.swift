@@ -70,6 +70,19 @@ class DefaultRealmManager: EntryLogRealmManager {
     }
 }
 
+// Why are they hiding this? Why is this a bad idea to generally do? We'll see lolol
+func safeWrite<Value>(_ value: Value, _ block: (Value) -> Void) where Value: ThreadConfined {
+    let thawed = value.realm == nil ? value : value.thaw() ?? value
+    if let realm = thawed.realm, !realm.isInWriteTransaction {
+        try! realm.write {
+            block(thawed)
+        }
+    } else {
+        block(thawed)
+    }
+}
+
+
 #if DEBUG
 class TestingRealmManager: EntryLogRealmManager {
     public func loadEntryLogRealm() throws -> Realm {
