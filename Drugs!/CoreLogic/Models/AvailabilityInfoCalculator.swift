@@ -76,7 +76,7 @@ class AvailabilityInfoCalculator: ObservableObject {
                     // TODO: better way to grab the value and persist and return info
                     // maybe just get finally get rid of old info
                     let newMap = Self.buildNewStatesMap(entries: entries, drugList: drugList)
-                    guard let container = self?.persistContainerChange(newMap) else {
+                    guard let container = self?.persistContainerChange(newMap, drugList) else {
                         log("Failed to persist container; cannot migrate to v1 drug list")
                         return nil
                     }
@@ -108,13 +108,15 @@ class AvailabilityInfoCalculator: ObservableObject {
     }
     
     private func persistContainerChange(
-        _ newMap: Map<Drug.ID, RLM_AvailabilityStats>
+        _ newMap: Map<Drug.ID, RLM_AvailabilityStats>,
+        _ drugList: RLM_AvailableDrugList
     ) -> RLM_AvailabilityInfoContainer? {
         manager.accessImmediate { realm -> RLM_AvailabilityInfoContainer in
             guard let container = RLM_AvailabilityInfoContainer.defaultFrom(realm) else {
                 throw AvailabilityInfoError.missingDrugList
             }
             
+//            let drugIds = Set(drugList.drugs.map { $0.id })
             safeWrite(container) { safeContainer in
                 safeContainer.allInfo = newMap
             }
@@ -124,28 +126,18 @@ class AvailabilityInfoCalculator: ObservableObject {
     }
     
     private func buildDrugListPublisher(_ realm: Realm) -> AnyPublisher<RLM_AvailableDrugList, Never> {
-        RLM_AvailableDrugList
-            .observableResults(realm)
-            .changesetPublisher
-            .compactMap { change in
-                switch change {
-                case let .initial(list):
-                    log("Load initial drug list")
-                    return list.first
-                case let .update(list, deletions, insertions, modifications):
-                    log("Drug list update: \(deletions) \(insertions) \(modifications)")
-                    return list.first
-                case let .error(error):
-                    log(error, "Failed to observe drug list")
-                    return nil
-                }
-            }
-            .map { (list: RLM_AvailableDrugList) in list }
+        return RLM_AvailableDrugList
+            .defaultFrom(realm)?
+            .publisher(for: \.self)
             .eraseToAnyPublisher()
+        ?? {
+            log(AvailabilityInfoError.missingDrugList, "Can't find list to build publisher")
+            return Empty().eraseToAnyPublisher()
+        }()
     }
     
     private func buildEntryListPublisher(_ realm: Realm) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
-        RLM_MedicineEntry
+        return RLM_MedicineEntry
             .observableResults(realm)
             .changesetPublisher
             .compactMap { change in

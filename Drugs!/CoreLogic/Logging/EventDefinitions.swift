@@ -38,6 +38,8 @@ public struct Event: CustomStringConvertible, EquatableFileStorable {
 	}
 	
 	public var description: String {
-        return "[\(dateString) \(criticality.rawValue) \(file):\(function)] -> \(message)"
+        let file = file.split(separator: ".").first ?? "()"
+        let function = function.split(separator: "(").first ?? "<>"
+        return "[\(dateString) \(criticality.rawValue) <\(file)::\(function)>]  \(message)"
 	}
 }
