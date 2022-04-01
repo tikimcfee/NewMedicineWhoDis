@@ -64,7 +64,8 @@ Migration state query:
                 return
             }
             results[toV1Drug(drug)] = (stats.value.canTake, stats.value.when)
-        } ?? AvailabilityInfo()
+        }
+        ?? AvailabilityInfo()
     }
     
     public func migrateEntriesToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {

@@ -29,7 +29,10 @@ public class MasterEnvironmentContainer: ObservableObject {
         self.manager = DefaultRealmManager()
         self.notificationState = NotificationInfoViewState()
         self.notificationScheduler = NotificationScheduler(notificationState: notificationState)
-        self.rootScreenState = AddEntryViewState(manager, notificationScheduler)
+        self.rootScreenState = AddEntryViewState(
+            manager,
+            notificationScheduler
+        )
     }
 
     public func makeNewDrugEditorState() -> DrugListEditorViewState {

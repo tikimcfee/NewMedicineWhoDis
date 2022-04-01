@@ -178,10 +178,15 @@ struct RootAppStartupView_Previews: PreviewProvider {
         let dataManager = DefaultRealmManager()
         let notificationState = NotificationInfoViewState()
         let scheduler = NotificationScheduler(notificationState: notificationState)
-        let rootState = AddEntryViewState(dataManager, scheduler)
+        let infoCalculator = AvailabilityInfoCalculator(manager: dataManager)
+        let rootState = AddEntryViewState(
+            dataManager,
+            scheduler
+        )
         return RootAppStartupView()
             .modifier(dataManager.makeModifier())
             .environmentObject(rootState)
+            .environmentObject(infoCalculator)
     }
 }
 #endif

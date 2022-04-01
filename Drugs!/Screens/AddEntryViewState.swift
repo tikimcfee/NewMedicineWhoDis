@@ -12,7 +12,6 @@ public final class AddEntryViewState: ObservableObject {
     private let notificationScheduler: NotificationScheduler
     private var cancellables = Set<AnyCancellable>()
 
-    private let calculator: AvailabilityInfoCalculator
     private let worker = BackgroundWorker()
 
     // View models
@@ -23,14 +22,9 @@ public final class AddEntryViewState: ObservableObject {
          _ notificationScheduler: NotificationScheduler) {
         self.manager = manager
         self.notificationScheduler = notificationScheduler
-        self.calculator = AvailabilityInfoCalculator(manager: manager)
-        calculator.start { [weak self] receiver in
-            guard let self = self else { return }
-            receiver(&self.drugSelectionModel)
-        }
     }
 
-    func saveNewEntry() {
+    func saveNewEntry(_ calculator: AvailabilityInfoCalculator) {
         let drugMap = drugSelectionModel.entryMap
         let hasEntries = drugMap.count > 0
         let hasNonZeroEntries = drugMap.values.allSatisfy { $0 > 0 }
@@ -56,7 +50,7 @@ public final class AddEntryViewState: ObservableObject {
         let converted = V1Migrator().fromV1Entry(newEntry)
         manager.access { [weak self] realm in
             do {
-                try realm.write {
+                try realm.write(withoutNotifying: calculator.realmTokens) {
                     realm.add(converted, update: .all)
                 }
                 self?.drugSelectionModel.resetEdits()

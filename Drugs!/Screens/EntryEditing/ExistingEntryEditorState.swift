@@ -20,22 +20,14 @@ public final class ExistingEntryEditorState: ObservableObject {
     @Published var selectedDate = Date()
     @ObservedRealmObject public var targetModel: RLM_MedicineEntry
     
-    let calculator: AvailabilityInfoCalculator
     private var bag = Set<AnyCancellable>()
     private var tokens = Set<NotificationToken>()
     
-    public init(_ unsafeTarget: RLM_MedicineEntry) {
+    init(_ unsafeTarget: RLM_MedicineEntry) {
         self.targetModel = unsafeTarget
         self.selectedDate = unsafeTarget.date
-        self.calculator = AvailabilityInfoCalculator(
-            manager: DefaultRealmManager()
-        )
         
         setInitialProgressEntry()
-        calculator.start { [weak self] editor in
-            guard let self = self else { return }
-            editor(&self.selectionModel)
-        }
     }
     
     deinit {
@@ -74,7 +66,10 @@ public final class ExistingEntryEditorState: ObservableObject {
         }
     }
 
-    func saveEdits(_ didComplete: @escaping Action) {
+    func saveEdits(
+        _ calculator: AvailabilityInfoCalculator,
+        _ didComplete: @escaping Action
+    ) {
         editorError = AppStateError.notImplemented()
         
         guard

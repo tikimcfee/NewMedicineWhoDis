@@ -40,6 +40,17 @@ class AvailabilityInfoCalculator: ObservableObject {
     
     var realmTokens = [NotificationToken]()
     private var bag = Set<AnyCancellable>()
+    private let migrator = V1Migrator()
+    
+    typealias InfoPublisher = AnyPublisher<(AvailabilityInfo, AvailableDrugList), Never>
+    lazy var infoPublisher: InfoPublisher = {
+        manager.accessImmediate { realm in
+            try self.makeRootInfoPublisher(from: realm)
+        } ?? {
+            log("No info publisher to send results to. That stinks.")
+            return Empty().eraseToAnyPublisher()
+        }()
+    }()
     
     init(manager: DefaultRealmManager) {
         self.manager = manager
@@ -50,64 +61,58 @@ class AvailabilityInfoCalculator: ObservableObject {
     }
     
     func start(receiver: @escaping ContainerReceiverGetter) {
-        manager.access { realm in
-            try ensureInitialRealmState(
-                RLM_MedicineEntry.observableResults(realm),
-                RLM_AvailabilityInfoContainer.observableResults(realm),
-                RLM_AvailableDrugList.observableResults(realm),
-                in: realm
-            )
-            
-            let drugListPublisher = buildDrugListPublisher(realm)
-            let entryListPublisher = buildEntryListPublisher(realm)
-            
-            bag.insert(
-                Publishers.CombineLatest(
-                    entryListPublisher,
-                    drugListPublisher
-                )
-//                .receive(on: workQueue)
-//                .removeDuplicates(by: { last, next in
-//                    return last.0 == next.0
-//                        && last.1 == next.1
-//                })
-//                .receive(on: RunLoop.main)
-                .compactMap { [weak self] (entries, drugList) -> (AvailabilityInfo, AvailableDrugList)? in
-                    // TODO: better way to grab the value and persist and return info
-                    // maybe just get finally get rid of old info
-                    let newMap = Self.buildNewStatesMap(entries: entries, drugList: drugList)
-                    guard let container = self?.persistContainerChange(newMap, drugList) else {
-                        log("Failed to persist container; cannot migrate to v1 drug list")
-                        return nil
-                    }
-                    
-                    let migrator = V1Migrator()
-                    let newInfo = migrator.migrateFromRLMAvailability(
-                        container: container,
-                        sourceList: drugList
-                    )
-                    return (newInfo, migrator.toV1DrugList(drugList))
+        bag.insert(
+            infoPublisher.sink { [receiver] newInfo in
+                receiver { toUpdate in
+                    log("Alert receiver of new info")
+                    toUpdate.info = newInfo.0
+                    toUpdate.availableDrugs = newInfo.1
                 }
-                .sink(
-                    receiveCompletion: { state in
-                        switch state {
-                        case .finished: log("CombineLatest reported finished state")
-                        case let .failure(error): log(error)
-                        }
-                    },
-                    receiveValue: { newInfo in
-                        receiver { toEdit in
-                            log("Alert receiver of new info")
-                            toEdit.info = newInfo.0
-                            toEdit.availableDrugs = newInfo.1
-                        }
-                    }
-                )
-            )
-        }
+            }
+        )
+    }
+}
+
+// MARK: -- Publishers
+private extension AvailabilityInfoCalculator {
+    func makeRootInfoPublisher(from realm: Realm) throws -> InfoPublisher {
+        try ensureInitialRealmState(
+            RLM_MedicineEntry.observableResults(realm),
+            RLM_AvailabilityInfoContainer.observableResults(realm),
+            RLM_AvailableDrugList.observableResults(realm),
+            in: realm
+        )
+        
+        return Publishers.CombineLatest(
+            buildEntryListPublisher(realm),
+            buildDrugListPublisher(realm)
+        )
+        .compactMap { [weak self] in self?.mergeObservedResults($0, $1) }
+        .eraseToAnyPublisher()
     }
     
-    private func persistContainerChange(
+    func mergeObservedResults(
+        _ entries: Results<RLM_MedicineEntry>,
+        _ drugList: RLM_AvailableDrugList
+    ) -> (AvailabilityInfo, AvailableDrugList)? {
+        
+        // TODO: better way to grab the value and persist and return info
+        // maybe just get finally get rid of old info
+        let newMap = Self.buildNewStatesMap(entries: entries, drugList: drugList)
+        guard let container = persistContainerChange(newMap, drugList) else {
+            log("Failed to persist container; cannot migrate to v1 drug list")
+            return nil
+        }
+        
+        let newInfo = migrator.migrateFromRLMAvailability(
+            container: container,
+            sourceList: drugList
+        )
+        
+        return (newInfo, migrator.toV1DrugList(drugList))
+    }
+    
+    func persistContainerChange(
         _ newMap: Map<Drug.ID, RLM_AvailabilityStats>,
         _ drugList: RLM_AvailableDrugList
     ) -> RLM_AvailabilityInfoContainer? {
@@ -116,7 +121,6 @@ class AvailabilityInfoCalculator: ObservableObject {
                 throw AvailabilityInfoError.missingDrugList
             }
             
-//            let drugIds = Set(drugList.drugs.map { $0.id })
             safeWrite(container) { safeContainer in
                 safeContainer.allInfo = newMap
             }
@@ -125,8 +129,8 @@ class AvailabilityInfoCalculator: ObservableObject {
         }
     }
     
-    private func buildDrugListPublisher(_ realm: Realm) -> AnyPublisher<RLM_AvailableDrugList, Never> {
-        return RLM_AvailableDrugList
+    func buildDrugListPublisher(_ realm: Realm) -> AnyPublisher<RLM_AvailableDrugList, Never> {
+        RLM_AvailableDrugList
             .defaultFrom(realm)?
             .publisher(for: \.self)
             .eraseToAnyPublisher()
@@ -136,8 +140,8 @@ class AvailabilityInfoCalculator: ObservableObject {
         }()
     }
     
-    private func buildEntryListPublisher(_ realm: Realm) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
-        return RLM_MedicineEntry
+    func buildEntryListPublisher(_ realm: Realm) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
+        RLM_MedicineEntry
             .observableResults(realm)
             .changesetPublisher
             .compactMap { change in
@@ -153,11 +157,10 @@ class AvailabilityInfoCalculator: ObservableObject {
                     return nil
                 }
             }
-            .map { (list: Results<RLM_MedicineEntry>) in list }
             .eraseToAnyPublisher()
     }
-
-    private func ensureInitialRealmState(
+    
+    func ensureInitialRealmState(
         _ entries: Results<RLM_MedicineEntry>,
         _ container: Results<RLM_AvailabilityInfoContainer>?,
         _ drugs: Results<RLM_AvailableDrugList>?,
@@ -184,30 +187,28 @@ class AvailabilityInfoCalculator: ObservableObject {
             return RLM_AvailableDrugList()
         }()
         
-        try realm.write {
-            [
-                ("Adding container", {
-                    realm.add(container, update: .modified)
-                }),
-                ("Adding list", {
-                    if !drugList.didSetDefaultList && drugList.drugs.isEmpty {
-                        // assign directly to allow reduce to capture type from property
-                        log("Adding initial drugs to list")
-                        let migrator = V1Migrator()
-                        drugList.drugs = AvailableDrugList.defaultList.drugs
-                            .reduce(into: List()) { result, drug in
-                                result.append(migrator.fromV1drug(drug))
-                            }
-                        log("Added drugs: \(drugList.drugs.count)")
-                    }
-                    drugList.didSetDefaultList = true
-                    realm.add(drugList, update: .modified)
-                })
-            ].forEach { step, action in
-                log(step)
-                action()
-            }
-        }
+        try realm.write {[
+            ("Adding container", {
+                realm.add(container, update: .modified)
+            }),
+            ("Adding list", {
+                if !drugList.didSetDefaultList && drugList.drugs.isEmpty {
+                    // assign directly to allow reduce to capture type from property
+                    log("Adding initial drugs to list")
+                    let migrator = V1Migrator()
+                    drugList.drugs = AvailableDrugList.defaultList.drugs
+                        .reduce(into: List()) { result, drug in
+                            result.append(migrator.fromV1drug(drug))
+                        }
+                    log("Added drugs: \(drugList.drugs.count)")
+                }
+                drugList.didSetDefaultList = true
+                realm.add(drugList, update: .modified)
+            })
+        ].forEach { step, action in
+            log(step)
+            action()
+        }}
     }
 }
 

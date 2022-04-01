@@ -3,6 +3,7 @@ import Combine
 
 struct AddNewEntryView: View {
     @EnvironmentObject private var rootScreenState: AddEntryViewState
+    @EnvironmentObject private var infoCalculator: AvailabilityInfoCalculator
 
     var body: some View {
         return VStack(spacing: 0) {
@@ -15,10 +16,15 @@ struct AddNewEntryView: View {
             
             Components.fullWidthButton(
                 "Take some drugs",
-                rootScreenState.saveNewEntry
+                { rootScreenState.saveNewEntry(infoCalculator) }
             )
             .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
             .accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)
+        }
+        .onReceive(infoCalculator.infoPublisher) { info in
+            log("Received new info in AddNewEntryView")
+            rootScreenState.drugSelectionModel.info = info.0
+            rootScreenState.drugSelectionModel.availableDrugs = info.1
         }
         .alert(item: $rootScreenState.saveError, content: makeSaveErrorAlert)
     }
@@ -46,12 +52,17 @@ struct ContentView_Previews: PreviewProvider {
         let dataManager = DefaultRealmManager()
         let notificationState = NotificationInfoViewState()
         let scheduler = NotificationScheduler(notificationState: notificationState)
-        let rootState = AddEntryViewState(dataManager, scheduler)
+        let infoCalculator = AvailabilityInfoCalculator(manager: dataManager)
+        let rootState = AddEntryViewState(
+            dataManager,
+            scheduler
+        )
         return Group {
             return ZStack {
                 AddNewEntryView()
                     .environmentObject(data)
                     .environmentObject(rootState)
+                    .environmentObject(infoCalculator)
             }
         }
 

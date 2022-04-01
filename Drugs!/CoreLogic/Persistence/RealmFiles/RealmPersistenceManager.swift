@@ -16,30 +16,14 @@ enum RealmPersistenceError: Error {
     case invalidMigrationCall
 }
 
-struct RealmPersistenceManagerEnvironment: ViewModifier {
-    let sourceRealm: Realm
-    func body(content: Content) -> some View {
-        return content
-            .environment(\.realm, sourceRealm)
-            .environment(\.realmConfiguration, sourceRealm.configuration)
-    }
-}
-
 class RealmPersistenceManager: ObservableObject, PersistenceManager {
     private let manager: EntryLogRealmManager
     private let tranformer: RealmPersistenceStateTransformer
     private let migrater = V1Migrator()
-    
+     
     init(manager: EntryLogRealmManager = DefaultRealmManager()) {
         self.manager = manager
         self.tranformer = RealmPersistenceStateTransformer(manager: manager)
-    }
-    
-    var makeEnvironmentModifier: RealmPersistenceManagerEnvironment? {
-        manager.accessImmediate {
-            log { Event("Attaching realm root environment modifier") }
-            return RealmPersistenceManagerEnvironment(sourceRealm: $0)
-        }
     }
     
     var appDataStream: AnyPublisher<ApplicationData, Never> {

@@ -5,6 +5,7 @@ import RealmSwift
 struct ExistingEntryEditorView: View {
     
     @StateObject var editorState: ExistingEntryEditorState
+    @EnvironmentObject var infoCalculator: AvailabilityInfoCalculator
     @Environment(\.presentationMode) private var presentationMode
 
 	var body: some View {
@@ -16,6 +17,11 @@ struct ExistingEntryEditorView: View {
                 cancelButton
             }
 		}
+        .onReceive(infoCalculator.infoPublisher) { info in
+            log("Received new info in ExistingEntryEditorView")
+            editorState.selectionModel.info = info.0
+            editorState.selectionModel.availableDrugs = info.1
+        }
         .alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
@@ -49,7 +55,7 @@ struct ExistingEntryEditorView: View {
 
     private var saveButton: some View {
         Components.fullWidthButton("Save changes", {
-            editorState.saveEdits {
+            editorState.saveEdits(infoCalculator) {
                 presentationMode.wrappedValue.dismiss()
             }
         })
@@ -173,6 +179,9 @@ struct DrugEntryEditorView_Previews: PreviewProvider {
             editorState: ExistingEntryEditorState(
                 RLM_MedicineEntry()
             )
+        )
+        .environmentObject(
+            AvailabilityInfoCalculator(manager: DefaultRealmManager())
         )
 	}
 }

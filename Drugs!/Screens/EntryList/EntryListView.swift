@@ -8,7 +8,6 @@ struct EntryListView: View {
         Entry.self,
         sortDescriptor: SortDescriptor(keyPath: \Entry.date, ascending: false)
     ) var allEntries
-//
     @StateObject var model: EntryListViewModel = EntryListViewModel()
 
     var body: some View {
@@ -22,7 +21,9 @@ struct EntryListView: View {
         .listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
-            ExistingEntryEditorView(editorState: ExistingEntryEditorState(entry))
+            ExistingEntryEditorView(
+                editorState: ExistingEntryEditorState(entry)
+            )
         })
     }
     

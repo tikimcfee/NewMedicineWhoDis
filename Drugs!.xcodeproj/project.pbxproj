@@ -31,6 +31,7 @@
 		45DA2BC3232551B600649270 /* DrugSelectionContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
 		B7DBE68927F111E2004AC4AF /* BackgroundWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */; };
+		B7E69CE827F6967A000DBE22 /* RealmEnvironmentModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E69CE727F6967A000DBE22 /* RealmEnvironmentModifier.swift */; };
 		B7F47D8E27EEAD1D00FF6B81 /* EntryListViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */; };
 		B7F47D9027EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */; };
 		B7FC2CB027B741BC002C950E /* RealmPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */; };
@@ -121,6 +122,7 @@
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
 		B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundWorker.swift; sourceTree = "<group>"; };
+		B7E69CE727F6967A000DBE22 /* RealmEnvironmentModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmEnvironmentModifier.swift; sourceTree = "<group>"; };
 		B7F47D8D27EEAD1D00FF6B81 /* EntryListViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryListViewState.swift; sourceTree = "<group>"; };
 		B7F47D8F27EEBA2300FF6B81 /* AvailabilityInfoCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityInfoCalculator.swift; sourceTree = "<group>"; };
 		B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmPersistenceManager.swift; sourceTree = "<group>"; };
@@ -324,6 +326,7 @@
 				B7FC9EA626D1FC020027E032 /* RealmManager.swift */,
 				B7FC9EAA26D1FE820027E032 /* RealmMigrations.swift */,
 				B7FC2CAF27B741BC002C950E /* RealmPersistenceManager.swift */,
+				B7E69CE727F6967A000DBE22 /* RealmEnvironmentModifier.swift */,
 				B7FC2CB127B7420B002C950E /* RealmPersistenceStateTransformer.swift */,
 			);
 			path = RealmFiles;
@@ -618,6 +621,7 @@
 				4518F0EE26D3301D0081A098 /* AppFiles.swift in Sources */,
 				F0456CDD247061450017B04E /* DrugEntryCell.swift in Sources */,
 				F066BB4F258EF98B00B1654B /* FilePersistenceManager.swift in Sources */,
+				B7E69CE827F6967A000DBE22 /* RealmEnvironmentModifier.swift in Sources */,
 				F021ED1E24EE14E5007147B6 /* NotificationInfoViewState.swift in Sources */,
 				4593B4B2231AFBD000787D91 /* AppDelegate.swift in Sources */,
 				B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */,

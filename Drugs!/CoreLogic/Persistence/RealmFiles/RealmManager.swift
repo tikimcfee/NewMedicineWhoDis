@@ -47,7 +47,10 @@ extension EntryLogRealmManager {
 
 class DefaultRealmManager: EntryLogRealmManager {
     public func makeModifier() -> DefaultRealmModifer {
-        DefaultRealmModifer(manager: self)
+        DefaultRealmModifer(
+            manager: self,
+            infoCalculator: AvailabilityInfoCalculator(manager: self)
+        )
     }
     
     public func loadEntryLogRealm() throws -> Realm {
