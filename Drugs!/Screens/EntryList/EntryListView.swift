@@ -45,13 +45,13 @@ struct EntryListView: View {
                         makeTopView()
                         makeEntryRow(entry)
                     }
-                    .listRowSeparator(.hidden, edges: .top)
+//                    .listRowSeparator(.hidden, edges: .top)
                 case let .nextDay(entry):
                     VStack {
                         makeBoundaryView(entry)
                         makeEntryRow(entry)
                     }
-                    .listRowSeparator(.hidden, edges: .top)
+//                    .listRowSeparator(.hidden, edges: .top)
                 case .none:
                     makeEntryRow(entry)
                 }
