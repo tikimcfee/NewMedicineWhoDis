@@ -70,7 +70,7 @@ public final class TestData {
     func randomEntry() -> MedicineEntry {
         let start = Int.random(in: 0..<drugs.count)
         let end = Int.random(in: start..<drugs.count)
-        let time = -Int.random(in: 0...12)
+        let time = -Int.random(in: 0...1000)
         let minutes = -Int.random(in: 0...60)
         let date = Calendar.current.date(
             byAdding: .hour, value: time, to: Date()

@@ -67,7 +67,7 @@ class EntryListViewModel: ObservableObject {
     func createRowModel(_ entry: Entry) -> EntryListViewRowModel {
         EntryListViewRowModel(
             listOfDrugs: makeDrugList(entry),
-            dateTaken: DateFormatting.LongDateShortTime.string(from: entry.date),
+            dateTaken: DateFormatting.EntryCellTime.string(from: entry.date),
             entryId: entry.id,
             onSelect: { self.entryForEdit = entry }
         )

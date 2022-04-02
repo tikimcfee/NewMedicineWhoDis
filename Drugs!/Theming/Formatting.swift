@@ -1,6 +1,13 @@
 import Foundation
 
 struct DateFormatting {
+    static let EntryCellTime: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
+    
     static let ShortDateShortTime: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
@@ -43,23 +50,40 @@ struct DateFormatting {
 }
 
 extension Date {
-    func timeDifference(from date: Date) -> (days: Int, hours: Int, minutes: Int) {
+    struct TimeDifference {
+        let days: Int
+        let hours: Int
+        let minutes: Int
+        let fromWeekday: Int?
+        let toWeekday: Int?
+        
+        var weekdayDiffers: Bool { fromWeekday != toWeekday }
+    }
+    
+    func timeDifference(from date: Date) -> TimeDifference {
         let calendar = Calendar.current
-        let components: Set<Calendar.Component> = [.calendar, .era, .year, .month, .weekOfYear, .day, .hour, .minute, .second, .nanosecond]
+        let components: Set<Calendar.Component> = [
+            .calendar, .era, .year, .month, .weekOfYear, .weekday, .day, .hour, .minute, .second, .nanosecond
+        ]
         let thisComponents = calendar.dateComponents(components, from: self)
         let requestedComponents = calendar.dateComponents(components, from: date)
         let difference = calendar.dateComponents(components, from: thisComponents, to: requestedComponents)
-        return (
-            max(difference.day!, difference.day! * -1),
-            max(difference.hour!, difference.hour! * -1),
-            max(difference.minute!, difference.minute! * -1)
+        return TimeDifference(
+            days: max(difference.day!, difference.day! * -1),
+            hours: max(difference.hour!, difference.hour! * -1),
+            minutes: max(difference.minute!, difference.minute! * -1),
+            fromWeekday: requestedComponents.weekday,
+            toWeekday: thisComponents.weekday
         )
     }
 
     func distanceString(_ date: Date,
                         postfixSelfIsBefore: String = "later",
                         postfixSelfIsAfter: String = "earlier") -> String {
-        let (days, hours, minutes) = timeDifference(from: date)
+        
+        let difference = timeDifference(from: date)
+        let (days, hours, minutes) = (difference.days, difference.hours, difference.minutes)
+        
         guard days > 0 || hours > 0 || minutes > 0 else {
             return "No time change"
         }

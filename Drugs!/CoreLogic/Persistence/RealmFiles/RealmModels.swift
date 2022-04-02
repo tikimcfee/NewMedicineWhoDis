@@ -63,7 +63,7 @@ public class RLM_AvailabilityInfoContainer: Object, Identifiable {
 
 extension Map: _PersistableInsideOptional where Key == Drug.ID, Value == RLM_AvailabilityStats {
     public static func _rlmGetPropertyOptional(_ obj: ObjectBase, _ key: PropertyKey) -> Self? {
-        log("OptionalPersistable called for RLM_AvailabilityStats map; what is this even doing and why does it work?")
+//        log("OptionalPersistable called for RLM_AvailabilityStats map; what is this even doing and why does it work?")
         return _rlmGetProperty(obj, key)
     }
 }
