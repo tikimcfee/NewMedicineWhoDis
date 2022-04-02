@@ -47,6 +47,12 @@ struct DateFormatting {
         dateFormatter.dateFormat = "y-MM-dd H:m:ss.SSSS"
         return dateFormatter
     }()
+
+    static let CustomFormatRLM_YearMonthDay: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter
+    }()
 }
 
 extension Date {
@@ -60,14 +66,23 @@ extension Date {
         var weekdayDiffers: Bool { fromWeekday != toWeekday }
     }
     
+    static var calendar: Calendar { Calendar.current }
+    static let componentQuery: Set<Calendar.Component> = [
+        .calendar, .era, .year, .month, .weekOfYear, .weekday, .day, .hour, .minute, .second, .nanosecond
+    ]
+    
+    var allComponents: DateComponents {
+        Calendar.current.dateComponents(Self.componentQuery, from: self)
+    }
+        
     func timeDifference(from date: Date) -> TimeDifference {
-        let calendar = Calendar.current
-        let components: Set<Calendar.Component> = [
-            .calendar, .era, .year, .month, .weekOfYear, .weekday, .day, .hour, .minute, .second, .nanosecond
-        ]
-        let thisComponents = calendar.dateComponents(components, from: self)
-        let requestedComponents = calendar.dateComponents(components, from: date)
-        let difference = calendar.dateComponents(components, from: thisComponents, to: requestedComponents)
+        let thisComponents = allComponents
+        let requestedComponents = date.allComponents
+        let difference = Self.calendar.dateComponents(
+            Self.componentQuery,
+            from: allComponents,
+            to: date.allComponents
+        )
         return TimeDifference(
             days: max(difference.day!, difference.day! * -1),
             hours: max(difference.hour!, difference.hour! * -1),

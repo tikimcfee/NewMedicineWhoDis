@@ -2,12 +2,15 @@ import Foundation
 import SwiftUI
 import RealmSwift
 
+private let AppLaunchStartFilterDate = Date().addingTimeInterval(-1.0 * (60.0 * 60 * 24 * 7 * 4))
 struct EntryListView: View {
     
     @ObservedResults(
         Entry.self,
+        where: { $0.date > AppLaunchStartFilterDate },
         sortDescriptor: SortDescriptor(keyPath: \Entry.date, ascending: false)
     ) var allEntries
+    
     @StateObject var model: EntryListViewModel = EntryListViewModel()
     
     enum Boundary {
@@ -17,20 +20,24 @@ struct EntryListView: View {
     }
     
     private func boundaryType(_ entry: RLM_MedicineEntry) -> Boundary {
-//        return Boundary.nextDay(RLM_MedicineEntry())
         
+        
+        return .none
+        
+        
+//        return Boundary.nextDay(RLM_MedicineEntry())
         if entry == allEntries.first { return .first }
         
         guard let index = allEntries.firstIndex(of: entry) else {
             log("Could not find index in results query. Why have you forsaken me, corporate database overlords")
             return .none
         }
-        
+
         let lastIndexEntry = index + 1
         if !allEntries.indices.contains(lastIndexEntry) {
             return .none
         }
-        
+
         let lastEntry = allEntries[lastIndexEntry]
         let timeDelta = entry.date.timeDifference(from: lastEntry.date)
         return timeDelta.weekdayDiffers ? .nextDay(lastEntry) : .none
@@ -160,21 +167,6 @@ struct EnryListView_Previews: PreviewProvider {
             dataManager,
             scheduler
         )
-//        dataManager.access { realm in
-//            try realm.write {
-//                realm.deleteAll()
-//            }
-//        }
-//        dataManager.access { realm in
-//            let migrator = V1Migrator()
-//            try realm.write {
-//                for _ in (0..<0) {
-//                    let random = TestData.shared.randomEntry()
-//                    let test = migrator.fromV1Entry(random)
-//                    realm.add(test, update: .all)
-//                }
-//            }
-//        }
         return EntryListView()
             .modifier(dataManager.makeModifier())
         

@@ -13,7 +13,8 @@ import SwiftUI
 
 struct DefaultRealmModifer: ViewModifier {
     let manager: DefaultRealmManager
-    let infoCalculator: AvailabilityInfoCalculator
+    
+    @ObservedObject var infoCalculator: AvailabilityInfoCalculator
     
     private var modifier: RealmPersistenceManagerEnvironment? {
         manager.accessImmediate {

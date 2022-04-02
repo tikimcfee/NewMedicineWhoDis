@@ -20,6 +20,11 @@ struct AddNewEntryView: View {
             )
             .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
             .accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)
+            
+            #if DEBUG
+            testButton()
+                .padding(8.0)
+            #endif
         }
         .onReceive(infoCalculator.infoPublisher) { info in
             log("Received new info in AddNewEntryView")
@@ -41,6 +46,39 @@ struct AddNewEntryView: View {
             message: Text(message),
             dismissButton: .default(Text("Well that sucks."))
         )
+    }
+    
+    
+    private func testButton() -> some View {
+        let dataManager = DefaultRealmManager()
+        return VStack {
+            Components.fullWidthButton(
+                "Clear everything",
+                {
+                    dataManager.access { realm in
+                        try realm.write {
+                            realm.deleteAll()
+                        }
+                    }
+                }
+            )
+            
+            Components.fullWidthButton(
+                "Add random everythings",
+                {
+                    dataManager.access { realm in
+                        let migrator = V1Migrator()
+                        try realm.write {
+                            for _ in (0..<1_000) {
+                                let random = TestData.shared.randomEntry()
+                                let test = migrator.fromV1Entry(random)
+                                realm.add(test, update: .all)
+                            }
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 

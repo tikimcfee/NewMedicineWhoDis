@@ -98,8 +98,8 @@ private extension AvailabilityInfoCalculator {
         
         // TODO: better way to grab the value and persist and return info
         // maybe just get finally get rid of old info
-        let newMap = Self.buildNewStatesMap(entries: entries, drugList: drugList)
-        guard let container = persistContainerChange(newMap, drugList) else {
+        let newInfoState = Self.buildNewStatesMap(entries: entries, drugList: drugList)
+        guard let container = persistStateChange(newState: newInfoState, drugList: drugList) else {
             log("Failed to persist container; cannot migrate to v1 drug list")
             return nil
         }
@@ -112,17 +112,23 @@ private extension AvailabilityInfoCalculator {
         return (newInfo, migrator.toV1DrugList(drugList))
     }
     
-    func persistContainerChange(
-        _ newMap: Map<Drug.ID, RLM_AvailabilityStats>,
-        _ drugList: RLM_AvailableDrugList
+    func persistStateChange(
+        newState: AvailabilityInfoState,
+        drugList: RLM_AvailableDrugList
     ) -> RLM_AvailabilityInfoContainer? {
         manager.accessImmediate { realm -> RLM_AvailabilityInfoContainer in
+        
             guard let container = RLM_AvailabilityInfoContainer.defaultFrom(realm) else {
                 throw AvailabilityInfoError.missingDrugList
             }
             
             safeWrite(container) { safeContainer in
-                safeContainer.allInfo = newMap
+                safeContainer.allInfo = newState.newInfo
+            }
+            
+            try realm.write {
+                log("Persiting \(newState.computedGroups.count) with initial id: \(newState.computedGroups.first?.simpleDateKey ?? "<no first id>")")
+                realm.add(newState.computedGroups, update: .all)
             }
             
             return container
@@ -212,35 +218,55 @@ private extension AvailabilityInfoCalculator {
     }
 }
 
+class AvailabilityInfoState {
+    var newInfo: Map<Drug.ID, RLM_AvailabilityStats> = .init()
+    var computedGroups: [RLM_MedicineEntryGroup] = .init()
+}
+
 extension AvailabilityInfoCalculator {
     static func buildNewStatesMap(
         startDate: Date = Date(),
         entries: Results<RLM_MedicineEntry>,
         drugList: RLM_AvailableDrugList
-    ) -> Map<Drug.ID, RLM_AvailabilityStats> {
+    ) -> AvailabilityInfoState {
         
-        let drugStates = Map<Drug.ID, RLM_AvailabilityStats>()
+        let newInfoState = AvailabilityInfoState()
+        
+        // Use the newest drug info if there is one.
+        // This is important so old entries don't step on new drugs.
         drugList.drugs.forEach {
-            drugStates[$0.id] = RLM_AvailabilityStats(canTake: true, when: startDate)
-        }
-        
-        func listMatchOrDefault(_ drug: RLM_Drug) -> RLM_Drug {
-            drugList.drugs.first(where: { $0.id == drug.id }) ?? drug
+            newInfoState.newInfo[$0.id] = RLM_AvailabilityStats(canTake: true, when: startDate)
         }
         
         // Use the newest drug info if there is one.
         // This is important so old entries don't step on new drugs.
-        entries.forEach { entry in
+        entries.sorted(by: \.date, ascending: false).forEach { entry in
+            
+            // groups up entries by 'simpleDateKey', currently "2022-04-02" (yyyy-MM-dd).
+            // group can be extended by mathing on an interval and making a range check.
+            // days are fine for now.
+            let upsertGroup = newInfoState.computedGroups
+                .first(where: { $0.simpleDateKey == entry.simpleDateKey })
+                ?? {
+                    let newGroup = makeInitialGroup(entry)
+                    newInfoState.computedGroups.append(newGroup)
+                    return newGroup
+                }()
+            upsertGroup.entries.append(entry)
+            
+            // Use all drugs taken to compute a mapping of the next date that drug id
+            // may be taken based on dosage time
+            var missingDrugs =  [String]()
             entry.drugsTaken.forEach { drugSelection in
                 guard let drug = drugSelection.drug else {
-                    log(AvailabilityInfoError.missingDrug("No drug from selection: \(entry.id), \(drugSelection.count)"))
+                    missingDrugs.append(entry.id)
                     return
                 }
                 
-                let entryOrListDrug = listMatchOrDefault(drug)
+                let entryOrListDrug = drugList.drugs.first(where: { $0.id == drug.id }) ?? drug
                 let nextDoseTime = entry.date.advanced(by: entryOrListDrug.doseTimeInSeconds)
                 
-                switch drugStates[entryOrListDrug.id] {
+                switch newInfoState.newInfo[entryOrListDrug.id] {
                 case .some(let stats):
                     stats.when = max(nextDoseTime, stats.when)
                     stats.canTake = nextDoseTime <= startDate
@@ -248,11 +274,20 @@ extension AvailabilityInfoCalculator {
                     let stats = RLM_AvailabilityStats()
                     stats.when = nextDoseTime
                     stats.canTake = nextDoseTime <= startDate
-                    drugStates[entryOrListDrug.id] = stats
+                    newInfoState.newInfo[entryOrListDrug.id] = stats
                 }
+            }
+            if !missingDrugs.isEmpty {
+                log(AvailabilityInfoError.missingDrug("No drugs from selection: \(entry.id): \(missingDrugs)"))
             }
         }
         
-        return drugStates
+        return newInfoState
+    }
+    
+    private static func makeInitialGroup(_ entry: Entry) -> RLM_MedicineEntryGroup {
+        let group = RLM_MedicineEntryGroup()
+        group.representableDate = entry.date
+        return group
     }
 }
