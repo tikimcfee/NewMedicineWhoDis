@@ -21,9 +21,8 @@ struct EntryListView: View {
         .listStyle(PlainListStyle())
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
-            ExistingEntryEditorView(
-                editorState: ExistingEntryEditorState(entry)
-            )
+            ExistingEntryEditorView(entryForEdit: $model.entryForEdit)
+                .environmentObject(ExistingEntryEditorState(entry))
         })
     }
     

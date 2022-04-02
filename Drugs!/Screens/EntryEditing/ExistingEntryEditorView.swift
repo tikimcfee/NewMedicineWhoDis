@@ -4,7 +4,8 @@ import RealmSwift
 
 struct ExistingEntryEditorView: View {
     
-    @StateObject var editorState: ExistingEntryEditorState
+    @Binding var entryForEdit: RLM_MedicineEntry?
+    @EnvironmentObject var editorState: ExistingEntryEditorState
     @EnvironmentObject var infoCalculator: AvailabilityInfoCalculator
     @Environment(\.presentationMode) private var presentationMode
 
@@ -43,14 +44,14 @@ struct ExistingEntryEditorView: View {
     }
 
     private var timeSection: some View {
-        VStack(alignment: .center, spacing: 8) {
+        VStack(alignment: .center, spacing: 0) {
             timePicker.screenWide
-            updatedDifferenceView
+            if showTimeChange {
+                updatedDifferenceView
+            }
         }
         .screenWide
-        .padding(4)
-        .boringBorder
-        .padding(8)
+        .padding(16)
     }
 
     private var saveButton: some View {
@@ -64,7 +65,9 @@ struct ExistingEntryEditorView: View {
     }
 
     private var cancelButton: some View {
-        Button(action: { presentationMode.wrappedValue.dismiss() }) {
+        Button(action: {
+            entryForEdit = nil
+        }) {
             Text("Cancel")
                 .foregroundColor(Color.white)
                 .padding(8)
@@ -79,46 +82,27 @@ struct ExistingEntryEditorView: View {
     }
 	
 	private var updatedDifferenceView: some View {
-        HStack(alignment: .bottom) {
-            Text("Was \(editorState.selectedDate, formatter: DateFormatting.ShortDateShortTime)")
+        VStack(alignment: .center) {
+            Text("Was \(editorState.targetModel.date, formatter: DateFormatting.ShortDateShortTime)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
-            Spacer()
-			Text("\(distance)")
-				.font(.subheadline)
-				.foregroundColor(.gray)
-
+            Text("\(distance)")
+                .font(.subheadline)
+                .foregroundColor(.gray)
         }
-	}
-	
-	private func time(_ title: String,
-                      _ date: Date,
-                      _ label: String) -> some View {
-		HStack(alignment: .firstTextBaseline) {
-			Text(title)
-				.font(.callout)
-            Text("\(date, formatter: DateFormatting.ShortDateShortTime)")
-                .accessibility(identifier: label)
-				.font(.subheadline)
-				.padding(.horizontal, 24)
-				.frame(width: 196)
-				.boringBorder
-		}
 	}
 	
 	private var timePicker: some View {
         DatePicker(
             selection: $editorState.selectedDate,
             displayedComponents: .init(arrayLiteral: .date, .hourAndMinute),
-            label: { Group { EmptyView() } }
+            label: {
+                
+            }
         )
-        .datePickerStyle(WheelDatePickerStyle())
+        .datePickerStyle(.compact)
         .labelsHidden()
-        .frame(height: 64)
-        .padding(8)
-        .contentShape(Rectangle()) // Without this, DatePicker touch area overlaps surrounding views
-        .clipped()
-        .compositingGroup()
+        .padding(4)
         .accessibility(identifier: EditEntryScreen.datePickerButton.rawValue)
     }
 }
@@ -129,6 +113,12 @@ extension ExistingEntryEditorView {
         let originalDate = editorState.targetModel.date
         let newDate = editorState.selectedDate
         return originalDate.distanceString(newDate)
+    }
+    
+    var showTimeChange: Bool {
+        let originalDate = editorState.targetModel.date
+        let newDate = editorState.selectedDate
+        return originalDate != newDate
     }
 }
 
@@ -175,11 +165,12 @@ extension View {
 #if DEBUG
 struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
+        let entry = RLM_MedicineEntry()
+        let binding = WrappedBinding(Optional(entry))
 		return ExistingEntryEditorView(
-            editorState: ExistingEntryEditorState(
-                RLM_MedicineEntry()
-            )
+            entryForEdit: binding.binding
         )
+        .environmentObject(ExistingEntryEditorState(entry))
         .environmentObject(
             AvailabilityInfoCalculator(manager: DefaultRealmManager())
         )
