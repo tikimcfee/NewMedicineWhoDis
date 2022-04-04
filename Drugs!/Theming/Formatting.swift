@@ -8,6 +8,12 @@ struct DateFormatting {
         return dateFormatter
     }()
     
+    static let EntryCellDate: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        return dateFormatter
+    }()
+    
     static let ShortDateShortTime: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
@@ -90,6 +96,15 @@ extension Date {
             fromWeekday: requestedComponents.weekday,
             toWeekday: thisComponents.weekday
         )
+    }
+    
+    private static let second = 1.0
+    private static let minute = second * 60.0
+    private static let hour = minute * 60.0
+    private static let day = hour * 24.0
+    
+    func minus(days: Double) -> Date {
+        return Date().addingTimeInterval(-1 * days * Self.day)
     }
 
     func distanceString(_ date: Date,

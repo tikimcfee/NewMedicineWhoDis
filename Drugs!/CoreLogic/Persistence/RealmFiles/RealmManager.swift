@@ -63,8 +63,9 @@ class DefaultRealmManager: EntryLogRealmManager {
     
     public static func makeEntryLogConfiguration() -> Realm.Configuration {
         var config = Realm.Configuration.defaultConfiguration
-        config.schemaVersion = 2
+        config.schemaVersion = CURRENT_SCHEMA_VERSION
         config.fileURL = AppFiles.entryLogRealm
+//        config.deleteRealmIfMigrationNeeded = true
         config.migrationBlock = { migration, flag in
             log { Event("Migration: New schema -- \(migration.newSchema.description)", .info) }
             log { Event("Migration: Old schema -- \(migration.oldSchema.description)", .info) }

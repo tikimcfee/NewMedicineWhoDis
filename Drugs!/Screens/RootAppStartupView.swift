@@ -100,8 +100,12 @@ extension RootAppStartupView {
     }
 
     private var entryListView: some View {
-        EntryListView()
-            .asEntryListTab
+        NavigationView {
+            EntryListView()
+                .navigationBarTitle("", displayMode: .inline)
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .asEntryListTab
     }
 
     private var notificationsView: some View {

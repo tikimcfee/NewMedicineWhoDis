@@ -5,4 +5,5 @@ public typealias Action = () -> Void
 
 // Model aliases because terrible ideas
 
-typealias Entry = RLM_MedicineEntry
+public typealias Entry = RLM_MedicineEntry
+public typealias EntryGroup = RLM_MedicineEntryGroup

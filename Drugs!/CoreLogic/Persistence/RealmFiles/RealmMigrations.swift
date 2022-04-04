@@ -13,6 +13,13 @@ public class V1Migrator {
     private var cachedMigratedDrugNames: [String: RLM_Drug] = [:]
     private var cachedMigratedIngredientNames: [String: RLM_Ingredient] = [:]
     
+    func cache(_ drug: RLM_Drug) {
+        cachedMigratedDrugNames[drug.id] = drug
+        drug.ingredients.forEach {
+            cachedMigratedIngredientNames[$0.id] = $0
+        }
+    }
+    
     public func isMigrationNeeded(into realm: Realm) -> Bool {
         guard let migrationData = RLM_AppMigrationData.from(realm) else {
             log { Event("No migration data found; assuming no migration has been run.", .info) }
@@ -58,14 +65,13 @@ Migration state query:
         container: RLM_AvailabilityInfoContainer,
         sourceList: RLM_AvailableDrugList
     ) -> AvailabilityInfo {
-        return container.allInfo?.reduce(into: AvailabilityInfo()) { results, stats in
-            guard let drug = sourceList.drugs.first(where: { $0.id == stats.key }) else {
-                log("No drug found in root list for: \(stats.key)")
+        return sourceList.drugs.reduce(into: AvailabilityInfo()) { results, drug in
+            guard let first = container.timingInfo?.first(where: { $0.key == drug.id }) else {
+                log("!! Drug list did not have timing info: \(drug.id)")
                 return
             }
-            results[toV1Drug(drug)] = (stats.value.canTake, stats.value.when)
+            results[toV1Drug(drug)] = (first.value.canTakeAsOfNow, first.value.when)
         }
-        ?? AvailabilityInfo()
     }
     
     public func migrateEntriesToRealmObjects(_ oldList: [MedicineEntry]) -> [RLM_MedicineEntry] {

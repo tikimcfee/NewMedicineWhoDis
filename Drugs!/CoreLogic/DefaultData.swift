@@ -81,6 +81,25 @@ public final class TestData {
             }
         )
     }
+    
+    func randomEntry(using drugs: RLM_AvailableDrugList) -> MedicineEntry {
+        let start = Int.random(in: 0..<drugs.drugs.count)
+        let end = Int.random(in: start..<drugs.drugs.count)
+        let time = -Int.random(in: 0...1000)
+        let minutes = -Int.random(in: 0...60)
+        let date = Calendar.current.date(
+            byAdding: .hour, value: time, to: Date()
+        )!.addingTimeInterval(TimeInterval(minutes))
+        let migrator = V1Migrator()
+        return MedicineEntry(
+            date,
+            Array(drugs.drugs.enumerated().compactMap { index, element in
+                (start...end).contains(index) ? element : nil
+            }).reduce(into: DrugCountMap()) { (result, drug: RLM_Drug) in
+                result[migrator.toV1Drug(drug), default: 0] += Double.random(in: 1...4)
+            }
+        )
+    }
 
     lazy var randomEntries: [MedicineEntry] = {
         return [randomEntry(), randomEntry(), randomEntry(), randomEntry()]

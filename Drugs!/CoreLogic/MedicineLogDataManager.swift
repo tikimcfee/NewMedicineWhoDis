@@ -199,7 +199,7 @@ extension MedicineLogDataManager {
 
     var availabilityInfoStream: AnyPublisher<AvailabilityInfo, Never> {
         let streamNumber = streamId
-        var refreshCount = 0
+//        var refreshCount = 0
         log { Event("Creating new availability stream: [\(streamNumber)]") }
         log { Event("----------- LIES I TURNED OFF THE LOG MANAGER!! -----------------") }
         return Empty().eraseToAnyPublisher()

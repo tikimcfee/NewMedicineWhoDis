@@ -10,7 +10,7 @@ struct SelectableDrug: Hashable, Equatable {
     }
     static func == (lhs: SelectableDrug, rhs: SelectableDrug) -> Bool {
         return lhs.drugId == rhs.drugId
-            && rhs.drugName == rhs.drugName
+            && lhs.drugName == rhs.drugName
     }
 }
 

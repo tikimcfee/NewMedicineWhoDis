@@ -21,15 +21,10 @@ struct AddNewEntryView: View {
             .padding(EdgeInsets(top: 0, leading: 4, bottom: 4, trailing: 4))
             .accessibility(identifier: MedicineLogScreen.saveEntry.rawValue)
             
-            #if DEBUG
+//            #if DEBUG
             testButton()
                 .padding(8.0)
-            #endif
-        }
-        .onReceive(infoCalculator.infoPublisher) { info in
-            log("Received new info in AddNewEntryView")
-            rootScreenState.drugSelectionModel.info = info.0
-            rootScreenState.drugSelectionModel.availableDrugs = info.1
+//            #endif
         }
         .alert(item: $rootScreenState.saveError, content: makeSaveErrorAlert)
     }
@@ -47,38 +42,42 @@ struct AddNewEntryView: View {
             dismissButton: .default(Text("Well that sucks."))
         )
     }
-    
-    
-    private func testButton() -> some View {
-        let dataManager = DefaultRealmManager()
-        return VStack {
-            Components.fullWidthButton(
-                "Clear everything",
-                {
-                    dataManager.access { realm in
-                        try realm.write {
-                            realm.deleteAll()
+}
+
+func testButton() -> some View {
+    let dataManager = DefaultRealmManager()
+    return VStack {
+        Components.fullWidthButton(
+            "Clear everything",
+            {
+                dataManager.access { realm in
+                    try realm.write {
+                        realm.deleteAll()
+                    }
+                }
+            }
+        )
+        
+        Components.fullWidthButton(
+            "Add random everythings",
+            {
+                
+                dataManager.access { realm in
+                    guard let drugList = RLM_AvailableDrugList.defaultFrom(realm) else {
+                        log("No drug list to insert samples")
+                        return
+                    }
+                    let migrator = V1Migrator()
+                    try realm.write {
+                        for _ in (0..<1_000) {
+                            let random = TestData.shared.randomEntry(using: drugList)
+                            let test = migrator.fromV1Entry(random)
+                            realm.add(test, update: .all)
                         }
                     }
                 }
-            )
-            
-            Components.fullWidthButton(
-                "Add random everythings",
-                {
-                    dataManager.access { realm in
-                        let migrator = V1Migrator()
-                        try realm.write {
-                            for _ in (0..<1_000) {
-                                let random = TestData.shared.randomEntry()
-                                let test = migrator.fromV1Entry(random)
-                                realm.add(test, update: .all)
-                            }
-                        }
-                    }
-                }
-            )
-        }
+            }
+        )
     }
 }
 

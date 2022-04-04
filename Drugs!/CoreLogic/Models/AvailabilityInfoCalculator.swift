@@ -10,6 +10,7 @@ import Foundation
 import RealmSwift
 import Combine
 import SwiftUI
+import Network
 
 public typealias AvailabilityInfo = [Drug: (canTake: Bool, when: Date)]
 
@@ -42,49 +43,54 @@ class AvailabilityInfoCalculator: ObservableObject {
     private var bag = Set<AnyCancellable>()
     private let migrator = V1Migrator()
     
-    typealias InfoPublisher = AnyPublisher<(AvailabilityInfo, AvailableDrugList), Never>
-    lazy var infoPublisher: InfoPublisher = {
-        manager.accessImmediate { realm in
-            try self.makeRootInfoPublisher(from: realm)
-        } ?? {
-            log("No info publisher to send results to. That stinks.")
-            return Empty().eraseToAnyPublisher()
-        }()
+    typealias Publised = (AvailabilityInfo, AvailableDrugList)
+    typealias InfoPublisher = AnyPublisher<Publised, Never>
+    typealias CurrentInfoPublisher = AnyPublisher<Publised, Never>
+    
+    private lazy var currentInfoSubject: CurrentValueSubject = {
+        CurrentValueSubject<(AvailabilityInfo, AvailableDrugList), Never>(
+            (AvailabilityInfo(), AvailableDrugList([]))
+        )
     }()
     
+    lazy var currentInfoPublisher: CurrentInfoPublisher = {
+        currentInfoSubject.eraseToAnyPublisher()
+    }()
+        
     init(manager: DefaultRealmManager) {
         self.manager = manager
+        onInit()
     }
     
     deinit {
         log("Calculator deinit")
     }
     
-    func start(receiver: @escaping ContainerReceiverGetter) {
-        bag.insert(
-            infoPublisher.sink { [receiver] newInfo in
-                receiver { toUpdate in
-                    log("Alert receiver of new info")
-                    toUpdate.info = newInfo.0
-                    toUpdate.availableDrugs = newInfo.1
-                }
-            }
-        )
+    func onInit() {
+        manager.access { realm in
+            try ensureInitialRealmState(
+                RLM_MedicineEntry.observableResults(realm),
+                RLM_AvailabilityInfoContainer.observableResults(realm),
+                RLM_AvailableDrugList.observableResults(realm),
+                in: realm
+            )
+            
+            let infoPublisher = try makeRootInfoPublisher(from: realm)
+            bag.insert(
+                infoPublisher.sink(receiveValue: { [weak self] result in
+                    self?.currentInfoSubject.send(result)
+                })
+            )
+        }
     }
 }
 
 // MARK: -- Publishers
 private extension AvailabilityInfoCalculator {
     func makeRootInfoPublisher(from realm: Realm) throws -> InfoPublisher {
-        try ensureInitialRealmState(
-            RLM_MedicineEntry.observableResults(realm),
-            RLM_AvailabilityInfoContainer.observableResults(realm),
-            RLM_AvailableDrugList.observableResults(realm),
-            in: realm
-        )
-        
+        let oneMonthPrior = Date().addingTimeInterval(-1 * (60 * 60 * 24 * 7 * 4))
         return Publishers.CombineLatest(
-            buildEntryListPublisher(realm),
+            buildEntryListPublisher(realm, cutoffDate: oneMonthPrior),
             buildDrugListPublisher(realm)
         )
         .compactMap { [weak self] in self?.mergeObservedResults($0, $1) }
@@ -94,47 +100,20 @@ private extension AvailabilityInfoCalculator {
     func mergeObservedResults(
         _ entries: Results<RLM_MedicineEntry>,
         _ drugList: RLM_AvailableDrugList
-    ) -> (AvailabilityInfo, AvailableDrugList)? {
-        
-        // TODO: better way to grab the value and persist and return info
-        // maybe just get finally get rid of old info
-        let newInfoState = Self.buildNewStatesMap(entries: entries, drugList: drugList)
-        guard let container = persistStateChange(newState: newInfoState, drugList: drugList) else {
-            log("Failed to persist container; cannot migrate to v1 drug list")
-            return nil
-        }
-        
-        let newInfo = migrator.migrateFromRLMAvailability(
-            container: container,
-            sourceList: drugList
-        )
-        
-        return (newInfo, migrator.toV1DrugList(drugList))
-    }
-    
-    func persistStateChange(
-        newState: AvailabilityInfoState,
-        drugList: RLM_AvailableDrugList
-    ) -> RLM_AvailabilityInfoContainer? {
-        manager.accessImmediate { realm -> RLM_AvailabilityInfoContainer in
-        
-            guard let container = RLM_AvailabilityInfoContainer.defaultFrom(realm) else {
-                throw AvailabilityInfoError.missingDrugList
-            }
-            
-            safeWrite(container) { safeContainer in
-                safeContainer.allInfo = newState.newInfo
-            }
-            
+    ) -> Publised? {
+        manager.accessImmediate { realm in
+            var newInfo: Publised? = nil
             try realm.write {
-                log("Persiting \(newState.computedGroups.count) with initial id: \(newState.computedGroups.first?.simpleDateKey ?? "<no first id>")")
-                realm.add(newState.computedGroups, update: .all)
+                newInfo = try Self.writeUpdatedContainersAndGroups(
+                    entries: entries,
+                    drugList: drugList,
+                    realm: realm
+                )
             }
-            
-            return container
+            return newInfo
         }
     }
-    
+
     func buildDrugListPublisher(_ realm: Realm) -> AnyPublisher<RLM_AvailableDrugList, Never> {
         RLM_AvailableDrugList
             .defaultFrom(realm)?
@@ -146,9 +125,11 @@ private extension AvailabilityInfoCalculator {
         }()
     }
     
-    func buildEntryListPublisher(_ realm: Realm) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
-        RLM_MedicineEntry
+    func buildEntryListPublisher(_ realm: Realm, cutoffDate: Date) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
+        return RLM_MedicineEntry
             .observableResults(realm)
+            .sorted(by: \.date, ascending: false)
+            .where { $0.date > cutoffDate }
             .changesetPublisher
             .compactMap { change in
                 switch change {
@@ -218,71 +199,102 @@ private extension AvailabilityInfoCalculator {
     }
 }
 
-class AvailabilityInfoState {
-    var newInfo: Map<Drug.ID, RLM_AvailabilityStats> = .init()
-    var computedGroups: [RLM_MedicineEntryGroup] = .init()
-}
 
 extension AvailabilityInfoCalculator {
-    static func buildNewStatesMap(
-        startDate: Date = Date(),
-        entries: Results<RLM_MedicineEntry>,
-        drugList: RLM_AvailableDrugList
-    ) -> AvailabilityInfoState {
+    static func writeUpdatedContainersAndGroups(
+        entries: Results<Entry>,
+        drugList: RLM_AvailableDrugList,
+        canTakeAtDate: Date = Date(),
+        realm: Realm
+    ) throws -> Publised {
+        guard let timingContainer = RLM_AvailabilityInfoContainer.defaultFrom(realm) else {
+            throw AvailabilityInfoError.missingContainer
+        }
         
-        let newInfoState = AvailabilityInfoState()
+        // Clear all current timings
+        log("Clearing timing container")
+        let newTimingInfo = timingContainer.timingInfo ?? {
+            log("Timing container missing info; recreating empty")
+            return Map<DrugId, RLM_AvailabilityStats>()
+        }()
+        timingContainer.timingInfo?.removeAll()
         
-        // Use the newest drug info if there is one.
-        // This is important so old entries don't step on new drugs.
-        drugList.drugs.forEach {
-            newInfoState.newInfo[$0.id] = RLM_AvailabilityStats(canTake: true, when: startDate)
+        
+        // Add all default timings
+        log("Adding default drugs")
+        drugList.drugs.forEach { drug in
+            newTimingInfo[drug.id] = RLM_AvailabilityStats(drug: drug, when: canTakeAtDate)
+        }
+        
+        // Clear all groups; we'll recreate and add next
+        log("Clearing all entry groups")
+        realm.delete(RLM_MedicineEntryGroup.observableResults(realm))
+        
+        // groups up entries by 'simpleDateKey', currently "2022-04-02" (yyyy-MM-dd).
+        var newEntryGroups = [String: EntryGroup]()
+        func upsertIntoNewGroups(_ entry: Entry) {
+            let group = newEntryGroups[entry.simpleDateKey] ?? {
+                let newGroup = EntryGroup()
+                newGroup.representableDate = entry.date
+                return newGroup
+            }()
+            group.entries.append(entry)
+            newEntryGroups[entry.simpleDateKey] = group
+        }
+
+        // Use all drugs taken to compute a mapping of the next date that drug id
+        // may be taken based on dosage time
+        func updateFromDrugSelection(_ entry: Entry, _ drugSelection: RLM_DrugSelection) {
+            guard let recordedDrug = drugSelection.drug else {
+                log("Missing: \(drugSelection.drug?.id ?? "<no drug>")")
+                return
+            }
+            
+            let lookupDrug = newTimingInfo[recordedDrug.id]?.drug ?? {
+                log("Missing drug from list; using recording drug: \(recordedDrug)")
+                return recordedDrug
+            }()
+            let entryOffsetNextDoseTime = entry.date.advanced(by: lookupDrug.doseTimeInSeconds)
+            
+            switch newTimingInfo[lookupDrug.id] {
+            case .some(let stats):
+                stats.when = max(entryOffsetNextDoseTime, stats.when)
+                newTimingInfo[lookupDrug.id] = stats
+                
+            case .none:
+                let stats = RLM_AvailabilityStats(
+                    drug: lookupDrug,
+                    when: canTakeAtDate
+                )
+                newTimingInfo[lookupDrug.id] = stats
+            }
         }
         
         // Use the newest drug info if there is one.
         // This is important so old entries don't step on new drugs.
-        entries.sorted(by: \.date, ascending: false).forEach { entry in
-            
-            // groups up entries by 'simpleDateKey', currently "2022-04-02" (yyyy-MM-dd).
-            // group can be extended by mathing on an interval and making a range check.
-            // days are fine for now.
-            let upsertGroup = newInfoState.computedGroups
-                .first(where: { $0.simpleDateKey == entry.simpleDateKey })
-                ?? {
-                    let newGroup = makeInitialGroup(entry)
-                    newInfoState.computedGroups.append(newGroup)
-                    return newGroup
-                }()
-            upsertGroup.entries.append(entry)
-            
-            // Use all drugs taken to compute a mapping of the next date that drug id
-            // may be taken based on dosage time
-            var missingDrugs =  [String]()
-            entry.drugsTaken.forEach { drugSelection in
-                guard let drug = drugSelection.drug else {
-                    missingDrugs.append(entry.id)
-                    return
-                }
-                
-                let entryOrListDrug = drugList.drugs.first(where: { $0.id == drug.id }) ?? drug
-                let nextDoseTime = entry.date.advanced(by: entryOrListDrug.doseTimeInSeconds)
-                
-                switch newInfoState.newInfo[entryOrListDrug.id] {
-                case .some(let stats):
-                    stats.when = max(nextDoseTime, stats.when)
-                    stats.canTake = nextDoseTime <= startDate
-                case .none:
-                    let stats = RLM_AvailabilityStats()
-                    stats.when = nextDoseTime
-                    stats.canTake = nextDoseTime <= startDate
-                    newInfoState.newInfo[entryOrListDrug.id] = stats
+        entries
+            .forEach { entry in
+                upsertIntoNewGroups(entry)
+                entry.drugsTaken.forEach { drugSelection in
+                    updateFromDrugSelection(entry, drugSelection)
                 }
             }
-            if !missingDrugs.isEmpty {
-                log(AvailabilityInfoError.missingDrug("No drugs from selection: \(entry.id): \(missingDrugs)"))
-            }
-        }
         
-        return newInfoState
+        
+        // Write all data
+        log("Running deferred add of updated timing container")
+        timingContainer.timingInfo = newTimingInfo
+        
+        log("Running deferred group add on entries: \(newEntryGroups.keys)")
+        realm.add(newEntryGroups.values)
+        
+        // Migrate to old format for compat
+        let migrator = V1Migrator()
+        drugList.drugs.forEach { migrator.cache($0) }
+        return (
+            migrator.migrateFromRLMAvailability(container: timingContainer, sourceList: drugList),
+            migrator.toV1DrugList(drugList)
+        )
     }
     
     private static func makeInitialGroup(_ entry: Entry) -> RLM_MedicineEntryGroup {
@@ -291,3 +303,5 @@ extension AvailabilityInfoCalculator {
         return group
     }
 }
+
+

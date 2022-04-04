@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 
 struct DrugSelectionContainerView: View {
+    @EnvironmentObject var infoCalculator: AvailabilityInfoCalculator
     @Binding var model: DrugSelectionContainerModel
     let countAutoUpdate: ((Drug.ID, Double?) -> Void)?
 
@@ -10,7 +11,13 @@ struct DrugSelectionContainerView: View {
             DrugSelectionListView(model: listModel)
                 .boringBorder
             DrugEntryNumberPad(model: numberPadModel)
-        }.padding(4.0)
+        }
+        .padding(4.0)
+        .onReceive(infoCalculator.currentInfoPublisher) { info in
+            log("Received new info in SelectionView")
+            model.info = info.0
+            model.availableDrugs = info.1
+        }
     }
 
     private var listModel: DrugSelectionListModel {
@@ -33,7 +40,7 @@ struct DrugSelectionContainerView: View {
             let message = model.info.nextDateMessage(drug)
             return DrugSelectionListRowModel(
                 drug: selectableDrug,
-                count: model.count(for: selectableDrug),
+                count: model.roundedCount(for: selectableDrug),
                 canTake: canTake,
                 timingMessage: message.message,
                 timingIcon: message.icon,

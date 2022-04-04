@@ -18,28 +18,30 @@ public final class ExistingEntryEditorState: ObservableObject {
     @Published var editorError: AppStateError? = nil
     @Published var selectionModel = DrugSelectionContainerModel()
     @Published var selectedDate = Date()
-    @ObservedRealmObject public var targetModel: RLM_MedicineEntry
+    
+    private var targetModel: Entry
+    public var targetDate: Date { targetModel.date }
     
     private var bag = Set<AnyCancellable>()
     private var tokens = Set<NotificationToken>()
     
-    init(_ unsafeTarget: RLM_MedicineEntry) {
+    init(_ unsafeTarget: Entry) {
         self.targetModel = unsafeTarget
         self.selectedDate = unsafeTarget.date
-        
-        setInitialProgressEntry()
+        setInitialProgressEntry(unsafeTarget)
     }
     
     deinit {
         log("Editor state cleaning up for \(targetModel.id)")
     }
     
-    private func setInitialProgressEntry() {
-        log("Setting initial entry: \(targetModel.id)")
-        selectionModel.entryMap = buildInitialEntry(targetModel)
+    private func setInitialProgressEntry(_ entry: Entry) {
+        log("Setting initial entry state: \(entry.id)")
+        selectionModel.entryMap = buildInitialEntry(entry)
+        selectedDate = entry.date
     }
     
-    private func buildInitialEntry(_ entry: RLM_MedicineEntry) -> [SelectableDrug: Double] {
+    private func buildInitialEntry(_ entry: Entry) -> [SelectableDrug: Double] {
         return entry.drugsTaken.reduce(into: [:]) { result, savedSelection in
             guard let drug = savedSelection.drug else { return }
             let selectableDrug = SelectableDrug(
@@ -70,8 +72,6 @@ public final class ExistingEntryEditorState: ObservableObject {
         _ calculator: AvailabilityInfoCalculator,
         _ didComplete: @escaping Action
     ) {
-        editorError = AppStateError.notImplemented()
-        
         guard
             let thawedEntry = targetModel.thaw(),
             let thawedRealm = targetModel.realm?.thaw()

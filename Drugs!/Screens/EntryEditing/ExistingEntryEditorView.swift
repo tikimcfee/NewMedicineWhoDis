@@ -18,11 +18,6 @@ struct ExistingEntryEditorView: View {
                 cancelButton
             }
 		}
-        .onReceive(infoCalculator.infoPublisher) { info in
-            log("Received new info in ExistingEntryEditorView")
-            editorState.selectionModel.info = info.0
-            editorState.selectionModel.availableDrugs = info.1
-        }
         .alert(item: $editorState.editorError) { error in
 			Alert(
 				title: Text("Kaboom 2"),
@@ -57,7 +52,7 @@ struct ExistingEntryEditorView: View {
     private var saveButton: some View {
         Components.fullWidthButton("Save changes", {
             editorState.saveEdits(infoCalculator) {
-                presentationMode.wrappedValue.dismiss()
+                entryForEdit = nil
             }
         })
         .padding(4)
@@ -83,7 +78,7 @@ struct ExistingEntryEditorView: View {
 	
 	private var updatedDifferenceView: some View {
         VStack(alignment: .center) {
-            Text("Was \(editorState.targetModel.date, formatter: DateFormatting.ShortDateShortTime)")
+            Text("Was \(editorState.targetDate, formatter: DateFormatting.ShortDateShortTime)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
             Text("\(distance)")
@@ -110,13 +105,13 @@ struct ExistingEntryEditorView: View {
 // Data
 extension ExistingEntryEditorView {
     var distance: String {
-        let originalDate = editorState.targetModel.date
+        let originalDate = editorState.targetDate
         let newDate = editorState.selectedDate
         return originalDate.distanceString(newDate)
     }
     
     var showTimeChange: Bool {
-        let originalDate = editorState.targetModel.date
+        let originalDate = editorState.targetDate
         let newDate = editorState.selectedDate
         return originalDate != newDate
     }
@@ -137,10 +132,11 @@ struct BoringBorder: ViewModifier {
         self.background = background
     }
     func body(content: Content) -> some View {
-        return content.overlay(
+        return content.background(
             RoundedRectangle(cornerRadius: 4)
                 .stroke(stroke)
-        )
+                .background(background)
+        ).clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 
@@ -167,13 +163,11 @@ struct DrugEntryEditorView_Previews: PreviewProvider {
 	static var previews: some View {
         let entry = RLM_MedicineEntry()
         let binding = WrappedBinding(Optional(entry))
-		return ExistingEntryEditorView(
-            entryForEdit: binding.binding
-        )
-        .environmentObject(ExistingEntryEditorState(entry))
-        .environmentObject(
-            AvailabilityInfoCalculator(manager: DefaultRealmManager())
-        )
+        return ExistingEntryEditorView(entryForEdit: binding.binding)
+            .environmentObject(ExistingEntryEditorState(entry))
+            .environmentObject(
+                AvailabilityInfoCalculator(manager: DefaultRealmManager())
+            )
 	}
 }
 #endif
