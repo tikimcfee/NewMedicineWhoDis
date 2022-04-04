@@ -24,18 +24,17 @@ struct EntryListView: View {
         let firstId = allGroups.first?.id
         return ScrollView {
             ForEach(allGroups.where { $0.representableDate > searchDate }) { entryGroup in
-                LazyVStack(pinnedViews: [.sectionHeaders]) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     Section(
                         content: {
                             ForEach(entryGroup.entries.sorted(by: \.date, ascending: false)) { entry in
                                 makeEntryRow(entry)
-                                    .padding([.leading, .trailing], 8.0)
-                                    .padding([.top, .bottom], 8.0)
-                                    .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.02))
+                                    .padding(12.0)
+                                    .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.05))
                                     .cornerRadius(4.0)
-                                    .padding([.top, .bottom], 4.0)
-                                    .padding([.leading, .trailing], 4.0)
+                                    .padding(8.0)
                                     .clipShape(RoundedRectangle(cornerRadius: 4.0))
+                                    
                             }
                         },
                         header: {
@@ -80,7 +79,7 @@ struct EntryListView: View {
                 .frame(alignment: .center)
         }
         .frame(maxWidth: .infinity)
-        .padding([.leading, .trailing], 16.0)
+        .padding([.trailing], 16.0)
         .padding([.top, .bottom], 4.0)
         .background(Color(.displayP3, red: 0.95, green: 0.95, blue: 0.99, opacity: 1.0))
         .compositingGroup()
@@ -99,8 +98,8 @@ struct EntryListView: View {
                 .frame(alignment: .center)
         }
         .frame(maxWidth: .infinity)
-        .padding([.leading, .trailing], 16.0)
-        .padding([.top, .bottom], 2.0)
+        .padding([.trailing], 16.0)
+        .padding([.top, .bottom], 4.0)
         .background(Color(.displayP3, red: 0.95, green: 0.95, blue: 0.99, opacity: 1.0))
         .compositingGroup()
     }
@@ -114,7 +113,7 @@ struct EntryListInfoCell: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             FlowStack(spacing: .init(width: 8.0, height: 2.0)) {
-                ForEach(source.drugsTaken, id: \.self) { taken in
+                ForEach(source.drugsTaken.sorted(by: \.drug?.name, ascending: true), id: \.self) { taken in
                     Text(taken.drug?.name ?? "No drug name")
                         .fontWeight(.regular)
                         .font(.subheadline)
