@@ -37,6 +37,10 @@ extension Color {
     public static let computedCanTake = Color(red: 0.4, green: 0.8, blue: 0.9).opacity(0.6)
     public static let computedCannotTake = Color(red: 0.5, green: 0.5, blue: 0.5).opacity(0.4)
 
+    
+    struct EntryCell {
+        static let deleteButtonBackground = Color(red: 0.8, green: 0.2, blue: 0.1).opacity(0.4)
+    }
 
 }
 

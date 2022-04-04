@@ -2,10 +2,11 @@ import Foundation
 import SwiftUI
 import RealmSwift
 
-private let AppLaunchStartFilterDate = Date().addingTimeInterval(-1.0 * (60.0 * 60 * 24 * 7))
+private let AppLaunchStartFilterDate = Date().minus(days: 90)
 struct EntryListView: View {
     
-    @State var searchDate: Date = AppLaunchStartFilterDate
+    @State private var searchDate: Date = AppLaunchStartFilterDate
+    @State private var isEditing: Bool = false
     
     @ObservedResults(
         EntryGroup.self,
@@ -21,45 +22,64 @@ struct EntryListView: View {
     }
 
     var body: some View {
-        let firstId = allGroups.first?.id
-        return ScrollView {
-            ForEach(allGroups.where { $0.representableDate > searchDate }) { entryGroup in
-                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                    Section(
-                        content: {
-                            ForEach(entryGroup.entries.sorted(by: \.date, ascending: false)) { entry in
-                                makeEntryRow(entry)
-                                    .padding(12.0)
-                                    .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.05))
-                                    .cornerRadius(4.0)
-                                    .padding(8.0)
-                                    .clipShape(RoundedRectangle(cornerRadius: 4.0))
-                                    
-                            }
-                        },
-                        header: {
-                            if (entryGroup.id == firstId && entryGroup.isToday) {
-                                makeTopView()
-                            } else {
-                                makeBoundaryDateSeparator(entryGroup.representableDate)
-                            }
-                        }
-                    )
-                }
-            }
+        ScrollView {
+            mainListIteratorView
         }
         .accessibility(identifier: MedicineLogScreen.entryCellList.rawValue)
         .sheet(item: $model.entryForEdit, content: { entry in
             ExistingEntryEditorView(entryForEdit: $model.entryForEdit)
                 .environmentObject(ExistingEntryEditorState(entry))
         })
+        .navigationBarItems(trailing: {
+            Button(action: {
+                withAnimation {
+                    isEditing.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "pencil.circle")
+                        .foregroundColor(.gray)
+                    Text("Edit")
+                        .foregroundColor(.gray)
+                }
+            }
+        }())
+    }
+    
+    var mainListIteratorView: some View {
+        let firstId = allGroups.first?.id
+        return ForEach(allGroups.where { $0.representableDate > searchDate }) { entryGroup in
+            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                Section(
+                    content: {
+                        ForEach(entryGroup.entries.sorted(by: \.date, ascending: false)) { entry in
+                            makeEntryRow(entry)
+                                .padding(12.0)
+                                .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.05))
+                                .cornerRadius(4.0)
+                                .padding(8.0)
+                                .clipShape(RoundedRectangle(cornerRadius: 4.0))
+                            
+                        }
+                    },
+                    header: {
+                        if (entryGroup.id == firstId && entryGroup.isToday) {
+                            makeTopView()
+                        } else {
+                            makeBoundaryDateSeparator(entryGroup.representableDate)
+                        }
+                    }
+                )
+            }
+        }
     }
     
     @ViewBuilder
     func makeEntryRow(_ entry: Entry) -> some View {
         Button(action: { model.didSelectRow(entry) }) {
             EntryListInfoCell(
-                source: entry
+                source: entry,
+                isEditing: $isEditing
             ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
         }
         .foregroundColor(.primary)
@@ -109,28 +129,77 @@ struct EntryListInfoCell: View {
     // Don't make these @ObservedObject if you want to delete them.
     // With code as of this commit, deletion causes an invalidated array error on internal row builder.
     let source: Entry
+    @Binding var isEditing: Bool
+    @State private var isRequestingDelete: Bool = false
     
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            FlowStack(spacing: .init(width: 8.0, height: 2.0)) {
-                ForEach(source.drugsTaken.sorted(by: \.drug?.name, ascending: true), id: \.self) { taken in
-                    Text(taken.drug?.name ?? "No drug name")
-                        .fontWeight(.regular)
-                        .font(.subheadline)
-                        .padding(6.0)
-                        .background(Color(.displayP3, red: 0.20, green: 0.20, blue: 0.40, opacity: 0.10))
-                        .clipShape(RoundedRectangle(cornerRadius: 4.0))
-                }
-                .padding([.top, .bottom], 1.0)
-            }
-            VStack(alignment: .trailing) {
-                Text(DateFormatting.EntryCellTime.string(from: source.date))
-                    .fontWeight(.ultraLight)
-                    .font(.footnote)
-                    .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
+            drugFlow
+            infoSection
+            if isEditing {
+                editingSection
             }
         }
-        .padding([.top, .bottom], 0.0)
+    }
+    
+    var drugFlow: some View {
+        FlowStack(spacing: .init(width: 8.0, height: 2.0)) {
+            ForEach(source.drugsTaken.sorted(by: \.drug?.name, ascending: true), id: \.self) { taken in
+                Text(taken.drug?.name ?? "No drug name")
+                    .fontWeight(.regular)
+                    .font(.subheadline)
+                    .padding(6.0)
+                    .background(Color(.displayP3, red: 0.20, green: 0.20, blue: 0.40, opacity: 0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: 4.0))
+            }
+            .padding([.top, .bottom], 1.0)
+        }
+    }
+    
+    var infoSection: some View {
+        VStack(alignment: .trailing) {
+            Text(DateFormatting.EntryCellTime.string(from: source.date))
+                .fontWeight(.ultraLight)
+                .font(.footnote)
+                .accessibility(identifier: MedicineLogScreen.entryCellSubtitleText.rawValue)
+        }
+    }
+    
+    @ViewBuilder
+    var editingSection: some View {
+        HStack {
+            Components.simpleButton("Delete",
+                ComponentSimpleButtonStyle(
+                    standardColor: Color.EntryCell.deleteButtonBackground,
+                    disabledColor: .gray
+                ),
+                { requestDeleteCheck() }
+            )
+        }
+        .padding(2.0)
+        .boringBorder
+        .alert(isPresented: $isRequestingDelete) {
+            let title = Text("Delete this entry?")
+            let message = Text("\(DateFormatting.LongDateShortTime.string(from: source.date))?")
+            return Alert(
+                title: title,
+                message: message,
+                primaryButton: Alert.Button.destructive(
+                    Text("Yes")
+                ) { deleteEntry() },
+                secondaryButton: .cancel()
+            )
+        }
+    }
+    
+    private func requestDeleteCheck() {
+        isRequestingDelete = true
+    }
+    
+    private func deleteEntry() {
+        safeWrite(source) { toDelete in
+            toDelete.realm?.delete(toDelete)
+        }
     }
 }
 
