@@ -32,6 +32,8 @@
 		B7457C4A27F81C02009D01E7 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7457C4927F81C02009D01E7 /* FlowLayout.swift */; };
 		B7809C7427F9685300D73D21 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = B7809C7327F9685300D73D21 /* Algorithms */; };
 		B7809C7627FA930B00D73D21 /* RealmModelExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7809C7527FA930B00D73D21 /* RealmModelExtensions.swift */; };
+		B7809C7827FBF3AA00D73D21 /* EditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7809C7727FBF3AA00D73D21 /* EditMode.swift */; };
+		B7809C7A27FBF73B00D73D21 /* TestComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7809C7927FBF73B00D73D21 /* TestComponents.swift */; };
 		B7881B1526D47D4200B7BBA6 /* FilePersistence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */; };
 		B7DBE68927F111E2004AC4AF /* BackgroundWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */; };
 		B7E69CE827F6967A000DBE22 /* RealmEnvironmentModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E69CE727F6967A000DBE22 /* RealmEnvironmentModifier.swift */; };
@@ -125,6 +127,8 @@
 		45DA2BC2232551B600649270 /* DrugSelectionContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrugSelectionContainerView.swift; sourceTree = "<group>"; };
 		B7457C4927F81C02009D01E7 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		B7809C7527FA930B00D73D21 /* RealmModelExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModelExtensions.swift; sourceTree = "<group>"; };
+		B7809C7727FBF3AA00D73D21 /* EditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMode.swift; sourceTree = "<group>"; };
+		B7809C7927FBF73B00D73D21 /* TestComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestComponents.swift; sourceTree = "<group>"; };
 		B7881B1426D47D4200B7BBA6 /* FilePersistence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilePersistence+Extensions.swift"; sourceTree = "<group>"; };
 		B7DBE68827F111E2004AC4AF /* BackgroundWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundWorker.swift; sourceTree = "<group>"; };
 		B7E69CE727F6967A000DBE22 /* RealmEnvironmentModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmEnvironmentModifier.swift; sourceTree = "<group>"; };
@@ -304,6 +308,7 @@
 				F07E207D24E9CBFF004DFB8C /* AddEntryViewState.swift */,
 				F02262522471AA8C00F31141 /* Components.swift */,
 				F0FE7FAA255E3CC5004D6D62 /* TestingKeys.swift */,
+				B7809C7927FBF73B00D73D21 /* TestComponents.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -442,6 +447,7 @@
 			children = (
 				F07E207F24E9CC2B004DFB8C /* DrugListEditState.swift */,
 				F0D289C1248D50F700FEBA51 /* DrugListEditorView.swift */,
+				B7809C7727FBF3AA00D73D21 /* EditMode.swift */,
 			);
 			path = DrugListEditor;
 			sourceTree = "<group>";
@@ -650,7 +656,9 @@
 				F0456CD024705D630017B04E /* DrugSelectionListView.swift in Sources */,
 				B7DBE68927F111E2004AC4AF /* BackgroundWorker.swift in Sources */,
 				4593B4B4231AFBD000787D91 /* SceneDelegate.swift in Sources */,
+				B7809C7827FBF3AA00D73D21 /* EditMode.swift in Sources */,
 				45DA2BBD2324C1FD00649270 /* MedicineModelDefinitions.swift in Sources */,
+				B7809C7A27FBF73B00D73D21 /* TestComponents.swift in Sources */,
 				F022624F2471A8A800F31141 /* ExistingEntryEditorView.swift in Sources */,
 				4518F0F226D3315E0081A098 /* EventDefinitions.swift in Sources */,
 				F09E36EE248216220011C8BD /* ApplicationData.swift in Sources */,

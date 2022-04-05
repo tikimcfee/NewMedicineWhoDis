@@ -9,34 +9,6 @@
 import SwiftUI
 import RealmSwift
 
-enum EditMode: Int, CustomStringConvertible, CaseIterable {
-    case add, delete, edit
-    var description: String {
-        switch self {
-        case .add: return "New drug"
-        case .delete: return "Delete"
-        case .edit: return "Edit"
-        }
-    }
-    var color: Color {
-        switch self {
-        case .add: return Color.green
-        case .delete: return Color.red
-        case .edit: return Color.primary
-        }
-    }
-    var image: some View {
-        switch self {
-        case .add:
-            return Image(systemName: "plus.circle.fill")
-        case .edit:
-            return Image(systemName: "pencil")
-        case .delete:
-            return Image(systemName: "minus.circle.fill")
-        }
-    }
-}
-
 struct DrugListEditorView: View {
 
     @ObservedResults(RLM_AvailableDrugList.self) var results
@@ -46,6 +18,7 @@ struct DrugListEditorView: View {
         return VStack(spacing: 0) {
             subviewDrugList.boringBorder.padding(8).zIndex(99)
             subviewEditor
+//            testButton()
         }
         .navigationBarItems(trailing: modeSwitchControls)
         .alert(item: $drugListEditorState.deleteTargetItem) { target in
@@ -81,7 +54,7 @@ struct DrugListEditorView: View {
     }
 
     private func buttonForMode(_ mode: EditMode) -> some View {
-        Button(action: { withAnimation {
+        Button(action: { withAnimation {{
             self.drugListEditorState.currentMode = mode
         }}) {
             HStack {
@@ -94,27 +67,23 @@ struct DrugListEditorView: View {
 
     @ViewBuilder
     private var subviewDrugList: some View {
-        if results.isEmpty {
-            EmptyView()
-        } else {
-            ForEach(results) { drugList in
-                ScrollView {
-                    VStack{
-                        ForEach(Array(drugList.drugs.sorted(by: \.name)), id: \.id) { drug in
-                            HStack{
-                                self.textGroup(drug)
-                                HStack{ Divider() }
-                                if self.drugListEditorState.currentMode != .add {
-                                    self.rowButtonForCurrentMode(drug)
-                                }
+        ForEach(results) { drugList in
+            ScrollView {
+                VStack{
+                    ForEach(Array(drugList.drugs.sorted(by: \.name)), id: \.id) { drug in
+                        HStack{
+                            self.textGroup(drug)
+                            HStack{ Divider() }
+                            if self.drugListEditorState.currentMode != .add {
+                                self.rowButtonForCurrentMode(drug)
                             }
-                            .frame(maxWidth: .infinity, minHeight: 44.0, alignment: .trailing)
-                            .padding(4)
-                            .boringBorder
-                            .padding(.horizontal, 8)
                         }
-                    }.padding(.vertical, 8.0)
-                }
+                        .frame(maxWidth: .infinity, minHeight: 44.0, alignment: .trailing)
+                        .padding(4)
+                        .boringBorder
+                        .padding(.horizontal, 8)
+                    }
+                }.padding(.vertical, 8.0)
             }
         }
     }
@@ -222,13 +191,13 @@ private extension DrugListEditorView {
 #if DEBUG
 struct DrugListEditorView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
-            DrugListEditorView().environmentObject(
-                DrugListEditorViewState()
-            ).navigationBarTitle(
-                Text("Test Navigation"),
-                displayMode: .inline
-            )
+        let dataManager = DefaultRealmManager()
+        
+        return NavigationView {
+            DrugListEditorView()
+                .modifier(dataManager.makeModifier())
+                .environmentObject(DrugListEditorViewState())
+                .navigationBarTitle(Text("Test Navigation"), displayMode: .inline)
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

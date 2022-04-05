@@ -42,6 +42,7 @@ class AvailabilityInfoCalculator: ObservableObject {
     var realmTokens = [NotificationToken]()
     private var bag = Set<AnyCancellable>()
     private let migrator = V1Migrator()
+    private let initializer = RealmStateInitializer()
     
     typealias Publised = (AvailabilityInfo, AvailableDrugList)
     typealias InfoPublisher = AnyPublisher<Publised, Never>
@@ -68,12 +69,7 @@ class AvailabilityInfoCalculator: ObservableObject {
     
     func onInit() {
         manager.access { realm in
-            try ensureInitialRealmState(
-                RLM_MedicineEntry.observableResults(realm),
-                RLM_AvailabilityInfoContainer.observableResults(realm),
-                RLM_AvailableDrugList.observableResults(realm),
-                in: realm
-            )
+            try initializer.ensureInitialRealmState(realm)
             
             let infoPublisher = try makeRootInfoPublisher(from: realm)
             bag.insert(
@@ -146,13 +142,28 @@ private extension AvailabilityInfoCalculator {
             }
             .eraseToAnyPublisher()
     }
+}
+
+class RealmStateInitializer {
+    private var didExecuteInitialCheck = false
     
-    func ensureInitialRealmState(
+    func ensureInitialRealmState(_ realm: Realm) throws {
+        try ensureInitialRealmState(
+            RLM_MedicineEntry.observableResults(realm),
+            RLM_AvailabilityInfoContainer.observableResults(realm),
+            RLM_AvailableDrugList.observableResults(realm),
+            in: realm
+        )
+    }
+    
+    private func ensureInitialRealmState(
         _ entries: Results<RLM_MedicineEntry>,
         _ container: Results<RLM_AvailabilityInfoContainer>?,
         _ drugs: Results<RLM_AvailableDrugList>?,
         in realm: Realm
     ) throws {
+        guard !didExecuteInitialCheck else { return }
+        
         log("Checking and setting initial state")
         
         if let _ = container?.first,
@@ -198,7 +209,6 @@ private extension AvailabilityInfoCalculator {
         }}
     }
 }
-
 
 extension AvailabilityInfoCalculator {
     static func writeUpdatedContainersAndGroups(
@@ -251,7 +261,7 @@ extension AvailabilityInfoCalculator {
             }
             
             let lookupDrug = newTimingInfo[recordedDrug.id]?.drug ?? {
-                log("Missing drug from list; using recording drug: \(recordedDrug)")
+                log("Missing drug from list; using recording drug: \(recordedDrug.name), \(recordedDrug.id)")
                 return recordedDrug
             }()
             let entryOffsetNextDoseTime = entry.date.advanced(by: lookupDrug.doseTimeInSeconds)

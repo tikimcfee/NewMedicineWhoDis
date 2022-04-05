@@ -14,12 +14,6 @@ struct EntryListView: View {
     ) var allGroups
     
     @StateObject var model: EntryListViewModel = EntryListViewModel()
-    
-    enum Boundary {
-        case none
-        case nextDay(RLM_MedicineEntry)
-        case first
-    }
 
     var body: some View {
         ScrollView {

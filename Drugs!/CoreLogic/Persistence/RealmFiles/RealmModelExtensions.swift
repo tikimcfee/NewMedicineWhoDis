@@ -41,7 +41,7 @@ extension Map: _PersistableInsideOptional where Key == Drug.ID, Value == RLM_Ava
 }
 
 extension RLM_AvailableDrugList {
-    public static let defaultId = "defaultAvailabilityInfoId"
+    public static let defaultId = "defaultDrugListKeyId"
     static func defaultFrom(_ realm: Realm) -> RLM_AvailableDrugList? {
         realm.object(ofType: RLM_AvailableDrugList.self, forPrimaryKey: Self.defaultId)
     }
