@@ -163,6 +163,7 @@ class RealmStateInitializer {
         in realm: Realm
     ) throws {
         guard !didExecuteInitialCheck else { return }
+        didExecuteInitialCheck = true
         
         log("Checking and setting initial state")
         

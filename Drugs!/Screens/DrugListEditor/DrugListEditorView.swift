@@ -18,7 +18,6 @@ struct DrugListEditorView: View {
         return VStack(spacing: 0) {
             subviewDrugList.boringBorder.padding(8).zIndex(99)
             subviewEditor
-//            testButton()
         }
         .navigationBarItems(trailing: modeSwitchControls)
         .alert(item: $drugListEditorState.deleteTargetItem) { target in
@@ -54,18 +53,16 @@ struct DrugListEditorView: View {
     }
 
     private func buttonForMode(_ mode: EditMode) -> some View {
-        Button(action: { withAnimation {{
-            self.drugListEditorState.currentMode = mode
-        }}) {
+        Button(action: {
+            withAnimation { self.drugListEditorState.currentMode = mode }
+        }, label: {
             HStack {
                 mode.image.foregroundColor(mode.color)
                 Text(mode.description)
-            }
-            .padding(4).boringBorder
-        }
-    }
+            }.padding(4).boringBorder
+        })
+   }
 
-    @ViewBuilder
     private var subviewDrugList: some View {
         ForEach(results) { drugList in
             ScrollView {
