@@ -12,8 +12,8 @@ import RealmSwift
 struct DrugListEditorView: View {
 
     @ObservedResults(RLM_AvailableDrugList.self) var results
-    
     @EnvironmentObject var editorState: DrugListEditorViewState
+    @State private var focusedDrug: RLM_Drug? = nil
 
     var body: some View {
         return VStack(spacing: 0) {
@@ -96,11 +96,14 @@ struct DrugListEditorView: View {
             .asButton { withAnimation(.easeInOut) {
                 switch mode {
                 case .edit:
-                    editorState.inProgress = drug.thaw()!
+                    editorState.focusedDrug = drug
+                    editorState.deleteTargetItem = nil
                 case .delete:
+                    editorState.focusedDrug = nil
                     editorState.deleteTargetItem = drug
                 case .add:
-                    break
+                    editorState.focusedDrug = nil
+                    editorState.deleteTargetItem = nil
                 }
             }}
     }
@@ -121,32 +124,29 @@ struct DrugListEditorView: View {
     }
 
     private var subviewEditor: some View {
-        return VStack(spacing: 0) {
-            switch editorState.currentMode {
-            case .edit:
-                editModeView
-                    .padding(8)
-                    .background(Color(red: 0.8, green: 0.9, blue: 0.9))
-            case .add:
-                addModeView
-                    .padding(8)
-                    .background(Color(red: 0.8, green: 0.9, blue: 0.9))
-            case .delete:
-                EmptyView()
+        QuickEditView(rootState: editorState)
+    }
+}
+
+struct QuickEditView: View {
+    @ObservedObject var rootState: DrugListEditorViewState
+    
+    @ViewBuilder
+    var body: some View {
+        switch rootState.currentMode {
+        case .add:
+            editingBoxWithSave("Enter new drug name", "Save") {
+                rootState.saveChanges()
             }
+        case .edit:
+            editingBoxWithSave("Edit drug: \(rootState.focusedDrug?.name ?? "<error>")", "Save") {
+                rootState.saveChanges()
+            }
+        case .delete:
+            EmptyView()
         }
     }
-
-    private var editModeView: some View {
-        return editingBox()
-    }
-
-    private var addModeView: some View {
-        return editingBoxWithSave("Enter new drug name", "Save") {
-            self.editorState.saveAsNew()
-        }
-    }
-
+    
     @ViewBuilder
     private func editingBoxWithSave(_ initialText: String,
                                     _ buttonTitle: String,
@@ -155,7 +155,8 @@ struct DrugListEditorView: View {
         Components.fullWidthButton(buttonTitle) {
             withAnimation { action() }
         }
-        .disabled(!editorState.isSaveEnabled)
+        .onSubmit { if rootState.isSaveEnabled { action() }}
+        .disabled(!rootState.isSaveEnabled)
         .boringBorder
     }
     
@@ -164,12 +165,12 @@ struct DrugListEditorView: View {
         HStack {
             TextField(
                 "Enter a name",
-                text: $editorState.inProgress.name
+                text: $rootState.currentName
             )
             .padding()
             .frame(minHeight: 64, maxHeight: 64, alignment: .center)
             .boringBorder
-            Picker(selection: $editorState.inProgress.hourlyDoseTime, label: EmptyView()) {
+            Picker(selection: $rootState.currentTime, label: EmptyView()) {
                 ForEach((0..<25)) { hour in
                     Text("\("hour".simplePlural(hour, "Any time"))").tag(Double(hour))
                 }

@@ -28,7 +28,11 @@ struct DrugSelectionContainerView: View {
         }
 
         let capturedAction = countAutoUpdate // must capture or context is captured from view
-        let drugModels = model.availableDrugs.drugs.map { drug -> DrugSelectionListRowModel in
+        let drugModels = model
+            .availableDrugs
+            .drugs
+            .sorted(by: { $0.drugName < $1.drugName })
+            .map { drug -> DrugSelectionListRowModel in
             let selectableDrug = SelectableDrug(
                 drugName: drug.drugName,
                 drugId: drug.id,

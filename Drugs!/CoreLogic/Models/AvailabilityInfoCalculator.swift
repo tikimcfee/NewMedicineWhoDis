@@ -111,14 +111,28 @@ private extension AvailabilityInfoCalculator {
     }
 
     func buildDrugListPublisher(_ realm: Realm) -> AnyPublisher<RLM_AvailableDrugList, Never> {
-        RLM_AvailableDrugList
-            .defaultFrom(realm)?
-            .publisher(for: \.self)
-            .eraseToAnyPublisher()
-        ?? {
+        guard let rootList = RLM_AvailableDrugList.defaultFrom(realm) else {
             log(AvailabilityInfoError.missingDrugList, "Can't find list to build publisher")
             return Empty().eraseToAnyPublisher()
-        }()
+        }
+        
+        return rootList
+            .drugs
+            .changesetPublisher
+            .compactMap { change in
+                switch change {
+                case let .initial(drugs):
+                    log("Load drug list")
+                    return rootList
+                case let .update(drugs, deletions, insertions, modifications):
+                    log("Drug list update: \(deletions) \(insertions) \(modifications)")
+                    return rootList
+                case let .error(error):
+                    log(error, "Failed to observe drug list")
+                    return nil
+                }
+            }
+            .eraseToAnyPublisher()
     }
     
     func buildEntryListPublisher(_ realm: Realm, cutoffDate: Date) -> AnyPublisher<Results<RLM_MedicineEntry>, Never> {
