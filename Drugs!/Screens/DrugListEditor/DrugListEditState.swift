@@ -1,60 +1,87 @@
 import Combine
 import Foundation
-
-public struct InProgressDrugEdit {
-    var targetDrug: RLM_Drug = RLM_Drug()
-    
-    var drugName: String {
-        get { targetDrug.name }
-        set { targetDrug.name = newValue }
-    }
-    
-    var doseTime: Int {
-        get { Int(targetDrug.hourlyDoseTime) }
-        set { targetDrug.hourlyDoseTime = Double(newValue) }
-    }
-
-    var isNewSaveEnabled: Bool {
-        return !targetDrug.name.isEmpty
-    }
-    
-    var asV1Drug: Drug {
-        V1Migrator().toV1Drug(targetDrug)
-    }
-    
-    mutating func setTarget(drug: RLM_Drug) {
-        targetDrug = drug
-    }
-
-    mutating func startEditingNewDrug() {
-        setTarget(drug: RLM_Drug())
-    }
-}
+import RealmSwift
 
 public final class DrugListEditorViewState: ObservableObject {
     private let manager = DefaultRealmManager()
-    private var cancellables = Set<AnyCancellable>()
+    private var tokens = Set<NotificationToken>()
 
-    @Published var inProgressEdit = InProgressDrugEdit()
     @Published var saveError: Error? = nil
+    @Published var isSaveEnabled = false
+    @Published var inProgress = RLM_Drug()
     @Published var deleteTargetItem: RLM_Drug? = nil
     @Published var currentMode: EditMode = .edit {
-        didSet { inProgressEdit.startEditingNewDrug() }
+        didSet { checkMode(changedFrom: oldValue) }
     }
 
     func saveAsNew() {
-        guard inProgressEdit.isNewSaveEnabled else {
-            log { Event("New save halted", .info) }
+        guard isSaveEnabled else {
+            log("New save halted")
             return
         }
         
-        manager.access { [weak self] realm in
-            guard let self = self else { return }
-            guard let list = RLM_AvailableDrugList.defaultFrom(realm) else { return }
-            try realm.write {
-                list.drugs.append(inProgressEdit.targetDrug)
+        manager.access { realm in
+            guard let list = RLM_AvailableDrugList.defaultFrom(realm) else {
+                log("Failed to find default list to add to")
+                return
             }
-            self.inProgressEdit.startEditingNewDrug()
+            
+            do {
+                try realm.write {
+                    list.drugs.append(inProgress)
+                }
+            } catch {
+                saveError = error
+                throw error
+            }
+            
+            log("new drug saved: \(inProgress)")
         }
+        createNewDrugForAddition()
+    }
+}
+
+extension DrugListEditorViewState {
+    private func checkMode(changedFrom last: EditMode) {
+        guard currentMode != last else {
+            log("already in mode \(currentMode)")
+            return
+        }
+        
+        log("switch edit mode: \(currentMode)")
+        switch currentMode {
+        case .add:
+            createNewDrugForAddition()
+        case .edit:
+            break
+        case .delete:
+            break
+        }
+    }
+    
+    private func setSaveState() {
+        let isDisabled = currentMode == .add
+        && inProgress.name.isEmpty
+        
+        isSaveEnabled = !isDisabled
+        log("save state checked. isSaveEnabled: \(isSaveEnabled)")
+    }
+    
+    private func createNewDrugForAddition() {
+        log("observing new drug for addition")
+        tokens.removeAll()
+        let newDrug = manager.accessImmediate { realm in
+            try realm.write {
+                realm.create(RLM_Drug.self)
+            }
+        }
+        
+        guard let newDrug = newDrug else { return }
+        inProgress = newDrug
+        tokens.insert(
+            newDrug.observe { [weak self] _ in
+                self?.setSaveState()
+            }
+        )
     }
 }

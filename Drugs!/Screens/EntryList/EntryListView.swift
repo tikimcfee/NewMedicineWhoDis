@@ -42,18 +42,12 @@ struct EntryListView: View {
     
     var mainListIteratorView: some View {
         let firstId = allGroups.first?.id
-        return ForEach(allGroups.where { $0.representableDate > searchDate }) { entryGroup in
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+        return LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+            ForEach(allGroups.where { $0.representableDate > searchDate }) { entryGroup in
                 Section(
                     content: {
                         ForEach(entryGroup.entries.sorted(by: \.date, ascending: false)) { entry in
                             makeEntryRow(entry)
-                                .padding(12.0)
-                                .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.05))
-                                .cornerRadius(4.0)
-                                .padding(8.0)
-                                .clipShape(RoundedRectangle(cornerRadius: 4.0))
-                            
                         }
                     },
                     header: {
@@ -70,14 +64,11 @@ struct EntryListView: View {
     
     @ViewBuilder
     func makeEntryRow(_ entry: Entry) -> some View {
-        Button(action: { model.didSelectRow(entry) }) {
-            EntryListInfoCell(
-                source: entry,
-                isEditing: $isEditing
-            ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
-        }
-        .foregroundColor(.primary)
-        .accessibility(identifier: MedicineLogScreen.entryCellButton.rawValue)
+        EntryListInfoCell(
+            source: entry,
+            isEditing: $isEditing,
+            onSelect: { [weak model] in model?.entryForEdit = $0 }
+        ).accessibility(identifier: MedicineLogScreen.entryCellBody.rawValue)
     }
     
     @ViewBuilder
@@ -125,19 +116,31 @@ struct EntryListInfoCell: View {
     let source: Entry
     @Binding var isEditing: Bool
     @State private var isRequestingDelete: Bool = false
+    let onSelect: (Entry) -> Void
     
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            drugFlow
-            infoSection
-            if isEditing {
-                editingSection
+        Button(action: { onSelect(source) }) {
+            HStack(alignment: .firstTextBaseline) {
+                drugFlow
+                infoSection
+                if isEditing {
+                    editingSection
+                }
             }
+            .padding(12.0)
+            .background(Color(.displayP3, red: 0.0, green: 0.2, blue: 0.5, opacity: 0.06))
+            .cornerRadius(4.0)
+            .padding([.leading, .trailing], 20.0)
+            .padding([.top, .bottom], 12.0)
+            .clipShape(RoundedRectangle(cornerRadius: 4.0))
         }
+        .foregroundColor(.primary)
+        .accessibility(identifier: MedicineLogScreen.entryCellButton.rawValue)
+        
     }
     
     var drugFlow: some View {
-        FlowStack(spacing: .init(width: 8.0, height: 2.0)) {
+        FlowStack(spacing: .init(width: 8.0, height: 6.0)) {
             ForEach(source.drugsTaken.sorted(by: \.drug?.name, ascending: true), id: \.self) { taken in
                 Text(taken.drug?.name ?? "No drug name")
                     .fontWeight(.regular)
