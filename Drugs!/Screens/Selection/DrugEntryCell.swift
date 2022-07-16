@@ -41,7 +41,7 @@ struct DrugEntryViewCell: View {
                 .font(.body)
                 .fontWeight(.semibold)
                 .animation(.none)
-                .frame(width: 42.0)
+                .frame(width: 64.0)
                 .background(Color(.displayP3, red: 0.00, green: 0.40, blue: 0.80, opacity: 0.8))
                 .clipShape(RoundedRectangle(cornerRadius: 4.0))
 
@@ -88,7 +88,7 @@ struct DrugEntryViewCell_Preview: PreviewProvider {
             DrugEntryViewCell(
                 model: DrugSelectionListRowModel(
                     drug: SelectableDrug(drugName: "A drug name", drugId: "12345", selectedCountAutoUpdate: { _ in }),
-                    count: 9,
+                    count: 1.5,
                     canTake: false,
                     timingMessage: "6:37 pm",
                     timingIcon: "timer",
